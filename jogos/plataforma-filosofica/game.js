@@ -86,6 +86,7 @@ function savePortalWin(){
   if(score>old){gained=score-old;s.xp=Number(s.xp||0)+gained;s.completed.plataforma=score;}
   s.achievements.platform=true;s.platformPhase=Math.max(Number(s.platformPhase||1),2);
   localStorage.setItem('nevoaProgressV4',JSON.stringify(s));
+  if(window.NevoaOnline?.getCode()) window.NevoaOnline.claimProgress('platform_socrates',60).catch(()=>{});
   return gained;
 }
 
