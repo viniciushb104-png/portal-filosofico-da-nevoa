@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1100"><rect width="800" height="1100" fill="white"/>
+<g fill="none" stroke="#111" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+<!-- moon/stars -->
+<path d="M155 90 q-80 25-68 110 q12 88 98 95 q-68 38-132 0 q-67-40-55-118 q12-76 157-87z"/>
+<path d="M620 110 l10 24 l26 4 l-20 18 l6 27 l-22-14 l-23 14 l6-27 l-20-18 l27-4z"/>
+<!-- owl hat -->
+<path d="M255 245 q85-125 180-120 q80 16 120 103 q-54-17-100 1 q32 30 60 72 q-123-48-260 8 q34-38 72-62z"/>
+<path d="M210 310 q180-58 380 4 q-32 50-188 48 q-153 0-192-52z"/>
+<rect x="390" y="210" width="52" height="44" rx="6"/><path d="M400 220 h32 v24 h-32z"/>
+<!-- owl -->
+<ellipse cx="400" cy="560" rx="190" ry="220"/>
+<path d="M245 460 q-40-98 28-145 q56 18 82 88 M555 460 q40-98-28-145 q-56 18-82 88"/>
+<circle cx="330" cy="510" r="68"/><circle cx="470" cy="510" r="68"/><circle cx="330" cy="510" r="28"/><circle cx="470" cy="510" r="28"/><circle cx="330" cy="510" r="8" fill="#111"/><circle cx="470" cy="510" r="8" fill="#111"/>
+<!-- glasses -->
+<circle cx="330" cy="510" r="78"/><circle cx="470" cy="510" r="78"/><path d="M408 510 h-16"/>
+<path d="M400 560 l-28 24 l28 22 l28-22z"/>
+<path d="M275 620 q55 55 125 34 q70 22 125-34"/>
+<path d="M310 655 q20 30 40 0 M360 672 q20 30 40 0 M410 672 q20 30 40 0 M460 655 q20 30 40 0"/>
+<!-- cape/medallion -->
+<path d="M255 630 q-45 135 20 220 q75 70 125-10 q50 80 125 10 q65-85 20-220"/>
+<circle cx="400" cy="735" r="36"/><path d="M400 713 l8 16 l18 3 l-13 12 l3 18 l-16-9 l-16 9 l3-18 l-13-12 l18-3z"/>
+<!-- books -->
+<rect x="170" y="825" width="460" height="65" rx="10"/><rect x="140" y="895" width="510" height="65" rx="10"/><rect x="185" y="965" width="430" height="65" rx="10"/>
+<path d="M220 850 h85 M485 850 h85 M210 920 h95 M490 920 h100"/>
+<!-- lantern -->
+<rect x="640" y="650" width="95" height="150" rx="8"/><path d="M660 650 q28-50 55 0 M662 690 q25-45 50 0 q-25 58-50 0z"/>
+<!-- candle -->
+<rect x="80" y="650" width="42" height="120" rx="8"/><path d="M101 650 q-21-30 0-50 q21 22 0 50z"/>
+<!-- pumpkin/quill -->
+<ellipse cx="115" cy="950" rx="82" ry="68"/><path d="M115 882 q-6-24 12-42 M70 950 l20-15 l18 17 M130 950 l20-15 l20 17 M85 985 q30 20 60 0"/>
+<path d="M680 890 q70-110 78-230 q-80 72-110 190 q24 15 32 140"/><path d="M680 890 l-35 140"/>
+</g></svg>
