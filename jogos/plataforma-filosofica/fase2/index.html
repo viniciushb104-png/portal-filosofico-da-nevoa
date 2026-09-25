@@ -13,7 +13,7 @@
   <header class="topbar">
     <a class="back" href="../">← Fase 1</a>
     <div><small>O LABIRINTO DOS FILÓSOFOS • FASE II</small><h1>A Caverna de Platão</h1></div>
-    <button id="soundBtn" class="soundBtn" aria-label="Ativar sons">🔇</button>
+    <div class="topActions"><button id="gameModeBtn" class="gameModeBtn" aria-label="Tela cheia e modo paisagem" title="Jogar com o celular deitado">↻</button><button id="soundBtn" class="soundBtn" aria-label="Ativar sons">🔇</button></div>
   </header>
 
   <section class="gameShell">
@@ -21,11 +21,11 @@
       <div class="hudBlock phase"><span>🕯️</span><div><small>FASE II</small><b>Das Sombras à Luz</b></div></div>
       <div class="hudBlock"><span>📜</span><div><small>PERGAMINHOS</small><b><span id="scrollCount">0</span>/8</b></div></div>
       <div class="hudBlock"><span>🚪</span><div><small>PORTAIS</small><b><span id="gateCount">0</span>/3</b></div></div>
-      <div class="hudBlock lanternHud"><span>🏮</span><div><small>LANTERNA DA RAZÃO</small><b id="lanternState">PRONTA</b></div></div>
+      <div class="hudBlock lanternHud"><span>🏮</span><div><small>LANTERNA DA RAZÃO</small><b id="lanternState">PRONTA</b></div></div><div class="hudBlock dangerHud"><span>❤️</span><div><small>TENTATIVAS</small><b id="lifeText">3/3</b></div></div><div class="hudBlock stageHud"><span>🗺️</span><div><small>ETAPA</small><b id="stageText">1/4</b></div></div>
     </div>
 
     <div class="canvasWrap">
-      <canvas id="game" width="960" height="540" aria-label="Jogo A Caverna de Platão"></canvas>
+      <canvas id="game" width="960" height="540" aria-label="Jogo A Caverna de Platão"></canvas><div id="guideHint" class="guideHint" hidden><b>💡 DICA DA CAVERNA</b><span id="guideHintText"></span></div><div class="rotateHint">📱 Para jogar melhor, deite o celular e toque em ↻.</div>
       <div id="interactionHint" class="interactionHint" hidden>Pressione <b>E</b> para interagir</div>
       <div id="lanternHint" class="lanternHint">Pressione <b>Q</b> para revelar o que é aparência e o que é real</div>
       <div id="toast" class="toast"></div>
