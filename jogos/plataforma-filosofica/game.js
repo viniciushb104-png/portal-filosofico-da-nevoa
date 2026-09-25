@@ -9,6 +9,7 @@ const keys={left:false,right:false,jump:false,interact:false};
 let started=false,paused=true,won=false;
 let cameraX=0,last=0,interactLatch=false;
 let audioCtx=null,sound=false;
+let lives=3,currentStage=1,lastHintStage=0;
 
 const WORLD_W=5600;
 const FLOOR=470;
@@ -45,10 +46,10 @@ const gates=[
 ];
 
 const scrolls=[
- {x:350,y:405,label:'Pergunta',got:false},{x:930,y:280,label:'Aporia',got:false},
- {x:1485,y:275,label:'Diálogo',got:false},{x:1960,y:350,label:'Ironia',got:false},
- {x:2750,y:265,label:'Maiêutica',got:false},{x:3580,y:300,label:'Razão',got:false},
- {x:4060,y:270,label:'Contradição',got:false},{x:4700,y:360,label:'Exame',got:false}
+ {x:350,y:405,label:'Pergunta',got:false},{x:560,y:300,label:'Aporia',got:false},
+ {x:930,y:270,label:'Diálogo',got:false},{x:1490,y:265,label:'Ironia',got:false},
+ {x:1900,y:345,label:'Maiêutica',got:false},{x:2750,y:260,label:'Razão',got:false},
+ {x:3580,y:290,label:'Contradição',got:false},{x:4050,y:260,label:'Exame',got:false}
 ];
 
 const checkpoints=[
@@ -83,7 +84,7 @@ function savePortalWin(){
   const score=60;
   let gained=0;
   if(score>old){gained=score-old;s.xp=Number(s.xp||0)+gained;s.completed.plataforma=score;}
-  s.achievements.platform=true;
+  s.achievements.platform=true;s.platformPhase=Math.max(Number(s.platformPhase||1),2);
   localStorage.setItem('nevoaProgressV4',JSON.stringify(s));
   return gained;
 }
@@ -93,6 +94,31 @@ function setHud(){
   $('#gateCount').textContent=gates.filter(g=>g.opened).length;
   const xp=scrolls.filter(s=>s.got).length*3+gates.filter(g=>g.opened).length*7+finalBoss.step*5;
   $('#phaseXP').textContent=xp;
+  const life=$('#lifeText'); if(life) life.textContent=lives+'/3';
+  const stage=$('#stageText'); if(stage) stage.textContent=currentStage+'/4';
+}
+function showHint(msg,dur=5200){
+  const box=$('#guideHint'),txt=$('#guideHintText'); if(!box||!txt)return;
+  txt.textContent=msg;box.hidden=false;clearTimeout(showHint.timer);
+  showHint.timer=setTimeout(()=>box.hidden=true,dur);
+}
+function loseLife(){
+  lives=Math.max(0,lives-1);setHud();tone(120,.15,'sawtooth',.025);
+  return lives>0;
+}
+function updateStage(){
+  const s=player.x<1100?1:player.x<3000?2:player.x<4750?3:4;
+  if(s!==currentStage){currentStage=s;setHud();}
+  if(s!==lastHintStage){
+    lastHintStage=s;
+    const tips={
+      1:'Explore sem pressa. Os pergaminhos ficam próximos das rotas seguras — encoste neles para coletar.',
+      2:'Ao encontrar uma Porta da Pergunta, aproxime-se e use E (ou ✦ no celular). Respostas erradas custam um coração.',
+      3:'Os lampiões são checkpoints. Se cair, você volta ao último lampião aceso.',
+      4:'O Sofista tenta convencer pela aparência do argumento. Leia as alternativas e procure a falha — o jogo não entrega mais a resposta.'
+    };
+    showHint('Etapa '+s+'/4 — '+tips[s]);
+  }
 }
 function toast(msg){
   const t=$('#toast');t.textContent=msg;t.classList.add('show');
@@ -160,7 +186,7 @@ let nearbyInteract=null;
 function interactions(){
  nearbyInteract=null;
  for(const s of scrolls){
-  if(!s.got && near(player,{x:s.x-10,y:s.y-20,w:45,h:55},20)){
+  if(!s.got && near(player,{x:s.x-22,y:s.y-36,w:64,h:82},55)){
    s.got=true;toast('📜 Pergaminho: '+s.label);tone(660,.11,'sine');setHud();
   }
  }
@@ -196,9 +222,14 @@ function showQuiz({icon='🔑',kicker='PORTA DA PERGUNTA',title,q,a,ok,feedback,
        f.className='quizFeedback ok';f.textContent='✓ '+feedback;tone(720,.12,'sine');
        setTimeout(()=>{ $('#quizOverlay').classList.remove('show'); paused=false; onCorrect(); },900);
      }else{
-       f.className='quizFeedback bad';f.textContent='✦ A névoa resiste. '+feedback;
-       tone(140,.16,'sawtooth',.02);
-       setTimeout(()=>{[...$('#quizAnswers').children].forEach(x=>x.disabled=false)},650);
+       const alive=loseLife();
+       f.className='quizFeedback bad';
+       f.textContent=alive?'✦ Resposta incorreta. Releia a pergunta e elimine as alternativas que não respondem exatamente ao problema. Você perdeu 1 coração.':'☠ Três erros. A névoa o devolve ao último checkpoint.';
+       if(alive){
+         setTimeout(()=>{[...$('#quizAnswers').children].forEach(x=>x.disabled=false)},850);
+       }else{
+         setTimeout(()=>{$('#quizOverlay').classList.remove('show');paused=false;lives=3;resetToCheckpoint();setHud();},1050);
+       }
      }
    };
    $('#quizAnswers').appendChild(b);
@@ -336,7 +367,7 @@ function render(){
 
 function update(dt){
  if(paused||!started||won)return;
- movePlayer(dt);interactions();
+ movePlayer(dt);interactions();updateStage();
  const target=Math.max(0,Math.min(WORLD_W-W,player.x-W*.35));
  cameraX+=(target-cameraX)*Math.min(1,dt*6);
 }
@@ -362,8 +393,14 @@ document.querySelectorAll('.mobileControls button').forEach(b=>{
  b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up);
 });
 
-$('#startBtn').onclick=()=>{$('#introOverlay').classList.remove('show');started=true;paused=false;tone(330,.1,'triangle');};
+$('#startBtn').onclick=()=>{$('#introOverlay').classList.remove('show');started=true;paused=false;tone(330,.1,'triangle');setTimeout(()=>showHint('Etapa 1/4 — Comece explorando. A/D ou setas movem, Espaço pula. No celular, deite a tela para controles maiores.'),350)};
 $('#replayBtn').onclick=()=>location.reload();
 
 setHud();render();
 })();
+async function enterGameMode(){
+  try{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen()}catch(e){}
+  try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(e){}
+  toast('📱 Modo jogo ativado. Se a tela não girar sozinha, deite o celular.');
+}
+if($('#gameModeBtn'))$('#gameModeBtn').onclick=enterGameMode;
