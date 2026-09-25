@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09060f">
+<meta name="description" content="Portal Filosófico da Névoa — jogos, enigmas e aventuras filosóficas com estética Halloween anime/cartoon, BNCC e Currículo Paulista.">
+<title>Portal Filosófico da Névoa</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<canvas id="mist" aria-hidden="true"></canvas>
+
+<div class="intro" id="intro" role="dialog" aria-label="Entrada do Portal Filosófico da Névoa">
+  <div class="introGlow"></div>
+  <div class="introCard">
+    <div class="sigil">☾</div>
+    <p class="eyebrow">As portas estão despertando...</p>
+    <h1>Portal Filosófico<br><span>da Névoa</span></h1>
+    <p class="introText">Jogos, enigmas e aventuras para questionar, pensar, argumentar e transformar.</p>
+    <button class="bigCta" id="enterPortal">🎃 Adentre o Portal</button>
+    <button class="ghostBtn" id="skipIntro">Entrar sem animação</button>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="wrap navin">
+    <a class="logo" href="#inicio" aria-label="Início"><img src="" data-media="logo" alt="Portal Filosófico da Névoa"></a>
+    <div class="navlinks">
+      <a href="#inicio" class="active">Início</a>
+      <a href="#jogos">Jogos</a>
+      <button class="navLinkBtn" id="openMapTop">Mapa</button>
+      <a href="#professor">Grimório</a>
+      <a href="#atelier">Ateliê</a>
+      <a href="#hall">Hall</a>
+      <a href="#sobre">Sobre</a>
+    </div>
+    <button class="iconBtn" id="soundBtn" title="Som ambiente" aria-label="Ativar ou desativar som">🔇</button>
+    <button class="profileBtn" id="profileBtn"><span class="profileOrb">☠</span><span><b id="profileRank">Aprendiz</b><small id="profileXP">0 XP</small></span></button>
+  </div>
+</nav>
+
+<header class="hero" id="inicio">
+  <div class="heroFog"></div>
+  <div class="wrap heroGrid">
+    <div class="heroCharacter leftCharacter"><div class="mediaSlot heroMedia" data-video-slot>
+      <img class="mediaPoster" src="" data-media="poster_guia" alt="Guia anime do Portal Filosófico da Névoa">
+      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="assets/videos/guia_da_nevoa.mp4" type="video/mp4">
+      </video>
+    </div></div>
+    <div class="heroCore">
+      <div class="eyebrow">Halloween • Filosofia • Ciências Humanas</div>
+      <h1>Portal Filosófico <span>da Névoa</span></h1>
+      <p>Uma mansão de enigmas onde cada porta abre um problema filosófico. Pense antes da névoa fechar o caminho.</p>
+      <div class="mantra"><span>Questionar</span><span>Pensar</span><span>Argumentar</span><span>Transformar</span></div>
+      <div class="actions">
+        <button class="cta" id="openMapHero">🗺 Explorar a mansão</button>
+        <a class="cta alt" href="#jogos">🎮 Escolher um jogo</a>
+      </div>
+      <div class="heroQuote"><b>Mensagem da Mansão</b><br><span id="dailyQuote">“Uma boa pergunta pode abrir portas que uma resposta pronta mantém fechadas.”</span></div>
+    </div>
+    <div class="heroCharacter rightCharacter"><div class="mediaSlot heroMedia" data-video-slot>
+      <img class="mediaPoster" src="" data-media="poster_mansao" alt="Mansão gótica do Portal Filosófico da Névoa">
+      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="assets/videos/mansao_da_nevoa.mp4" type="video/mp4">
+      </video>
+    </div></div>
+  </div>
+  <div class="scrollHint">Role para entrar ↓</div>
+</header>
+
+<main>
+<section class="featureStrip">
+  <div class="wrap featureGrid">
+    <button class="feature featured" data-game="socrates"><span class="featureIcon">🏚️</span><span><small>AVENTURA PRINCIPAL</small><b>A Mansão de Sócrates</b><em>7 cômodos • senha final</em></span><i>→</i></button>
+    <button class="feature" id="dailyChallenge"><span class="featureIcon">🌙</span><span><small>DESAFIO DO DIA</small><b>Enigma da Meia-Noite</b><em>+15 XP na primeira conclusão</em></span><i>→</i></button>
+    <button class="feature" id="achievementBtn"><span class="featureIcon">🏆</span><span><small>CONQUISTAS</small><b id="achievementCount">0 de 8</b><em>Insígnias da Névoa</em></span><i>→</i></button>
+  </div>
+</section>
+
+<section id="jogos" class="gamesSection">
+  <div class="wrap">
+    <div class="sectionHead">
+      <div class="eyebrow">Salas da Mansão</div>
+      <h2>Escolha uma porta</h2>
+      <p>Cada sala traz desafios curtos com correção comentada. Use os filtros para adaptar o percurso ao nível e ao tema da aula.</p>
+    </div>
+    <div class="filters" role="group" aria-label="Filtros dos jogos">
+      <button class="filter active" data-filter="all">Todas</button>
+      <button class="filter" data-filter="fund">6º–9º ano</button>
+      <button class="filter" data-filter="em">Ensino Médio</button>
+      <button class="filter" data-filter="logica">Lógica</button>
+      <button class="filter" data-filter="etica">Ética</button>
+      <button class="filter" data-filter="conhecimento">Conhecimento</button>
+    </div>
+
+    <div class="rooms">
+      <article class="room" data-tags="fund em conhecimento historia" data-room="filosofos">
+        <div class="roomArch"><div class="mediaSlot roomMedia" data-video-slot>
+      <img class="mediaPoster" src="" data-media="poster_guardiao" alt="Guardião dos Filósofos">
+      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="assets/videos/guardiao_dos_filosofos.mp4" type="video/mp4">
+      </video>
+    </div><div class="roomNumber">I</div></div>
+        <div class="roomBody"><div class="tag">HISTÓRIA DA FILOSOFIA</div><h3>Corredor dos Filósofos</h3><p>Retratos que falam, ideias que se contradizem e pistas para descobrir quem está por trás de cada pensamento.</p><div class="meta"><span>3 desafios</span><span>+30 XP</span></div></div>
+        <button class="enter" data-game="filosofos">Entrar na sala →</button>
+      </article>
+      <article class="room" data-tags="fund em logica" data-room="logica">
+        <div class="roomArch"><img src="" data-media="logica" alt="Sala da Lógica"><div class="roomNumber">II</div></div>
+        <div class="roomBody"><div class="tag">LÓGICA</div><h3>Sala da Lógica</h3><p>Argumentos, falácias e contradições escondidas em mecanismos que só se abrem com raciocínio.</p><div class="meta"><span>3 desafios</span><span>+30 XP</span></div></div>
+        <button class="enter orange" data-game="logica">Entrar na sala →</button>
+      </article>
+      <article class="room" data-tags="fund em etica" data-room="etica">
+        <div class="roomArch"><img src="" data-media="etica" alt="Tribunal das Sombras"><div class="roomNumber">III</div></div>
+        <div class="roomBody"><div class="tag">ÉTICA</div><h3>Tribunal das Sombras</h3><p>Dilemas em julgamento. Aqui, escolher não basta: toda decisão precisa de uma justificativa.</p><div class="meta"><span>3 desafios</span><span>+30 XP</span></div></div>
+        <button class="enter" data-game="etica">Entrar na sala →</button>
+      </article>
+      <article class="room" data-tags="em conhecimento" data-room="descartes">
+        <div class="roomArch"><div class="mediaSlot roomMedia" data-video-slot>
+      <img class="mediaPoster" src="" data-media="poster_espelho" alt="Espelho gótico e o guardião sombrio">
+      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="assets/videos/espelho_guardiao_sombrio.mp4" type="video/mp4">
+      </video>
+    </div><div class="roomNumber">IV</div></div>
+        <div class="roomBody"><div class="tag">EPISTEMOLOGIA</div><h3>Espelho de Descartes</h3><p>O reflexo mente? Investigue dúvida, certeza e critérios para justificar o que chamamos de conhecimento.</p><div class="meta"><span>3 desafios</span><span>+30 XP</span></div></div>
+        <button class="enter orange" data-game="descartes">Entrar na sala →</button>
+      </article>
+      <article class="room" data-tags="fund em conhecimento" data-room="platao">
+        <div class="roomArch"><img src="" data-media="platao" alt="Caverna de Platão"><div class="roomNumber">V</div></div>
+        <div class="roomBody"><div class="tag">PLATÃO</div><h3>Caverna de Platão</h3><p>Sombras, aparências e interpretações. Atravesse a caverna sem confundir o que parece com o que é.</p><div class="meta"><span>3 desafios</span><span>+30 XP</span></div></div>
+        <button class="enter" data-game="platao">Entrar na sala →</button>
+      </article>
+      <article class="room" data-tags="fund em conhecimento" data-room="fontes">
+        <div class="roomArch"><img src="" data-media="biblioteca" alt="Biblioteca Proibida"><div class="roomNumber">VI</div></div>
+        <div class="roomBody"><div class="tag">FONTES & LEITURA</div><h3>Biblioteca Proibida</h3><p>Documentos discordam entre si. Compare autoria, contexto, linguagem e evidências antes de escolher em quem confiar.</p><div class="meta"><span>3 desafios</span><span>+30 XP</span></div></div>
+        <button class="enter orange" data-game="fontes">Entrar na sala →</button>
+      </article>
+      <article class="room" data-tags="fund em logica conhecimento" data-room="escape">
+        <div class="roomArch"><img src="" data-media="escape" alt="Escape Room Filosófico"><div class="roomNumber">VII</div></div>
+        <div class="roomBody"><div class="tag">ESCAPE ROOM</div><h3>Escape Filosófico</h3><p>Três chaves conceituais, uma porta trancada e nenhuma saída sem raciocínio.</p><div class="meta"><span>3 enigmas</span><span>+30 XP</span></div></div>
+        <button class="enter" data-game="escape">Entrar na sala →</button>
+      </article>
+      <article class="room" data-tags="fund em etica" data-room="dilemas">
+        <div class="roomArch"><img src="" data-media="dilemas" alt="Dilemas da Meia-Noite"><div class="roomNumber">VIII</div></div>
+        <div class="roomBody"><div class="tag">ARGUMENTAÇÃO</div><h3>Dilemas da Meia-Noite</h3><p>Situações sem respostas automáticas, feitas para testar razões, objeções e revisão de ideias.</p><div class="meta"><span>3 desafios</span><span>+30 XP</span></div></div>
+        <button class="enter orange" data-game="dilemas">Entrar na sala →</button>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="journey" id="trilha">
+  <div class="wrap journeyGrid">
+    <div class="panel progressPanel">
+      <div class="eyebrow">Trilha de Progressão</div><h3>Sua jornada pela névoa</h3>
+      <div class="rankHeader"><div><b id="rankTitle">Aprendiz da Névoa</b><span id="xpText">0 pontos conquistados.</span></div><span id="nextRank">Próximo nível: 60 XP</span></div>
+      <div class="progressbar"><i id="progressFill"></i></div>
+      <div class="ranks">
+        <div class="rank"><div class="orb">🧙</div><strong>Aprendiz</strong><small>0 XP</small></div>
+        <div class="rank"><div class="orb">🏮</div><strong>Investigador</strong><small>60 XP</small></div>
+        <div class="rank"><div class="orb">💀</div><strong>Filósofo</strong><small>140 XP</small></div>
+        <div class="rank"><div class="orb">👑</div><strong>Mestre</strong><small>240 XP</small></div>
+        <div class="rank"><div class="orb">🦇</div><strong>Guardião</strong><small>360 XP</small></div>
+      </div>
+      <button class="smallBtn" id="openMapProgress">Ver mapa da mansão</button>
+    </div>
+    <div class="panel levelPanel">
+      <div class="eyebrow">Escolha seu caminho</div><h3>Níveis escolares</h3>
+      <button class="level fund" data-level="fund"><span class="face">🧪</span><span><b>Ensino Fundamental II</b><small>6º ao 9º ano • ética, leitura crítica, cidadania e lógica</small></span><i>→</i></button>
+      <button class="level em" data-level="em"><span class="face">🕯️</span><span><b>Ensino Médio</b><small>1ª à 3ª série • Filosofia, epistemologia, ética e argumentação</small></span><i>→</i></button>
+      <button class="smallBtn subtle" id="resetBtn">Reiniciar progresso</button>
+    </div>
+  </div>
+</section>
+
+<section id="professor" class="teacherSection">
+  <div class="wrap">
+    <div class="sectionHead"><div class="eyebrow">📖 Grimório do Professor</div><h2>O jogo por trás da aula</h2><p>Cada experiência foi desenhada para poder ser usada como disparador, revisão, atividade rápida ou percurso de aula.</p></div>
+    <div class="teacherGrid">
+      <article class="teacherCard"><span>🎯</span><h3>Objetivo pedagógico visível</h3><p>O aluno vê o desafio; o professor encontra tema, objetivo, tempo estimado e habilidade relacionada.</p></article>
+      <article class="teacherCard"><span>🧩</span><h3>Correção comentada</h3><p>Cada resposta recebe uma explicação curta para transformar erro em revisão conceitual.</p></article>
+      <article class="teacherCard"><span>📚</span><h3>Currículo Paulista + BNCC</h3><p>As propostas priorizam análise de fontes, pensamento crítico, argumentação, ética, cidadania e cultura digital.</p></article>
+      <article class="teacherCard"><span>⏳</span><h3>Uso flexível</h3><p>Desafios de poucos minutos para turmas com pouca infraestrutura, funcionando também em celular.</p></article>
+    </div>
+    <div class="curriculumPanel">
+      <div><div class="eyebrow">Exemplo de alinhamento</div><h3>EM13CHS101</h3><p>Identificação, análise e comparação de diferentes fontes e narrativas para compreender ideias filosóficas e processos sociais.</p></div>
+      <div class="pills"><span>Leitura de fontes</span><span>Argumentação</span><span>Pensamento crítico</span><span>Autonomia</span><span>Cidadania</span><span>Cultura digital</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="sobre" class="aboutSection">
+  <div class="wrap aboutGrid">
+    <div class="aboutArt"><img src="" data-media="mansion" alt="Mansão do Portal Filosófico da Névoa"></div>
+    <div><div class="eyebrow">Sobre o Portal</div><h2>Filosofia com atmosfera</h2><p>O Portal Filosófico da Névoa transforma problemas filosóficos em pequenas aventuras de exploração. A estética Halloween é parte da narrativa, mas o centro continua sendo a pergunta, a justificativa e o pensamento.</p><p class="signature">Adentre o Portal. 🎃</p></div>
+  </div>
+</section>
+
+<section id="atelier" class="atelierSection">
+  <div class="wrap">
+    <div class="sectionHead"><div class="eyebrow">🎬 Ateliê Gemini</div><h2>Personagens prontos para ganhar vida</h2><p>Se você quiser animar no Gemini, estas fichas já organizam personagem, atmosfera e proposta de cena em blocos rápidos de referência.</p></div>
+    <div class="videoReadyNotice"><span>🎞️</span><div><b>Versão 5 preparada para vídeo</b><p>Coloque os quatro MP4 em <code>assets/videos/</code>. O portal detecta cada arquivo e troca automaticamente o poster pela animação.</p></div></div>
+    <div class="atelierGrid">
+      <article class="atelierCard">
+        <div class="atelierArt"><div class="mediaSlot atelierMedia" data-video-slot>
+      <img class="mediaPoster" src="" data-media="poster_guia" alt="Guia da Névoa">
+      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="assets/videos/guia_da_nevoa.mp4" type="video/mp4">
+      </video>
+    </div><span class="videoState">Imagem base</span></div>
+        <div class="atelierBody"><div class="tag">PERSONAGEM-GUIA</div><h3>Guia da Névoa</h3><p>A personagem-anfitriã do portal, sempre elegante, curiosa e acolhedora, conduzindo o aluno para dentro da mansão.</p><button class="smallBtn promptBtn" data-prompt="guia">Abrir prompt Gemini</button></div>
+      </article>
+      <article class="atelierCard">
+        <div class="atelierArt"><div class="mediaSlot atelierMedia" data-video-slot>
+      <img class="mediaPoster" src="" data-media="poster_mansao" alt="Mansão da Névoa">
+      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="assets/videos/mansao_da_nevoa.mp4" type="video/mp4">
+      </video>
+    </div><span class="videoState">Imagem base</span></div>
+        <div class="atelierBody"><div class="tag">CENÁRIO</div><h3>Mansão da Névoa</h3><p>Plano geral cinematográfico da mansão com névoa, luar, lanternas e atmosfera de aventura filosófica.</p><button class="smallBtn promptBtn" data-prompt="mansao">Abrir prompt Gemini</button></div>
+      </article>
+      <article class="atelierCard">
+        <div class="atelierArt"><div class="mediaSlot atelierMedia" data-video-slot>
+      <img class="mediaPoster" src="" data-media="poster_guardiao" alt="Guardião dos Filósofos">
+      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="assets/videos/guardiao_dos_filosofos.mp4" type="video/mp4">
+      </video>
+    </div><span class="videoState">Imagem base</span></div>
+        <div class="atelierBody"><div class="tag">SALA VIVA</div><h3>Guardião dos Filósofos</h3><p>Um retrato antigo desperta, observa o visitante e lança um enigma, como se a própria parede estivesse pensando.</p><button class="smallBtn promptBtn" data-prompt="filosofos">Abrir prompt Gemini</button></div>
+      </article>
+      <article class="atelierCard">
+        <div class="atelierArt"><div class="mediaSlot atelierMedia" data-video-slot>
+      <img class="mediaPoster" src="" data-media="poster_espelho" alt="Sombra do Espelho">
+      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="assets/videos/espelho_guardiao_sombrio.mp4" type="video/mp4">
+      </video>
+    </div><span class="videoState">Imagem base</span></div>
+        <div class="atelierBody"><div class="tag">CENA CURTA</div><h3>Sombra do Espelho</h3><p>O espelho pulsa, reflete a dúvida e cria uma cena curta perfeita para epistemologia, mistério e suspense.</p><button class="smallBtn promptBtn" data-prompt="espelho">Abrir prompt Gemini</button></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="hall" class="hallSection">
+  <div class="wrap hallGrid">
+    <div class="panel hallPanel">
+      <div class="eyebrow">🏆 Hall da Turma</div><h2>Registre sua passagem pela mansão</h2><p>Salve localmente o nome do explorador, seu XP total, seu título atual e a quantidade de conquistas desbloqueadas neste dispositivo.</p>
+      <div class="hallForm">
+        <input id="hallName" type="text" maxlength="24" placeholder="Nome do explorador">
+        <button class="smallBtn" id="saveHall">Salvar no Hall</button>
+        <button class="smallBtn subtle" id="openCertificate">Gerar certificado</button>
+      </div>
+      <div class="hallTip">Dica: ótimo para registrar o avanço da turma no mesmo computador da sala.</div>
+    </div>
+    <div class="panel hallListPanel">
+      <div class="eyebrow">Classificação local</div><h3>Melhores exploradores</h3><div id="hallList" class="hallList"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap"><div class="footerMantra">PENSAR • QUESTIONAR • ARGUMENTAR • TRANSFORMAR</div><p>Portal Filosófico da Névoa • versão 5 preparada para animações Gemini</p></div></footer>
+
+<!-- MAPA -->
+<dialog id="mapDialog" class="wideDialog">
+  <div class="modalShell mapShell">
+    <button class="closeBtn" data-close="mapDialog" aria-label="Fechar">×</button>
+    <div class="eyebrow">Mapa da Mansão</div><h2>Escolha uma ala</h2>
+    <p class="modalLead">Salas concluídas brilham na névoa. A Mansão de Sócrates é a aventura principal.</p>
+    <div class="mansionMap">
+      <button class="mapNode boss" data-game="socrates"><span>🏚️</span><b>Mansão de Sócrates</b><small>7 cômodos</small></button>
+      <div class="mapPath p1"></div><div class="mapPath p2"></div><div class="mapPath p3"></div>
+      <button class="mapNode n1" data-game="filosofos"><span>🏛️</span><b>Filósofos</b></button>
+      <button class="mapNode n2" data-game="logica"><span>🧠</span><b>Lógica</b></button>
+      <button class="mapNode n3" data-game="etica"><span>⚖️</span><b>Ética</b></button>
+      <button class="mapNode n4" data-game="descartes"><span>🪞</span><b>Descartes</b></button>
+      <button class="mapNode n5" data-game="platao"><span>🕯️</span><b>Platão</b></button>
+      <button class="mapNode n6" data-game="fontes"><span>📜</span><b>Fontes</b></button>
+      <button class="mapNode n7" data-game="escape"><span>🔐</span><b>Escape</b></button>
+      <button class="mapNode n8" data-game="dilemas"><span>🌙</span><b>Dilemas</b></button>
+    </div>
+  </div>
+</dialog>
+
+<!-- QUIZ -->
+<dialog id="gameDialog" class="gameDialog">
+  <div class="gameBackdrop"><img id="modalImg" alt=""></div>
+  <div class="modalShell gameShell">
+    <button class="closeBtn" data-close="gameDialog" aria-label="Fechar">×</button>
+    <div class="gameHeader"><div><div class="eyebrow" id="modalTag">DESAFIO</div><h2 id="modalTitle">Sala</h2></div><div class="scoreOrb"><b id="scoreText">0</b><small>XP</small></div></div>
+    <div id="quiz">
+      <div class="stepLine"><span id="stepText">Pergunta 1</span><i id="stepFill"></i></div>
+      <div class="question" id="question"></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="nextBtn" id="nextBtn">Próxima →</button>
+    </div>
+    <div id="scorePanel" class="scorePanel">
+      <div class="badgeBig" id="badgeBig">🏮</div><h3 id="finalTitle">Porta aberta!</h3><p id="finalText"></p><div class="badgeLabel" id="badgeText">Desafio concluído</div>
+      <button class="cta" data-close="gameDialog">Voltar à mansão</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- AVENTURA SÓCRATES -->
+<dialog id="socratesDialog" class="wideDialog socratesDialog">
+  <div class="modalShell adventureShell">
+    <button class="closeBtn" data-close="socratesDialog" aria-label="Fechar">×</button>
+    <div class="adventureHeader"><div><div class="eyebrow">Aventura Principal</div><h2>A Mansão de Sócrates</h2><p>Sete cômodos. Sete letras. Uma pergunta final.</p></div><div class="keyRing" id="keyRing">_ _ _ _ _ _ _</div></div>
+    <div class="adventureLayout">
+      <div class="adventureRooms" id="socratesRooms"></div>
+      <aside class="guidePanel"><div class="guidePortrait">🦉</div><h3>O Guardião pergunta</h3><p id="socratesHint">Entre no primeiro cômodo e examine a pergunta. Cada resposta correta revela uma letra.</p><div class="inventory"><b>Inventário</b><span id="inventoryText">Nenhuma pista coletada.</span></div></aside>
+    </div>
+  </div>
+</dialog>
+
+<!-- CONQUISTAS -->
+<dialog id="achievementDialog" class="wideDialog">
+  <div class="modalShell achievementShell">
+    <button class="closeBtn" data-close="achievementDialog" aria-label="Fechar">×</button>
+    <div class="eyebrow">Insígnias da Névoa</div><h2>Conquistas</h2><p class="modalLead">Elas são desbloqueadas conforme você explora a mansão.</p>
+    <div class="achievementGrid" id="achievementGrid"></div>
+  </div>
+</dialog>
+
+
+<!-- ATELIÊ GEMINI -->
+<dialog id="promptDialog" class="wideDialog">
+  <div class="modalShell promptShell">
+    <button class="closeBtn" data-close="promptDialog" aria-label="Fechar">×</button>
+    <div class="eyebrow">Prompt de animação</div><h2 id="promptTitle">Gemini</h2><p class="modalLead">Cena curta pensada para animação de cerca de 8 a 10 segundos.</p>
+    <textarea id="promptText" class="promptText" readonly></textarea>
+    <div class="promptActions"><button class="smallBtn" id="copyPrompt">Copiar prompt</button></div>
+  </div>
+</dialog>
+
+<!-- CERTIFICADO -->
+<dialog id="certificateDialog" class="wideDialog">
+  <div class="modalShell certificateShell">
+    <button class="closeBtn" data-close="certificateDialog" aria-label="Fechar">×</button>
+    <div class="certificate" id="certificateCard">
+      <div class="certificateGlow"></div>
+      <div class="eyebrow">Certificado da Mansão</div>
+      <h2>Portal Filosófico da Névoa</h2>
+      <p>Certificamos que</p>
+      <h3 id="certificateName">Explorador da Névoa</h3>
+      <p>atravessou os corredores filosóficos da mansão e alcançou o título de</p>
+      <h4 id="certificateRank">Aprendiz da Névoa</h4>
+      <div class="certificateMeta"><span id="certificateXP">0 XP</span><span id="certificateDate"></span></div>
+      <div class="certificateMantra">Questionar • Pensar • Argumentar • Transformar</div>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" aria-live="polite"></div>
+<script src="media/logo.js"></script>
+<script src="media/mansion.js"></script>
+<script src="media/filosofos.js"></script>
+<script src="media/logica.js"></script>
+<script src="media/etica.js"></script>
+<script src="media/descartes.js"></script>
+<script src="media/platao.js"></script>
+<script src="media/biblioteca.js"></script>
+<script src="media/escape.js"></script>
+<script src="media/dilemas.js"></script>
+<script src="media/poster_guia.js"></script>
+<script src="media/poster_mansao.js"></script>
+<script src="media/poster_guardiao.js"></script>
+<script src="media/poster_espelho.js"></script>
+<script src="media/init.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
