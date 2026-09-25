@@ -190,7 +190,24 @@ function loop(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;update(dt);rend
 function setKey(code,val){if(code==='ArrowLeft'||code==='KeyA')keys.left=val;if(code==='ArrowRight'||code==='KeyD')keys.right=val;if(code==='ArrowUp'||code==='KeyW'||code==='Space')keys.jump=val;if(code==='KeyE'||code==='Enter')keys.interact=val;if(code==='KeyQ')keys.lantern=val;if(code==='KeyR'&&val)resetCheckpoint()}
 addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','Space'].includes(e.code))e.preventDefault();setKey(e.code,true)});addEventListener('keyup',e=>setKey(e.code,false));
 document.querySelectorAll('.mobileControls button').forEach(b=>{const k=b.dataset.key,down=e=>{e.preventDefault();keys[k]=true},up=e=>{e.preventDefault();keys[k]=false};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up)});
-$('#startBtn').onclick=()=>{$('#introOverlay').classList.remove('show');started=true;paused=false;setTimeout(()=>showHint('Etapa 1/4 — Use Q ou 🏮 ANTES de saltar. A luz revela as plataformas douradas verdadeiras; sem ela, você atravessa e cai.'),300);setTimeout(()=>$('#lanternHint').classList.add('hide'),9000)};$('#replayBtn').onclick=()=>location.reload();
+let phaseUnlocked=false;
+async function checkPhaseUnlock(){
+  const btn=$('#startBtn');
+  const local=portalState();
+  if(Number(local.completed?.plataforma||0)>=60){phaseUnlocked=true;btn.disabled=false;btn.textContent='🎮 Começar a subida';return}
+  if(window.NevoaOnline?.getCode()){
+    try{
+      const snap=await window.NevoaOnline.loadExplorer();
+      const ok=(snap?.progress||[]).some(x=>x.event_key==='platform_socrates'&&Number(x.best_score)>=60);
+      if(ok){local.completed.plataforma=60;localStorage.setItem('nevoaProgressV4',JSON.stringify(local));phaseUnlocked=true;btn.disabled=false;btn.textContent='🎮 Começar a subida';return}
+    }catch(e){}
+  }
+  phaseUnlocked=false;btn.disabled=true;btn.textContent='🔒 Conclua a Fase 1 primeiro';
+  showHint('A Caverna de Platão é a Fase 2. Conclua O Caminho de Sócrates para desbloqueá-la.',8000);
+}
+$('#startBtn').onclick=()=>{if(!phaseUnlocked)return;$('#introOverlay').classList.remove('show');started=true;paused=false;setTimeout(()=>showHint('Etapa 1/4 — Use Q ou 🏮 ANTES de saltar. A luz revela as plataformas douradas verdadeiras; sem ela, você atravessa e cai.'),300);setTimeout(()=>$('#lanternHint').classList.add('hide'),9000)};
+$('#replayBtn').onclick=()=>location.reload();
+checkPhaseUnlock();
 async function enterGameMode(){
  try{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen()}catch(e){}
  try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(e){}
