@@ -4,6 +4,7 @@ const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),W=canva
 const keys={left:false,right:false,jump:false,interact:false,lantern:false};
 let started=false,paused=true,won=false,last=0,cameraX=0,interactLatch=false,lanternLatch=false,audioCtx=null,sound=false;
 let lives=3,currentStage=1,lastHintStage=0;
+let bossEngaged=false,bossPerfect=true;
 const WORLD_W=6100,FLOOR=472,gravity=1780;
 const player={x:90,y:360,w:42,h:68,vx:0,vy:0,speed:280,jump:660,onGround:false,facing:1,anim:0,checkpointX:90,checkpointY:360};
 
@@ -123,11 +124,24 @@ function interactions(){
  nearby=null;
  scrolls.forEach(s=>{if(!s.got&&near(player,{x:s.x-14,y:s.y-22,w:48,h:58},22)){s.got=true;toast('📜 Conceito: '+s.label);tone(660,.1,'sine');setHud()}});
  checkpoints.forEach(c=>{const r={x:c.x,y:c.y,w:38,h:60};if(!c.active&&near(player,r,25)){c.active=true;player.checkpointX=c.x+42;player.checkpointY=c.y-62;toast('🕯️ '+c.label+' — checkpoint');tone(500,.11,'triangle')}});
- const g=gates.find(x=>!x.opened&&near(player,x,72));if(g)nearby={type:'gate',obj:g};
- if(boss.active&&near(player,{x:boss.x,y:boss.y,w:80,h:125},110))nearby={type:'boss',obj:boss};
+
+ const g=gates.find(x=>!x.opened&&near(player,x,72));
+ if(g)nearby={type:'gate',obj:g};
+
+ const bossNear=boss.active&&near(player,{x:boss.x,y:boss.y,w:80,h:125},118);
+ if(bossNear&&!bossEngaged&&!paused){
+   bossEngaged=true;bossPerfect=true;paused=true;player.vx=0;
+   $('#interactionHint').hidden=true;
+   showHint('👤 O Mestre das Sombras surgiu. O confronto começa automaticamente.',1800);
+   setTimeout(bossQuiz,420);
+   return;
+ }
+
  $('#interactionHint').hidden=!nearby;
- if(keys.interact&&!interactLatch&&nearby){interactLatch=true;nearby.type==='gate'?gateQuiz(nearby.obj):bossQuiz()}if(!keys.interact)interactLatch=false;
- if(keys.lantern&&!lanternLatch){lanternLatch=true;activateLantern()}if(!keys.lantern)lanternLatch=false;
+ if(keys.interact&&!interactLatch&&nearby){interactLatch=true;gateQuiz(nearby.obj)}
+ if(!keys.interact)interactLatch=false;
+ if(keys.lantern&&!lanternLatch){lanternLatch=true;activateLantern()}
+ if(!keys.lantern)lanternLatch=false;
 }
 
 function showQuiz({icon='🚪',kicker='PORTAL DA CAVERNA',title,q,a,ok,feedback,onCorrect}){
@@ -144,11 +158,65 @@ function showQuiz({icon='🚪',kicker='PORTAL DA CAVERNA',title,q,a,ok,feedback,
      if(alive)setTimeout(()=>[...$('#quizAnswers').children].forEach(x=>x.disabled=false),850);
      else setTimeout(()=>{$('#quizOverlay').classList.remove('show');paused=false;lives=3;resetCheckpoint();setHud()},1050);
    }
- };$('#quizAnswers').appendChild(b)});$('#quizOverlay').classList.add('show')
+ };$('#quizAnswers').appendChild(b)});$('#quizOverlay').classList.add('show');const qc=$('#quizOverlay .quizCard');if(qc)qc.scrollTop=0;$('#quizOverlay').scrollTop=0
 }
 function gateQuiz(g){showQuiz({title:g.title,q:g.q,a:g.a,ok:g.ok,feedback:g.f,onCorrect:()=>{g.opened=true;player.checkpointX=g.checkpoint;player.checkpointY=360;toast('🚪 A passagem se abre.');setHud()}})}
-function bossQuiz(){const i=boss.step,q=boss.questions[i];showQuiz({icon:'👤',kicker:'MESTRE DAS SOMBRAS',title:'Ilusão '+(i+1)+'/3',q:q.q,a:q.a,ok:q.ok,feedback:q.f,onCorrect:()=>{boss.step++;if(boss.step>=3){boss.active=false;setTimeout(winGame,250)}else toast('A parede de sombras perde força...')}})}
-function winGame(){won=true;paused=true;const gained=saveWin(),n=scrolls.filter(s=>s.got).length;$('#finalScrolls').textContent=n+'/8';$('#finalXP').textContent=gained+' XP';$('#bonusText').textContent=n===8?'✨ Coleção completa: você reuniu os oito conceitos da Caverna.':'Você pode retornar depois para reunir todos os oito conceitos.';$('#winOverlay').classList.add('show');tone(523,.12,'triangle');setTimeout(()=>tone(659,.12,'triangle'),120);setTimeout(()=>tone(784,.25,'triangle'),240)}
+function bossQuiz(){
+ if(!boss.active)return;
+ paused=true;
+ const i=boss.step,q=boss.questions[i];
+ $('#quizIcon').textContent='👤';
+ $('#quizKicker').textContent='MESTRE DAS SOMBRAS • CONFRONTO AUTOMÁTICO';
+ $('#quizTitle').textContent='Ilusão '+(i+1)+'/'+boss.questions.length;
+ $('#quizQuestion').textContent=q.q;
+ $('#quizAnswers').innerHTML='';
+ $('#quizFeedback').className='quizFeedback';
+ $('#quizFeedback').textContent='';
+ q.a.forEach((txt,idx)=>{
+   const btn=document.createElement('button');
+   btn.textContent=txt;
+   btn.onclick=()=>{
+     [...$('#quizAnswers').children].forEach(x=>x.disabled=true);
+     const f=$('#quizFeedback');
+     if(idx===q.ok){
+       f.className='quizFeedback ok';
+       f.textContent='✓ '+q.f;
+       tone(740,.12,'sine');
+       boss.step++;setHud();
+       if(boss.step>=boss.questions.length){
+         boss.active=false;
+         setTimeout(()=>{
+           $('#quizOverlay').classList.remove('show');
+           winGame(bossPerfect);
+         },850);
+       }else{
+         setTimeout(()=>bossQuiz(),850);
+       }
+     }else{
+       bossPerfect=false;
+       const alive=loseLife();
+       f.className='quizFeedback bad';
+       f.textContent=alive
+         ?'✦ A sombra venceu este ponto. Você perdeu 1 coração. Releia o problema e tente novamente.'
+         :'☠ O Mestre das Sombras venceu este confronto. Você volta ao checkpoint e recomeça a sequência.';
+       if(alive){
+         setTimeout(()=>[...$('#quizAnswers').children].forEach(x=>x.disabled=false),850);
+       }else{
+         setTimeout(()=>{
+           $('#quizOverlay').classList.remove('show');
+           lives=3;boss.step=0;bossEngaged=false;bossPerfect=true;paused=false;
+           setHud();resetCheckpoint();
+           showHint('👤 Volte ao Mestre das Sombras. O confronto reiniciará automaticamente.',2600);
+         },1050);
+       }
+     }
+   };
+   $('#quizAnswers').appendChild(btn);
+ });
+ $('#quizOverlay').classList.add('show');
+ const qc=$('#quizOverlay .quizCard');if(qc)qc.scrollTop=0;$('#quizOverlay').scrollTop=0;
+}
+function winGame(perfectBoss=false){won=true;paused=true;const gained=saveWin(),n=scrolls.filter(s=>s.got).length;$('#finalScrolls').textContent=n+'/8';$('#finalXP').textContent=gained+' XP';$('#bonusText').textContent=perfectBoss?'🌞 Confronto perfeito! Você atravessou as três ilusões sem errar. A próxima porta será a Fase 3.':(n===8?'✨ Coleção completa: você reuniu os oito conceitos da Caverna.':'Você pode retornar depois para reunir todos os oito conceitos.');$('#winOverlay').classList.add('show');$('#winOverlay').scrollTop=0;tone(523,.12,'triangle');setTimeout(()=>tone(659,.12,'triangle'),120);setTimeout(()=>tone(784,.25,'triangle'),240)}
 
 function drawBg(){
  const x=cameraX,g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#100718');g.addColorStop(.55,'#24102e');g.addColorStop(1,'#08040b');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
