@@ -1,0 +1,8 @@
+Coloque nesta pasta os vídeos do Gemini com estes nomes exatos:
+
+- guia_da_nevoa.mp4
+- mansao_da_nevoa.mp4
+- guardiao_dos_filosofos.mp4
+- espelho_guardiao_sombrio.mp4
+
+O site continuará mostrando as imagens estáticas enquanto algum vídeo estiver ausente.
