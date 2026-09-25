@@ -1,0 +1,30 @@
+PORTAL FILOSÓFICO DA NÉVOA — PROMPTS GEMINI
+Formato recomendado: 8–10 s, horizontal 16:9, 1920x1080, 24/30 fps, 100% 2D anime/cartoon.
+
+============================================================
+1) GUIA DA NÉVOA
+Imagem base: assets/posters/guia_da_nevoa.png
+Salvar vídeo como: assets/videos/guia_da_nevoa.mp4
+============================================================
+Use a imagem enviada como base obrigatória da cena. Quero uma animação de 8 a 10 segundos em estilo 100% 2D anime/cartoon, sem alterar o design da personagem. A Guia da Névoa está em uma biblioteca gótica iluminada por velas e lanternas alaranjadas, com névoa roxa suave no ambiente. Ela segura um livro antigo junto ao peito e estende uma das mãos em direção à câmera, como se convidasse o visitante a entrar no portal. Quero movimentos suaves e elegantes: leve balanço do cabelo, tecido da roupa reagindo discretamente ao ar, brilho delicado nos olhos, chamas das velas tremulando e a névoa se movendo lentamente. A expressão deve ser acolhedora, misteriosa e inteligente. Não transformar em 3D, não mudar o rosto, não mudar a roupa, não criar dedos extras, não deformar mãos, não fazer movimentos bruscos, não adicionar personagens novos. Atmosfera mágica, bela e envolvente.
+
+============================================================
+2) MANSÃO DA NÉVOA
+Imagem base: assets/posters/mansao_da_nevoa.png
+Salvar vídeo como: assets/videos/mansao_da_nevoa.mp4
+============================================================
+Use a imagem enviada como base obrigatória da cena. Quero uma animação de 8 a 10 segundos em estilo 100% 2D anime/cartoon, sem alterar o design da mansão. Mostrar a Mansão da Névoa em plano geral cinematográfico, com lua cheia laranja ao fundo, céu roxo, névoa rasteira e lanternas brilhando em tons quentes. A câmera deve fazer uma aproximação lenta e sutil em direção ao portão principal. Quero movimento suave da névoa, pequenas folhas ou partículas no ar, morcegos voando discretamente ao fundo e luzes tremulando nas janelas e lanternas. A cena deve parecer um convite para entrar em uma aventura filosófica misteriosa. Não transformar em realismo, não distorcer a arquitetura, não mudar a composição central, não fazer movimentos de câmera exagerados, não inserir personagens humanos. Clima bonito, encantado, gótico e mágico.
+
+============================================================
+3) GUARDIÃO DOS FILÓSOFOS
+Imagem base: assets/posters/guardiao_dos_filosofos.png
+Salvar vídeo como: assets/videos/guardiao_dos_filosofos.mp4
+============================================================
+Use a imagem enviada como base obrigatória da cena. Quero uma animação de 8 a 10 segundos em estilo 100% 2D anime/cartoon, preservando totalmente o design do Guardião dos Filósofos. A cena se passa em um corredor gótico com velas, livros antigos, fumaça roxa e atmosfera de mistério intelectual. O guardião deve mover levemente a cabeça, piscar, mudar de expressão com sutileza e estender a mão em direção ao visitante como se estivesse convidando para um enigma. Quero brilho discreto nos olhos, chamas das velas tremulando, fumaça roxa se movendo devagar e o corvo ao lado com um pequeno movimento natural. Não transformar em 3D, não criar distorções faciais, não alterar a barba, não deformar mãos, não adicionar personagens extras, não fazer gestos exagerados. A cena deve transmitir sabedoria, enigma e acolhimento filosófico.
+
+============================================================
+4) ESPELHO GÓTICO / GUARDIÃO SOMBRIO
+Imagem base: assets/posters/espelho_guardiao_sombrio.png
+Salvar vídeo como: assets/videos/espelho_guardiao_sombrio.mp4
+============================================================
+Use a imagem enviada como base obrigatória da cena. Quero uma animação de 8 a 10 segundos em estilo 100% 2D anime/cartoon, sem alterar o design do espelho, do ambiente nem da figura sombria refletida. A cena deve mostrar o espelho oval gótico pulsando com energia violeta, enquanto a figura sombria dentro do reflexo move lentamente a cabeça e o olhar, como se estivesse observando e questionando quem entrou na sala. Quero pequenas partículas luminosas roxas, leve oscilação da fumaça, brilho suave das velas e um efeito sutil de vibração mágica no espelho. O clima deve ser de dúvida filosófica, mistério e beleza. Não transformar em realismo, não criar monstros, não deformar a figura, não exagerar no terror, não adicionar sangue ou gore, não fazer movimentos bruscos ou caóticos.
