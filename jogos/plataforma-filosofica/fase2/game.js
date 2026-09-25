@@ -3,6 +3,7 @@
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height,$=s=>document.querySelector(s);
 const keys={left:false,right:false,jump:false,interact:false,lantern:false};
 let started=false,paused=true,won=false,last=0,cameraX=0,interactLatch=false,lanternLatch=false,audioCtx=null,sound=false;
+let lives=3,currentStage=1,lastHintStage=0;
 const WORLD_W=6100,FLOOR=472,gravity=1780;
 const player={x:90,y:360,w:42,h:68,vx:0,vy:0,speed:280,jump:660,onGround:false,facing:1,anim:0,checkpointX:90,checkpointY:360};
 
@@ -62,22 +63,50 @@ const boss={x:5630,y:345,active:true,step:0,questions:[
 {q:'O prisioneiro liberto deve compreender as sombras como:',a:['A própria realidade completa.','Aparências que precisam ser relacionadas às suas causas e a uma compreensão mais ampla.','Imagens que devem ser esquecidas sem análise.'],ok:1,f:'O ponto não é simplesmente apagar as sombras, mas deixar de confundi-las com a totalidade do real.'}
 ]};
 
-let lantern={active:false,time:0,cooldown:0,duration:3.2,maxCooldown:5.5};
+let lantern={active:false,time:0,cooldown:0,duration:4.5,maxCooldown:2.8};
 
 function portalState(){const raw=localStorage.getItem('nevoaProgressV4')||localStorage.getItem('nevoaProgressV3');let s={xp:0,completed:{},achievements:{},socrates:0,daily:null,hall:[]};try{if(raw)s=Object.assign(s,JSON.parse(raw));}catch(e){}s.completed=s.completed||{};s.achievements=s.achievements||{};return s}
-function saveWin(){const s=portalState(),old=Number(s.completed.plataoPlataforma||0),score=70;let gained=0;if(score>old){gained=score-old;s.xp=Number(s.xp||0)+gained;s.completed.plataoPlataforma=score}s.achievements.platoCave=true;localStorage.setItem('nevoaProgressV4',JSON.stringify(s));return gained}
+function saveWin(){const s=portalState(),old=Number(s.completed.plataoPlataforma||0),score=70;let gained=0;if(score>old){gained=score-old;s.xp=Number(s.xp||0)+gained;s.completed.plataoPlataforma=score}s.achievements.platoCave=true;s.platformPhase=Math.max(Number(s.platformPhase||2),3);localStorage.setItem('nevoaProgressV4',JSON.stringify(s));return gained}
 
 function tone(freq=440,dur=.08,type='sine',gainVal=.04){if(!sound)return;if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=gainVal;o.connect(g).connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);o.stop(audioCtx.currentTime+dur+.03)}
 $('#soundBtn').onclick=()=>{sound=!sound;$('#soundBtn').textContent=sound?'🔊':'🔇';if(sound){tone(196,.1,'triangle');setTimeout(()=>tone(294,.15,'sine'),100)}};
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1800)}
 function overlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
 function near(a,b,p=60){return a.x+a.w>b.x-p&&a.x<b.x+b.w+p&&a.y+a.h>b.y-p&&a.y<b.y+b.h+p}
-function setHud(){ $('#scrollCount').textContent=scrolls.filter(s=>s.got).length;$('#gateCount').textContent=gates.filter(g=>g.opened).length;const hud=$('.lanternHud'),txt=$('#lanternState');hud.classList.remove('ready','active','cool');if(lantern.active){hud.classList.add('active');txt.textContent='REVELANDO'}else if(lantern.cooldown>0){hud.classList.add('cool');txt.textContent='RECARGA '+lantern.cooldown.toFixed(1)+'s'}else{hud.classList.add('ready');txt.textContent='PRONTA'}}
+function setHud(){
+ $('#scrollCount').textContent=scrolls.filter(s=>s.got).length;
+ $('#gateCount').textContent=gates.filter(g=>g.opened).length;
+ const hud=$('.lanternHud'),txt=$('#lanternState');hud.classList.remove('ready','active','cool');
+ if(lantern.active){hud.classList.add('active');txt.textContent='REVELANDO'}
+ else if(lantern.cooldown>0){hud.classList.add('cool');txt.textContent='RECARGA '+lantern.cooldown.toFixed(1)+'s'}
+ else{hud.classList.add('ready');txt.textContent='PRONTA'}
+ const life=$('#lifeText');if(life)life.textContent=lives+'/3';
+ const stage=$('#stageText');if(stage)stage.textContent=currentStage+'/4';
+}
+function showHint(msg,dur=5600){
+ const box=$('#guideHint'),txt=$('#guideHintText');if(!box||!txt)return;
+ txt.textContent=msg;box.hidden=false;clearTimeout(showHint.timer);showHint.timer=setTimeout(()=>box.hidden=true,dur);
+}
+function loseLife(){lives=Math.max(0,lives-1);setHud();tone(120,.15,'sawtooth',.025);return lives>0}
+function updateStage(){
+ const s=player.x<1050?1:player.x<3000?2:player.x<4650?3:4;
+ if(s!==currentStage){currentStage=s;setHud()}
+ if(s!==lastHintStage){
+   lastHintStage=s;
+   const tips={
+    1:'As plataformas roxas são aparências. Use Q/🏮 para revelar em dourado as plataformas verdadeiras. Sem a luz, elas NÃO sustentam Platão.',
+    2:'A Lanterna dura alguns segundos e recarrega rápido. Acenda antes do salto, não depois de já estar caindo.',
+    3:'Os portais testam o sentido da alegoria. Errar custa um coração; três erros devolvem você ao checkpoint.',
+    4:'Na saída, o Mestre das Sombras usa ideias convincentes. Procure a diferença entre opinião, aparência e conhecimento.'
+   };
+   showHint('Etapa '+s+'/4 — '+tips[s]);
+ }
+}
 
 function activateLantern(){if(lantern.active||lantern.cooldown>0)return;lantern.active=true;lantern.time=lantern.duration;lantern.cooldown=lantern.maxCooldown;$('#lanternHint').classList.add('hide');toast('🏮 A razão ilumina: dourado é real; roxo é aparência.');tone(520,.12,'sine');setTimeout(()=>tone(760,.16,'sine'),90)}
 function resetCheckpoint(){player.x=player.checkpointX;player.y=player.checkpointY;player.vx=0;player.vy=0;toast('A sombra se desfaz. Platão retorna à última tocha.');tone(140,.18,'triangle')}
 
-function solids(){const hiddenTruth=truths.map(t=>({x:t.x,y:t.y,w:t.w,h:t.h}));return stone.concat(hiddenTruth).concat(gates.filter(g=>!g.opened).map(g=>({x:g.x,y:g.y,w:g.w,h:g.h})))}
+function solids(){const revealed=lantern.active?truths.map(t=>({x:t.x,y:t.y,w:t.w,h:t.h})):[];return stone.concat(revealed).concat(gates.filter(g=>!g.opened).map(g=>({x:g.x,y:g.y,w:g.w,h:g.h})))}
 
 function movePlayer(dt){
  const prevY=player.y,accel=1900;if(keys.left){player.vx-=accel*dt;player.facing=-1}if(keys.right){player.vx+=accel*dt;player.facing=1}if(!keys.left&&!keys.right)player.vx*=Math.pow(.0008,dt);player.vx=Math.max(-player.speed,Math.min(player.speed,player.vx));
@@ -101,7 +130,22 @@ function interactions(){
  if(keys.lantern&&!lanternLatch){lanternLatch=true;activateLantern()}if(!keys.lantern)lanternLatch=false;
 }
 
-function showQuiz({icon='🚪',kicker='PORTAL DA CAVERNA',title,q,a,ok,feedback,onCorrect}){paused=true;$('#quizIcon').textContent=icon;$('#quizKicker').textContent=kicker;$('#quizTitle').textContent=title;$('#quizQuestion').textContent=q;$('#quizAnswers').innerHTML='';$('#quizFeedback').className='quizFeedback';$('#quizFeedback').textContent='';a.forEach((txt,i)=>{const b=document.createElement('button');b.textContent=txt;b.onclick=()=>{[...$('#quizAnswers').children].forEach(x=>x.disabled=true);const f=$('#quizFeedback');if(i===ok){f.className='quizFeedback ok';f.textContent='✓ '+feedback;tone(730,.12,'sine');setTimeout(()=>{$('#quizOverlay').classList.remove('show');paused=false;onCorrect()},900)}else{f.className='quizFeedback bad';f.textContent='✦ A sombra engana. '+feedback;tone(130,.15,'sawtooth',.018);setTimeout(()=>[...$('#quizAnswers').children].forEach(x=>x.disabled=false),650)}};$('#quizAnswers').appendChild(b)});$('#quizOverlay').classList.add('show')}
+function showQuiz({icon='🚪',kicker='PORTAL DA CAVERNA',title,q,a,ok,feedback,onCorrect}){
+ paused=true;$('#quizIcon').textContent=icon;$('#quizKicker').textContent=kicker;$('#quizTitle').textContent=title;
+ $('#quizQuestion').textContent=q;$('#quizAnswers').innerHTML='';$('#quizFeedback').className='quizFeedback';$('#quizFeedback').textContent='';
+ a.forEach((txt,i)=>{const b=document.createElement('button');b.textContent=txt;b.onclick=()=>{
+   [...$('#quizAnswers').children].forEach(x=>x.disabled=true);const f=$('#quizFeedback');
+   if(i===ok){
+     f.className='quizFeedback ok';f.textContent='✓ '+feedback;tone(730,.12,'sine');
+     setTimeout(()=>{$('#quizOverlay').classList.remove('show');paused=false;onCorrect()},900);
+   }else{
+     const alive=loseLife();f.className='quizFeedback bad';
+     f.textContent=alive?'✦ Resposta incorreta. Pense no contraste central da alegoria sem confundir aquilo que aparece com aquilo que foi investigado. Você perdeu 1 coração.':'☠ Três erros. As sombras o devolvem ao último checkpoint.';
+     if(alive)setTimeout(()=>[...$('#quizAnswers').children].forEach(x=>x.disabled=false),850);
+     else setTimeout(()=>{$('#quizOverlay').classList.remove('show');paused=false;lives=3;resetCheckpoint();setHud()},1050);
+   }
+ };$('#quizAnswers').appendChild(b)});$('#quizOverlay').classList.add('show')
+}
 function gateQuiz(g){showQuiz({title:g.title,q:g.q,a:g.a,ok:g.ok,feedback:g.f,onCorrect:()=>{g.opened=true;player.checkpointX=g.checkpoint;player.checkpointY=360;toast('🚪 A passagem se abre.');setHud()}})}
 function bossQuiz(){const i=boss.step,q=boss.questions[i];showQuiz({icon:'👤',kicker:'MESTRE DAS SOMBRAS',title:'Ilusão '+(i+1)+'/3',q:q.q,a:q.a,ok:q.ok,feedback:q.f,onCorrect:()=>{boss.step++;if(boss.step>=3){boss.active=false;setTimeout(winGame,250)}else toast('A parede de sombras perde força...')}})}
 function winGame(){won=true;paused=true;const gained=saveWin(),n=scrolls.filter(s=>s.got).length;$('#finalScrolls').textContent=n+'/8';$('#finalXP').textContent=gained+' XP';$('#bonusText').textContent=n===8?'✨ Coleção completa: você reuniu os oito conceitos da Caverna.':'Você pode retornar depois para reunir todos os oito conceitos.';$('#winOverlay').classList.add('show');tone(523,.12,'triangle');setTimeout(()=>tone(659,.12,'triangle'),120);setTimeout(()=>tone(784,.25,'triangle'),240)}
@@ -118,7 +162,7 @@ function drawBg(){
  if(cameraX>4650){const a=Math.min(1,(cameraX-4650)/650),rg=ctx.createRadialGradient(850,150,10,850,150,250);rg.addColorStop(0,'rgba(255,227,145,'+(.8*a)+')');rg.addColorStop(1,'rgba(255,150,45,0)');ctx.fillStyle=rg;ctx.fillRect(560,0,400,420)}
 }
 function rock(r){const x=r.x-cameraX;if(x>W+60||x+r.w<-60)return;const g=ctx.createLinearGradient(0,r.y,0,r.y+r.h);g.addColorStop(0,'#4c2b50');g.addColorStop(.12,'#2a172d');g.addColorStop(1,'#100913');ctx.fillStyle=g;ctx.fillRect(x,r.y,r.w,r.h);ctx.fillStyle='#8c557c';ctx.globalAlpha=.28;ctx.fillRect(x,r.y,r.w,4);ctx.globalAlpha=1}
-function drawTruth(t){const x=t.x-cameraX;if(x>W+40||x+t.w<-40)return;ctx.save();if(lantern.active){ctx.globalAlpha=1;ctx.shadowBlur=22;ctx.shadowColor='#ffd56f';ctx.fillStyle='#8b6532';ctx.fillRect(x,t.y,t.w,t.h);ctx.fillStyle='#ffe29a';ctx.fillRect(x,t.y,t.w,4)}else{ctx.globalAlpha=.08;ctx.fillStyle='#d7b66c';ctx.fillRect(x,t.y,t.w,t.h)}ctx.restore()}
+function drawTruth(t){const x=t.x-cameraX;if(x>W+40||x+t.w<-40)return;ctx.save();if(lantern.active){ctx.globalAlpha=1;ctx.shadowBlur=22;ctx.shadowColor='#ffd56f';ctx.fillStyle='#8b6532';ctx.fillRect(x,t.y,t.w,t.h);ctx.fillStyle='#ffe29a';ctx.fillRect(x,t.y,t.w,4)}else{ctx.globalAlpha=0}ctx.restore()}
 function drawIllusion(i){const x=i.x-cameraX;if(x>W+40||x+i.w<-40)return;ctx.save();ctx.globalAlpha=lantern.active?.14:.8;ctx.shadowBlur=lantern.active?0:18;ctx.shadowColor='#c950ff';ctx.fillStyle='#653077';ctx.fillRect(x,i.y,i.w,i.h);ctx.strokeStyle='#d26aff';ctx.setLineDash([7,5]);ctx.strokeRect(x,i.y,i.w,i.h);ctx.setLineDash([]);ctx.restore()}
 function drawGate(g){if(g.opened)return;const x=g.x-cameraX;if(x<-70||x>W+70)return;ctx.save();ctx.translate(x,g.y);ctx.fillStyle='#16091d';ctx.fillRect(0,0,g.w,g.h);ctx.strokeStyle='#bd5be3';ctx.lineWidth=3;ctx.strokeRect(3,3,g.w-6,g.h-6);ctx.shadowBlur=18;ctx.shadowColor='#ffba57';ctx.fillStyle='#ffca68';ctx.font='bold 22px Georgia';ctx.textAlign='center';ctx.fillText('◐',g.w/2,65);ctx.restore()}
 function drawScroll(s){if(s.got)return;const x=s.x-cameraX;if(x<-40||x>W+40)return;const b=Math.sin(performance.now()/340+s.x)*5;ctx.save();ctx.translate(x,s.y+b);ctx.shadowBlur=15;ctx.shadowColor='#ffb558';ctx.fillStyle='#eec77c';ctx.fillRect(-12,-13,32,26);ctx.fillStyle='#734020';ctx.fillRect(-15,-16,5,32);ctx.fillRect(20,-16,5,32);ctx.fillStyle='#4e2730';ctx.font='bold 7px serif';ctx.textAlign='center';ctx.fillText(s.label.toUpperCase(),4,3);ctx.restore()}
@@ -140,11 +184,18 @@ function drawBoss(){if(!boss.active)return;const x=boss.x-cameraX,y=boss.y;if(x<
 function drawLanternEffect(){if(!lantern.active)return;const px=player.x-cameraX+player.w/2,py=player.y+player.h/2,rg=ctx.createRadialGradient(px,py,20,px,py,220);rg.addColorStop(0,'rgba(255,222,117,.23)');rg.addColorStop(1,'rgba(255,210,90,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,W,H)}
 function render(){drawBg();stone.forEach(rock);illusions.forEach(drawIllusion);truths.forEach(drawTruth);gates.forEach(drawGate);scrolls.forEach(drawScroll);checkpoints.forEach(drawCheckpoint);drawBoss();drawPlato();drawLanternEffect();if(cameraX>5150){ctx.fillStyle='#fff2c4';ctx.font='bold 18px Georgia';ctx.textAlign='center';ctx.fillText('A saída para a luz',820,155)}}
 
-function update(dt){if(paused||!started||won)return;if(lantern.active){lantern.time-=dt;if(lantern.time<=0)lantern.active=false}if(lantern.cooldown>0)lantern.cooldown=Math.max(0,lantern.cooldown-dt);movePlayer(dt);interactions();const target=Math.max(0,Math.min(WORLD_W-W,player.x-W*.35));cameraX+=(target-cameraX)*Math.min(1,dt*6);setHud()}
+function update(dt){if(paused||!started||won)return;if(lantern.active){lantern.time-=dt;if(lantern.time<=0)lantern.active=false}if(lantern.cooldown>0)lantern.cooldown=Math.max(0,lantern.cooldown-dt);movePlayer(dt);interactions();updateStage();const target=Math.max(0,Math.min(WORLD_W-W,player.x-W*.35));cameraX+=(target-cameraX)*Math.min(1,dt*6);setHud()}
 function loop(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;update(dt);render();requestAnimationFrame(loop)}requestAnimationFrame(loop);
 
 function setKey(code,val){if(code==='ArrowLeft'||code==='KeyA')keys.left=val;if(code==='ArrowRight'||code==='KeyD')keys.right=val;if(code==='ArrowUp'||code==='KeyW'||code==='Space')keys.jump=val;if(code==='KeyE'||code==='Enter')keys.interact=val;if(code==='KeyQ')keys.lantern=val;if(code==='KeyR'&&val)resetCheckpoint()}
 addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','Space'].includes(e.code))e.preventDefault();setKey(e.code,true)});addEventListener('keyup',e=>setKey(e.code,false));
 document.querySelectorAll('.mobileControls button').forEach(b=>{const k=b.dataset.key,down=e=>{e.preventDefault();keys[k]=true},up=e=>{e.preventDefault();keys[k]=false};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up)});
-$('#startBtn').onclick=()=>{$('#introOverlay').classList.remove('show');started=true;paused=false;setTimeout(()=>$('#lanternHint').classList.add('hide'),7000)};$('#replayBtn').onclick=()=>location.reload();setHud();render();
+$('#startBtn').onclick=()=>{$('#introOverlay').classList.remove('show');started=true;paused=false;setTimeout(()=>showHint('Etapa 1/4 — Use Q ou 🏮 ANTES de saltar. A luz revela as plataformas douradas verdadeiras; sem ela, você atravessa e cai.'),300);setTimeout(()=>$('#lanternHint').classList.add('hide'),9000)};$('#replayBtn').onclick=()=>location.reload();
+async function enterGameMode(){
+ try{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen()}catch(e){}
+ try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(e){}
+ toast('📱 Modo jogo ativado. Se a tela não girar sozinha, deite o celular.');
+}
+if($('#gameModeBtn'))$('#gameModeBtn').onclick=enterGameMode;
+setHud();render();
 })();
