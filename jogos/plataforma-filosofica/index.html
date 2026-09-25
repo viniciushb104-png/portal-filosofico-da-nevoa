@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#09050f">
+  <title>O Labirinto dos Filósofos — Portal Filosófico da Névoa</title>
+  <meta name="description" content="Jogo de plataforma filosófico: atravesse Atenas da Névoa com Sócrates, resolva enigmas e confronte o Sofista.">
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <main class="gamePage">
+    <header class="topbar">
+      <a class="back" href="../../index.html">← Voltar ao Portal</a>
+      <div>
+        <small>PORTAL FILOSÓFICO DA NÉVOA</small>
+        <h1>O Labirinto dos Filósofos</h1>
+      </div>
+      <button id="soundBtn" class="soundBtn" aria-label="Ativar ou desativar sons">🔇</button>
+    </header>
+
+    <section class="gameShell" aria-label="Jogo de plataforma filosófico">
+      <div class="hud">
+        <div class="hudBlock"><span>🏛️</span><div><small>FASE</small><b>Atenas da Névoa</b></div></div>
+        <div class="hudBlock"><span>📜</span><div><small>PERGAMINHOS</small><b><span id="scrollCount">0</span>/8</b></div></div>
+        <div class="hudBlock"><span>🔑</span><div><small>PORTAS</small><b><span id="gateCount">0</span>/3</b></div></div>
+        <div class="hudBlock"><span>✨</span><div><small>XP DA FASE</small><b id="phaseXP">0</b></div></div>
+      </div>
+
+      <div class="canvasWrap">
+        <canvas id="game" width="960" height="540" aria-label="Área principal do jogo"></canvas>
+        <div id="interactionHint" class="interactionHint" hidden>Pressione <b>E</b> para interagir</div>
+        <div id="toast" class="toast" role="status"></div>
+      </div>
+
+      <div class="legend">
+        <span><kbd>A</kbd><kbd>D</kbd> mover</span>
+        <span><kbd>Espaço</kbd> pular</span>
+        <span><kbd>E</kbd> interagir</span>
+        <span><kbd>R</kbd> reiniciar do checkpoint</span>
+      </div>
+
+      <div class="mobileControls" aria-label="Controles de toque">
+        <button data-key="left" aria-label="Esquerda">◀</button>
+        <button data-key="right" aria-label="Direita">▶</button>
+        <button data-key="jump" class="jump" aria-label="Pular">↑</button>
+        <button data-key="interact" class="interact" aria-label="Interagir">✦</button>
+      </div>
+    </section>
+
+    <section class="storyPanel">
+      <div class="portrait">Σ</div>
+      <div>
+        <small>MISSÃO DE SÓCRATES</small>
+        <h2>Alcance o Templo da Pergunta</h2>
+        <p>A névoa tomou Atenas e o Sofista fechou o caminho com discursos que parecem convincentes. Colete pergaminhos, atravesse as Portas da Pergunta e use razões — não força — para abrir o caminho.</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="overlay show" id="introOverlay">
+    <div class="modalCard introCard">
+      <div class="sigil">☾</div>
+      <small>FASE I</small>
+      <h2>O Caminho de Sócrates</h2>
+      <p>Corra, salte e investigue. Algumas passagens só surgem quando você responde filosoficamente.</p>
+      <div class="missionList">
+        <span>📜 Colete 8 pergaminhos de conceitos.</span>
+        <span>🔑 Abra 3 Portas da Pergunta.</span>
+        <span>🎭 Supere o Sofista identificando falácias.</span>
+      </div>
+      <button id="startBtn" class="mainBtn">🎮 Começar a travessia</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="quizOverlay">
+    <div class="modalCard quizCard">
+      <div class="quizIcon" id="quizIcon">🔑</div>
+      <small id="quizKicker">PORTA DA PERGUNTA</small>
+      <h2 id="quizTitle">Enigma</h2>
+      <p id="quizQuestion"></p>
+      <div id="quizAnswers" class="quizAnswers"></div>
+      <div id="quizFeedback" class="quizFeedback"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="winOverlay">
+    <div class="modalCard winCard">
+      <div class="trophy">🏆</div>
+      <small>CONQUISTA DESBLOQUEADA</small>
+      <h2>Caminhante de Atenas</h2>
+      <p>Você atravessou a névoa pelo diálogo, pela dúvida e pela argumentação. O Sofista não foi derrotado por golpes, mas por perguntas melhores.</p>
+      <div class="resultGrid">
+        <div><span>📜</span><b id="finalScrolls">0/8</b><small>Pergaminhos</small></div>
+        <div><span>🔑</span><b>3/3</b><small>Portas</small></div>
+        <div><span>✨</span><b id="finalXP">0 XP</b><small>Recompensa</small></div>
+      </div>
+      <div class="winActions">
+        <button id="replayBtn" class="mainBtn">Jogar novamente</button>
+        <a class="mainBtn alt" href="../../index.html">Voltar ao Portal</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
