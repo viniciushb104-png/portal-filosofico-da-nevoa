@@ -1,0 +1,21 @@
+PORTAL FILOSÓFICO DA NÉVOA — VERSÃO 5
+
+Esta versão já está preparada para os vídeos do Gemini.
+
+TESTE RÁPIDO
+1. Abra index.html.
+2. Sem vídeos, o portal usa automaticamente as imagens em assets/posters/.
+3. Gere os vídeos no Gemini.
+4. Coloque-os em assets/videos/ com os nomes exatos descritos em INSTRUCOES_VIDEOS.txt.
+5. Reabra index.html. Quando um vídeo carregar, ele substitui automaticamente o poster.
+
+ARQUIVOS IMPORTANTES
+- index.html: estrutura do portal
+- styles.css: visual e responsividade
+- app.js: jogos, XP, conquistas, Hall e detecção dos vídeos
+- PROMPTS_GEMINI.txt: prompts prontos
+- INSTRUCOES_VIDEOS.txt: passo a passo
+- assets/posters/: quatro imagens-base
+- assets/videos/: coloque aqui os MP4
+
+O PORTAL CONTINUA FUNCIONANDO MESMO SEM OS MP4.
