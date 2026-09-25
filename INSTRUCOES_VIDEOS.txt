@@ -1,0 +1,24 @@
+COMO COLOCAR OS VÍDEOS NO PORTAL
+
+1. Extraia o ZIP portal_filosofico_nevoa_v5.zip.
+2. Entre na pasta: portal_filosofico_nevoa_v5/assets/videos/
+3. Copie os vídeos gerados no Gemini para essa pasta.
+4. Renomeie exatamente assim:
+   - guia_da_nevoa.mp4
+   - mansao_da_nevoa.mp4
+   - guardiao_dos_filosofos.mp4
+   - espelho_guardiao_sombrio.mp4
+5. Abra index.html.
+6. O site detecta automaticamente cada vídeo. Se o arquivo existir e carregar, a animação aparece; se não existir, o poster continua no lugar.
+
+ONDE CADA VÍDEO APARECE
+- guia_da_nevoa.mp4: personagem-guia no topo + Ateliê Gemini
+- mansao_da_nevoa.mp4: mansão principal no topo + Ateliê Gemini
+- guardiao_dos_filosofos.mp4: Corredor dos Filósofos + Ateliê Gemini
+- espelho_guardiao_sombrio.mp4: Espelho de Descartes + Ateliê Gemini
+
+FORMATO RECOMENDADO
+MP4 / H.264 / 1920x1080 / 16:9 / 24 ou 30 fps / 8–10 s / sem áudio.
+
+OBSERVAÇÃO
+Alguns navegadores bloqueiam autoplay com som. Por isso o portal reproduz as animações silenciadas, em loop e com playsinline.
