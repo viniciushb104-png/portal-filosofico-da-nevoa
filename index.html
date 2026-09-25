@@ -248,17 +248,43 @@
 
 <section id="hall" class="hallSection">
   <div class="wrap hallGrid">
-    <div class="panel hallPanel">
-      <div class="eyebrow">🏆 Hall da Turma</div><h2>Registre sua passagem pela mansão</h2><p>Salve localmente o nome do explorador, seu XP total, seu título atual e a quantidade de conquistas desbloqueadas neste dispositivo.</p>
-      <div class="hallForm">
-        <input id="hallName" type="text" maxlength="24" placeholder="Nome do explorador">
-        <button class="smallBtn" id="saveHall">Salvar no Hall</button>
-        <button class="smallBtn subtle" id="openCertificate">Gerar certificado</button>
+    <div class="panel hallPanel onlineHallPanel">
+      <div class="eyebrow">🧙 Meu Explorador</div>
+      <h2>Salve seu progresso na Névoa</h2>
+      <p>Crie um apelido público e uma turma opcional. Seu XP e suas fases passam a ficar salvos online e entram no ranking visto por todos.</p>
+      <div class="hallForm onlineCreateForm">
+        <input id="hallName" type="text" maxlength="24" autocomplete="nickname" placeholder="Apelido do explorador">
+        <input id="hallClass" type="text" maxlength="16" placeholder="Turma (ex.: 7ºB)">
+        <button class="smallBtn" id="saveHall">Criar / sincronizar</button>
       </div>
-      <div class="hallTip">Dica: ótimo para registrar o avanço da turma no mesmo computador da sala.</div>
+      <div class="restoreBox">
+        <b>Já tem um Código da Névoa?</b>
+        <div class="hallForm">
+          <input id="hallCode" type="text" maxlength="32" autocomplete="off" placeholder="NEVOA-XXXXXXXXXX">
+          <button class="smallBtn subtle" id="restoreHall">Recuperar progresso</button>
+        </div>
+      </div>
+      <div id="onlineProfile" class="onlineProfile">
+        <span class="onlineDot"></span>
+        <div><b>Perfil online ainda não criado</b><small>Crie seu explorador para entrar no Ranking Global.</small></div>
+      </div>
+      <div id="explorerCodeBox" class="explorerCodeBox" hidden>
+        <small>SEU CÓDIGO DA NÉVOA — GUARDE EM LOCAL SEGURO</small>
+        <strong id="explorerCodeText">NEVOA-XXXXXXXXXX</strong>
+        <button class="smallBtn subtle" id="copyExplorerCode">Copiar código</button>
+      </div>
+      <div class="hallForm compactActions">
+        <button class="smallBtn subtle" id="openCertificate">Gerar certificado</button>
+        <button class="smallBtn subtle" id="syncOnline">Sincronizar agora</button>
+      </div>
+      <div class="hallTip">Use apenas apelido ou primeiro nome + turma. Evite nome completo. O Código da Névoa funciona como chave de recuperação e não aparece no ranking público.</div>
     </div>
     <div class="panel hallListPanel">
-      <div class="eyebrow">Classificação local</div><h3>Melhores exploradores</h3><div id="hallList" class="hallList"></div>
+      <div class="rankingHead">
+        <div><div class="eyebrow">🌎 Ranking Global da Névoa</div><h3>Exploradores de todos os aparelhos</h3></div>
+        <button class="smallBtn subtle" id="refreshRanking">Atualizar</button>
+      </div>
+      <div id="hallList" class="hallList"><div class="hallItem"><div><b>Carregando ranking...</b><small>Consultando a névoa.</small></div><span class="hallBadge">…</span></div></div>
     </div>
   </div>
 </section>
@@ -374,6 +400,7 @@
 <script src="media/poster_guardiao.js"></script>
 <script src="media/poster_espelho.js"></script>
 <script src="media/init.js"></script>
+<script src="online.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
