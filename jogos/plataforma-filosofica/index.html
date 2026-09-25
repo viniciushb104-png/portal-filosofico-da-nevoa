@@ -16,7 +16,7 @@
         <small>PORTAL FILOSÓFICO DA NÉVOA</small>
         <h1>O Labirinto dos Filósofos</h1>
       </div>
-      <button id="soundBtn" class="soundBtn" aria-label="Ativar ou desativar sons">🔇</button>
+      <div class="topActions"><button id="gameModeBtn" class="gameModeBtn" aria-label="Tela cheia e modo paisagem" title="Jogar com o celular deitado">↻</button><button id="soundBtn" class="soundBtn" aria-label="Ativar ou desativar sons">🔇</button></div>
     </header>
 
     <section class="gameShell" aria-label="Jogo de plataforma filosófico">
@@ -24,11 +24,11 @@
         <div class="hudBlock"><span>🏛️</span><div><small>FASE</small><b>Atenas da Névoa</b></div></div>
         <div class="hudBlock"><span>📜</span><div><small>PERGAMINHOS</small><b><span id="scrollCount">0</span>/8</b></div></div>
         <div class="hudBlock"><span>🔑</span><div><small>PORTAS</small><b><span id="gateCount">0</span>/3</b></div></div>
-        <div class="hudBlock"><span>✨</span><div><small>XP DA FASE</small><b id="phaseXP">0</b></div></div>
+        <div class="hudBlock"><span>✨</span><div><small>XP DA FASE</small><b id="phaseXP">0</b></div></div><div class="hudBlock dangerHud"><span>❤️</span><div><small>TENTATIVAS</small><b id="lifeText">3/3</b></div></div><div class="hudBlock stageHud"><span>🗺️</span><div><small>ETAPA</small><b id="stageText">1/4</b></div></div>
       </div>
 
       <div class="canvasWrap">
-        <canvas id="game" width="960" height="540" aria-label="Área principal do jogo"></canvas>
+        <canvas id="game" width="960" height="540" aria-label="Área principal do jogo"></canvas><div id="guideHint" class="guideHint" hidden><b>💡 DICA DA NÉVOA</b><span id="guideHintText"></span></div><div class="rotateHint">📱 Para jogar melhor, deite o celular e toque em ↻.</div>
         <div id="interactionHint" class="interactionHint" hidden>Pressione <b>E</b> para interagir</div>
         <div id="toast" class="toast" role="status"></div>
       </div>
