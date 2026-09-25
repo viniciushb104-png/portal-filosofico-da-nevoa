@@ -10,6 +10,7 @@ let started=false,paused=true,won=false;
 let cameraX=0,last=0,interactLatch=false;
 let audioCtx=null,sound=false;
 let lives=3,currentStage=1,lastHintStage=0;
+let bossEngaged=false,bossPerfect=true;
 
 const WORLD_W=5600;
 const FLOOR=470;
@@ -200,12 +201,20 @@ function interactions(){
  });
  const g=gates.find(g=>!g.opened&&near(player,g,70));
  if(g)nearbyInteract={type:'gate',obj:g};
- if(finalBoss.active&&near(player,{x:finalBoss.x,y:finalBoss.y,w:70,h:120},105))nearbyInteract={type:'boss',obj:finalBoss};
+
+ const bossNear=finalBoss.active&&near(player,{x:finalBoss.x,y:finalBoss.y,w:70,h:120},115);
+ if(bossNear&&!bossEngaged&&!paused){
+   bossEngaged=true;bossPerfect=true;paused=true;player.vx=0;
+   $('#interactionHint').hidden=true;
+   showHint('🎭 O Sofista bloqueou o caminho. O duelo de argumentos começa automaticamente.',1800);
+   setTimeout(openBossQuiz,420);
+   return;
+ }
+
  $('#interactionHint').hidden=!nearbyInteract;
  if(keys.interact&&!interactLatch&&nearbyInteract){
    interactLatch=true;
-   if(nearbyInteract.type==='gate')openGateQuiz(nearbyInteract.obj);
-   else openBossQuiz();
+   openGateQuiz(nearbyInteract.obj);
  }
  if(!keys.interact)interactLatch=false;
 }
@@ -236,6 +245,7 @@ function showQuiz({icon='🔑',kicker='PORTA DA PERGUNTA',title,q,a,ok,feedback,
    $('#quizAnswers').appendChild(b);
  });
  $('#quizOverlay').classList.add('show');
+ const qc=$('#quizOverlay .quizCard');if(qc)qc.scrollTop=0;$('#quizOverlay').scrollTop=0;
 }
 function openGateQuiz(g){
  showQuiz({title:g.title,q:g.q,a:g.a,ok:g.ok,feedback:g.feedback,onCorrect:()=>{
@@ -244,22 +254,71 @@ function openGateQuiz(g){
  }});
 }
 function openBossQuiz(){
- const i=finalBoss.step;
- const q=finalBoss.questions[i];
- showQuiz({icon:'🎭',kicker:'O SOFISTA',title:'Duelo de Argumentos '+(i+1)+'/3',q:q.q,a:q.a,ok:q.ok,feedback:q.f,onCorrect:()=>{
-   finalBoss.step++;setHud();
-   if(finalBoss.step>=finalBoss.questions.length){finalBoss.active=false;setTimeout(winGame,300)}
-   else {toast('🎭 O Sofista recua... ainda há um argumento.');}
- }});
+ if(!finalBoss.active)return;
+ paused=true;
+ const i=finalBoss.step,q=finalBoss.questions[i];
+ $('#quizIcon').textContent='🎭';
+ $('#quizKicker').textContent='O SOFISTA • DUELO AUTOMÁTICO';
+ $('#quizTitle').textContent='Argumento '+(i+1)+'/'+finalBoss.questions.length;
+ $('#quizQuestion').textContent=q.q;
+ $('#quizAnswers').innerHTML='';
+ $('#quizFeedback').className='quizFeedback';
+ $('#quizFeedback').textContent='';
+ q.a.forEach((txt,idx)=>{
+   const btn=document.createElement('button');
+   btn.textContent=txt;
+   btn.onclick=()=>{
+     [...$('#quizAnswers').children].forEach(x=>x.disabled=true);
+     const f=$('#quizFeedback');
+     if(idx===q.ok){
+       f.className='quizFeedback ok';
+       f.textContent='✓ '+q.f;
+       tone(740,.12,'sine');
+       finalBoss.step++;setHud();
+       if(finalBoss.step>=finalBoss.questions.length){
+         finalBoss.active=false;
+         setTimeout(()=>{
+           $('#quizOverlay').classList.remove('show');
+           winGame(bossPerfect);
+         },850);
+       }else{
+         setTimeout(()=>openBossQuiz(),850);
+       }
+     }else{
+       bossPerfect=false;
+       const alive=loseLife();
+       f.className='quizFeedback bad';
+       f.textContent=alive
+         ?'✦ O Sofista ganhou este ponto. Você perdeu 1 coração. Releia o argumento e tente novamente.'
+         :'☠ O Sofista venceu este duelo. Você volta ao checkpoint e o confronto recomeça do primeiro argumento.';
+       if(alive){
+         setTimeout(()=>[...$('#quizAnswers').children].forEach(x=>x.disabled=false),850);
+       }else{
+         setTimeout(()=>{
+           $('#quizOverlay').classList.remove('show');
+           lives=3;finalBoss.step=0;bossEngaged=false;bossPerfect=true;paused=false;
+           setHud();resetToCheckpoint();
+           showHint('🎭 Volte ao Sofista. O duelo reiniciará automaticamente.',2600);
+         },1050);
+       }
+     }
+   };
+   $('#quizAnswers').appendChild(btn);
+ });
+ $('#quizOverlay').classList.add('show');
+ const qc=$('#quizOverlay .quizCard');if(qc)qc.scrollTop=0;$('#quizOverlay').scrollTop=0;
 }
-function winGame(){
+function winGame(perfectBoss=false){
  won=true;paused=true;
  const newXP=savePortalWin();
  const collected=scrolls.filter(s=>s.got).length;
  $('#finalScrolls').textContent=collected+'/8';
  $('#finalXP').textContent=(newXP||0)+' XP';
- $('#winOverlay').classList.add('show');
+ const winText=$('#winOverlay .winCard p');
+ if(perfectBoss&&winText)winText.textContent='Sequência perfeita contra o Sofista! A Caverna de Platão foi aberta e começará automaticamente.';
+ $('#winOverlay').classList.add('show');$('#winOverlay').scrollTop=0;
  tone(523,.12,'triangle');setTimeout(()=>tone(659,.12,'triangle'),120);setTimeout(()=>tone(784,.22,'triangle'),240);
+ if(perfectBoss)setTimeout(()=>{if(won)location.href='fase2/'},3200);
 }
 
 function drawBackground(){
