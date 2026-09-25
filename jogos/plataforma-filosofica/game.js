@@ -397,10 +397,10 @@ $('#startBtn').onclick=()=>{$('#introOverlay').classList.remove('show');started=
 $('#replayBtn').onclick=()=>location.reload();
 
 setHud();render();
-})();
 async function enterGameMode(){
   try{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen()}catch(e){}
   try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(e){}
   toast('📱 Modo jogo ativado. Se a tela não girar sozinha, deite o celular.');
 }
 if($('#gameModeBtn'))$('#gameModeBtn').onclick=enterGameMode;
+})();
