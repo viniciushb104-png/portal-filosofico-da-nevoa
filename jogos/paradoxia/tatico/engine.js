@@ -210,7 +210,7 @@ function renderCommands(u){
    '<button data-cmd="interact">🔎 Interagir</button>'+
    '<button data-cmd="wait">✓ Encerrar ação</button>'+
    '<button data-cmd="cancel">↶ Trocar unidade</button>';
- $('#commandButtons button').forEach(b=>b.onclick=()=>{if(!b.disabled)command(b.dataset.cmd)});
+ $$('#commandButtons button').forEach(b=>b.onclick=()=>{if(!b.disabled)command(b.dataset.cmd)});
 }
 function command(cmd){
  const u=selection();if(!u)return;
