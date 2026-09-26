@@ -18,7 +18,8 @@ function renderMissionCards(){
    const best=Number(s.best_score)||0, attempts=Number(s.attempts_count)||0;
    const enabled=!!s.enabled;
    const status=enabled?(best?'<span class="mStatus best">🏆 Melhor: '+best+' pts • '+attempts+' tentativa(s)</span>':'<span class="mStatus ready">🟢 Liberada para competição</span>'):'<span class="mStatus">🔒 Fase em produção</span>';
-   return '<article class="competitionMission" data-mission="'+esc(m.key)+'"><div class="mTop"><span class="mIcon">'+esc(m.icon)+'</span><div><b>'+esc(m.title)+'</b><em>'+esc(typeLabel[m.kind]||m.kind)+' • '+esc(m.place||m.giver||'Missão NPC')+'</em></div></div><p>'+esc(m.description)+'</p><div class="mStats"><span>'+esc(m.theme)+'</span><strong>até '+esc(m.max)+' pts</strong></div>'+status+'</article>';
+   const launch=m.href&&enabled?'<a class="missionLaunch" href="'+esc(m.href)+'">🎮 Jogar fase</a>':'';
+   return '<article class="competitionMission" data-mission="'+esc(m.key)+'"><div class="mTop"><span class="mIcon">'+esc(m.icon)+'</span><div><b>'+esc(m.title)+'</b><em>'+esc(typeLabel[m.kind]||m.kind)+' • '+esc(m.place||m.giver||'Missão NPC')+'</em></div></div><p>'+esc(m.description)+'</p><div class="mStats"><span>'+esc(m.theme)+'</span><strong>até '+esc(m.max)+' pts</strong></div>'+status+launch+'</article>';
  }).join('');
 }
 function renderRanks(rows){
