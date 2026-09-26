@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0611">
 <title>Paradoxia — O Reino das Escolhas</title>
-<link rel="stylesheet" href="game.css?v=1">
+<link rel="stylesheet" href="game.css?v=2">
 </head>
 <body>
 <div class="fog fogA"></div><div class="fog fogB"></div>
@@ -52,6 +52,65 @@
     </div>
   </section>
 
+  <section class="worldShell" id="worldShell">
+    <div class="worldTopline">
+      <div class="questNow"><small>MISSÃO ATUAL</small><b id="questNow">Encontre os Portões de Paradoxia</b></div>
+      <div class="worldHint">⌨️ WASD / setas para andar • E ou Enter para interagir</div>
+    </div>
+
+    <div class="worldViewport" id="worldViewport" tabindex="0" aria-label="Mapa explorável de Paradoxia">
+      <div class="worldLayer" id="worldLayer">
+        <div class="worldSky"></div>
+        <div class="worldMoon"></div>
+        <div class="floatingIsland i1"></div><div class="floatingIsland i2"></div><div class="floatingIsland i3"></div>
+        <div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><div class="road r4"></div><div class="road r5"></div><div class="road r6"></div>
+
+        <div class="district academy"><span>🏛️</span><b>Academia Filosófica</b><small>Estudar • Debater • Evoluir</small></div>
+        <div class="district village"><span>🏘️</span><b>Vila das Abóboras</b><small>Tradições • Encontros</small></div>
+        <div class="district forest"><span>🌲</span><b>Floresta das Sombras Doces</b><small>Mistérios • Autoconhecimento</small></div>
+        <div class="district castle"><span>🏰</span><b>Castelo do Paradoxo</b><small>Confrontar • Compreender</small></div>
+
+        <button class="worldPoi" data-scene="gate" style="left:13%;top:70%"><span>🚪</span><b>Portões</b></button>
+        <button class="worldPoi" data-scene="market" style="left:36%;top:45%"><span>🎪</span><b>Feira</b></button>
+        <button class="worldPoi" data-scene="bridge" style="left:53%;top:53%"><span>🌉</span><b>Ponte</b></button>
+        <button class="worldPoi" data-scene="theseus" style="left:42%;top:78%"><span>🎃</span><b>Bosque</b></button>
+        <button class="worldPoi" data-scene="library" style="left:73%;top:71%"><span>📚</span><b>Biblioteca</b></button>
+        <button class="worldPoi" data-scene="square" style="left:72%;top:39%"><span>🕰️</span><b>Praça</b></button>
+        <button class="worldPoi bossPoi" data-scene="boss" style="left:87%;top:18%"><span>👑</span><b>Castelo</b></button>
+
+        <div class="worldNpc npcDialetico" style="left:22%;top:35%"><div class="spriteArt"></div><small>Estudiosa Dialética</small></div>
+        <div class="worldNpc npcCetico" style="left:29%;top:31%"><div class="spriteArt"></div><small>Investigadora Cética</small></div>
+        <div class="worldNpc npcEtico" style="left:79%;top:58%"><div class="spriteArt"></div><small>Guardiã Ética</small></div>
+        <div class="worldNpc npcExistencial" style="left:58%;top:22%"><div class="spriteArt"></div><small>Andarilho</small></div>
+
+        <div class="ambientNpc ghost" style="left:34%;top:67%">👻</div>
+        <div class="ambientNpc cat" style="left:61%;top:73%">🐈‍⬛</div>
+        <div class="ambientNpc pumpkin" style="left:18%;top:82%">🎃</div>
+        <div class="ambientNpc owl" style="left:68%;top:18%">🦉</div>
+
+        <div class="worldPlayer" id="worldPlayer">
+          <div class="spriteArt" id="playerSprite"></div>
+          <span id="playerLabel">Explorador</span>
+        </div>
+      </div>
+
+      <div class="interactionPrompt" id="interactionPrompt" hidden>
+        <b>✦ Interagir</b><span>E / Enter</span>
+      </div>
+      <div class="worldCompass"><span>N</span><i></i><small id="worldPlace">Academia Filosófica</small></div>
+    </div>
+
+    <div class="mobileWorldControls" aria-label="Controles do mapa">
+      <div class="dpad">
+        <button data-move="up" aria-label="Subir">▲</button>
+        <button data-move="left" aria-label="Esquerda">◀</button>
+        <button data-move="down" aria-label="Descer">▼</button>
+        <button data-move="right" aria-label="Direita">▶</button>
+      </div>
+      <button class="interactMobile" id="interactMobile">✦<small>Interagir</small></button>
+    </div>
+  </section>
+
   <section class="playGrid">
     <aside class="statsPanel">
       <div class="panelTitle">Seu modo de pensar</div>
@@ -69,7 +128,7 @@
       <div class="saveState" id="saveState"><span>☁️</span><small>Progresso local</small></div>
     </aside>
 
-    <section class="sceneCard" id="sceneCard">
+    <section class="sceneCard" id="sceneCard"><button class="sceneClose" id="sceneClose" aria-label="Fechar diálogo">×</button>
       <div class="sceneVisual" id="sceneVisual">
         <div class="moon"></div>
         <div class="sceneIcon" id="sceneIcon">🚪</div>
@@ -132,6 +191,6 @@
 <div class="toast" id="toast"></div>
 
 <script src="../../online.js?v=7.5"></script>
-<script src="game.js?v=1"></script>
+<script src="game.js?v=2"></script>
 </body>
 </html>
