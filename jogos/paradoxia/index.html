@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0611">
+<title>Paradoxia — O Reino das Escolhas</title>
+<link rel="stylesheet" href="game.css?v=1">
+</head>
+<body>
+<div class="fog fogA"></div><div class="fog fogB"></div>
+
+<header class="topbar">
+  <a class="back" href="../../index.html#jogos">← Portal</a>
+  <div class="brand"><span class="brandSigil">🎭</span><div><b>Paradoxia</b><small>O Reino das Escolhas</small></div></div>
+  <div class="account" id="accountBadge"><span class="dot"></span><span>Visitante</span></div>
+</header>
+
+<main class="game">
+  <section class="heroIntro">
+    <div>
+      <div class="eyebrow">RPG FILOSÓFICO • CAPÍTULO I</div>
+      <h1>Paradoxia <span>O Reino das Escolhas</span></h1>
+      <p>Um reino de Halloween onde argumentos criam monstros, dúvidas abrem atalhos e nenhuma escolha importante cabe em uma resposta preguiçosa.</p>
+    </div>
+    <div class="chapterSeal">I</div>
+  </section>
+
+  <section class="hud">
+    <div class="hudItem"><span>🧙</span><div><small>CLASSE</small><b id="hudClass">Não escolhida</b></div></div>
+    <div class="hudItem"><span>✨</span><div><small>XP DO RPG</small><b id="hudXP">0 / 120</b></div></div>
+    <div class="hudItem"><span>❤️</span><div><small>FOCO</small><b id="hudHearts">3 / 3</b></div></div>
+    <div class="hudItem"><span>📍</span><div><small>LOCAL</small><b id="hudPlace">Portões de Paradoxia</b></div></div>
+  </section>
+
+  <section class="mapPanel">
+    <div class="mapTitle"><span>🗺️</span><div><small>MAPA DO CAPÍTULO</small><b>A Estrada das Certezas Quebradas</b></div></div>
+    <div class="map" id="worldMap">
+      <div class="mapNode" data-node="gate"><span>🚪</span><small>Portão</small></div>
+      <i></i>
+      <div class="mapNode" data-node="market"><span>🎪</span><small>Feira</small></div>
+      <i></i>
+      <div class="mapNode" data-node="bridge"><span>🌉</span><small>Ponte</small></div>
+      <i></i>
+      <div class="mapNode" data-node="theseus"><span>🎃</span><small>Bosque</small></div>
+      <i></i>
+      <div class="mapNode" data-node="library"><span>📚</span><small>Biblioteca</small></div>
+      <i></i>
+      <div class="mapNode" data-node="square"><span>🕰️</span><small>Praça</small></div>
+      <i></i>
+      <div class="mapNode boss" data-node="boss"><span>👑</span><small>Castelo</small></div>
+    </div>
+  </section>
+
+  <section class="playGrid">
+    <aside class="statsPanel">
+      <div class="panelTitle">Seu modo de pensar</div>
+      <div class="stat"><span>🧠 Razão</span><b id="statRazao">0</b><i><u id="barRazao"></u></i></div>
+      <div class="stat"><span>⚖️ Ética</span><b id="statEtica">0</b><i><u id="barEtica"></u></i></div>
+      <div class="stat"><span>🗝️ Autonomia</span><b id="statAutonomia">0</b><i><u id="barAutonomia"></u></i></div>
+      <div class="stat"><span>💬 Diálogo</span><b id="statDialogo">0</b><i><u id="barDialogo"></u></i></div>
+      <div class="abilityBox">
+        <small>HABILIDADE DE CLASSE</small>
+        <b id="abilityName">Escolha uma classe</b>
+        <p id="abilityDesc">Sua habilidade especial aparecerá aqui.</p>
+        <button id="abilityBtn" disabled>Usar habilidade</button>
+        <em id="abilityCharges">0 cargas</em>
+      </div>
+      <div class="saveState" id="saveState"><span>☁️</span><small>Progresso local</small></div>
+    </aside>
+
+    <section class="sceneCard" id="sceneCard">
+      <div class="sceneVisual" id="sceneVisual">
+        <div class="moon"></div>
+        <div class="sceneIcon" id="sceneIcon">🚪</div>
+        <div class="silhouette s1"></div><div class="silhouette s2"></div>
+        <div class="sceneBadge" id="sceneType">DILEMA</div>
+      </div>
+
+      <div class="dialogue">
+        <div class="location" id="sceneLocation">Portões de Paradoxia</div>
+        <div class="speaker" id="sceneSpeaker">Guarda-Fantasma Mnésio</div>
+        <h2 id="sceneTitle">A cidade não abre para respostas automáticas.</h2>
+        <p id="sceneText">Escolha uma classe para iniciar sua jornada.</p>
+        <div class="conceptBox" id="conceptBox" hidden></div>
+        <div class="feedback" id="feedback" hidden></div>
+        <div class="choices" id="choices"></div>
+      </div>
+    </section>
+  </section>
+
+  <section class="philoLog">
+    <div class="logHead"><span>📜</span><div><small>GRIMÓRIO DE CAMPO</small><b>Ideias encontradas durante a jornada</b></div></div>
+    <div id="logList" class="logList"><span>Nenhum conceito registrado ainda.</span></div>
+  </section>
+</main>
+
+<div class="overlay show" id="startOverlay">
+  <div class="startCard">
+    <div class="startSigil">🎃</div>
+    <div class="eyebrow">ANTES DE ENTRAR EM PARADOXIA</div>
+    <h2>Escolha sua classe filosófica</h2>
+    <p>Não existe “classe melhor”. Cada uma representa uma maneira diferente de investigar problemas e oferece uma habilidade especial.</p>
+    <div class="classGrid" id="classGrid"></div>
+    <div class="guestWarning" id="guestWarning" hidden>
+      <b>⚠️ Você está como visitante.</b>
+      <span>Seu RPG será salvo apenas neste aparelho e não contará no ranking de XP.</span>
+      <a href="../../login.html">Entrar antes de começar</a>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="endOverlay">
+  <div class="endCard">
+    <div class="endCrown">👑</div>
+    <div class="eyebrow">CAPÍTULO I CONCLUÍDO</div>
+    <h2 id="endingTitle">Título do final</h2>
+    <p id="endingText"></p>
+    <div class="endingStats">
+      <div><span>✨</span><b id="endingXP">120 XP</b><small>XP do capítulo</small></div>
+      <div><span>🏆</span><b id="endingRank">Ranking</b><small>salvo online</small></div>
+      <div><span>📜</span><b id="endingIdeas">0 ideias</b><small>registradas</small></div>
+    </div>
+    <div class="endActions">
+      <button id="replayBtn">↻ Jogar outro caminho</button>
+      <a href="../../index.html#hall">🏆 Ver Ranking de XP</a>
+      <a href="../../index.html#jogos">← Voltar ao Portal</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../../online.js?v=7.5"></script>
+<script src="game.js?v=1"></script>
+</body>
+</html>
