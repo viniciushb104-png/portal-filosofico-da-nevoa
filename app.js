@@ -146,13 +146,19 @@ function setOnlineProfile(profile,logged=!!window.NevoaOnline?.getSession?.()){
    if(codeBox)codeBox.hidden=false;
    if(codeText)codeText.textContent=profile.explorer_code||window.NevoaOnline.getCode();
    if(logoutBtn)logoutBtn.hidden=!logged;
-   if(loginBtn){loginBtn.classList.toggle('logged',logged);loginBtn.textContent=logged?'🟢 '+profile.nickname:'🔐 Entrar';}
+   if(loginBtn){
+     loginBtn.classList.toggle('logged',logged);
+     loginBtn.href=logged?'#hall':'login.html';
+     loginBtn.innerHTML=logged?'<span>🟢</span><b>'+escapeHTML(profile.nickname)+'</b>':'<span>🔐</span><b>Entrar</b>';
+   }
+   const registerBtn=$('#registerBtn');if(registerBtn)registerBtn.hidden=logged;
  }else{
    box.classList.remove('connected');
    box.innerHTML='<span class="onlineDot"></span><div><b>Você ainda não entrou</b><small>Entre para salvar automaticamente e aparecer na competição.</small></div>';
    if(codeBox)codeBox.hidden=true;
    if(logoutBtn)logoutBtn.hidden=true;
-   if(loginBtn){loginBtn.classList.remove('logged');loginBtn.textContent='🔐 Entrar';}
+   if(loginBtn){loginBtn.classList.remove('logged');loginBtn.href='login.html';loginBtn.innerHTML='<span>🔐</span><b>Entrar</b>';}
+   const registerBtn=$('#registerBtn');if(registerBtn)registerBtn.hidden=false;
  }
 }
 function applyServerProgress(snapshot){
@@ -227,55 +233,6 @@ async function initOnlineHall(){
    }else setOnlineProfile(null);
  }
 }
-function openLogin(){
- const d=$('#loginDialog');if(!d)return;
- if(typeof d.showModal==='function')d.showModal();else d.setAttribute('open','');
- setTimeout(()=>$('#loginUsername')?.focus(),80);
-}
-function openRegister(){
- const d=$('#loginDialog');if(!d)return;
- if(typeof d.showModal==='function')d.showModal();else d.setAttribute('open','');
- setTimeout(()=>{
-   const el=$('#registerUsername');
-   el?.scrollIntoView({behavior:'smooth',block:'center'});
-   el?.focus();
- },100);
-}
-$('#loginBtn').onclick=()=>window.NevoaOnline?.getSession()?$('#hall').scrollIntoView({behavior:'smooth'}):openLogin();
-$('#registerBtn').onclick=openRegister;
-$('#openLoginHall').onclick=openLogin;
-$('#openRegisterHall').onclick=openRegister;
-
-$('#loginSubmit').onclick=async()=>{
- const user=($('#loginUsername').value||'').trim();
- const pin=($('#loginPin').value||'').trim();
- if(!user||!/^[0-9]{4,6}$/.test(pin)){toast('Digite seu apelido e um PIN de 4 a 6 números.');return}
- try{
-   const p=await window.NevoaOnline.loginStudent(user,pin);
-   setOnlineProfile(p,true);
-   $('#loginDialog').close();
-   await syncOnlineProfile(false);
-   beginPortalPresence();
-   toast('🦇 Login feito. Bem-vindo de volta, '+p.nickname+'!');
- }catch(e){toast(e.message||'Apelido ou PIN incorreto.')}
-};
-
-$('#registerSubmit').onclick=async()=>{
- const user=($('#registerUsername').value||'').trim();
- const pin=($('#registerPin').value||'').trim();
- const turma=($('#registerClass').value||'').trim();
- if(!user){toast('Escolha um apelido.');return}
- if(!/^[0-9]{4,6}$/.test(pin)){toast('O PIN deve ter de 4 a 6 números.');return}
- try{
-   const p=await window.NevoaOnline.registerStudent(user,pin,turma);
-   setOnlineProfile(p,true);
-   $('#loginDialog').close();
-   await syncOnlineProfile(false);
-   beginPortalPresence();
-   toast('🎃 Conta criada! Seu progresso já está salvo online.');
- }catch(e){toast(e.message||'Não foi possível criar a conta.')}
-};
-
 $('#logoutOnline').onclick=async()=>{
  await window.NevoaOnline.logout();
  window.NevoaOnline.setCode('');
