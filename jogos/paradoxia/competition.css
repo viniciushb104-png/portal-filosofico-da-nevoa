@@ -32,3 +32,5 @@
 .missionEntrance b{margin-top:5px;padding:4px 7px;border-radius:999px;background:#120813e8;border:1px solid #8e4c3d;color:#ffd99e;font-size:6px;letter-spacing:.08em;white-space:nowrap}
 @keyframes entrancePulse{to{transform:translateY(-4px) scale(1.06);box-shadow:0 0 0 5px #35111dcc,0 0 34px #ff9a4a88}}
 @media(prefers-reduced-motion:reduce){.missionEntrance span{animation:none}}
+
+.quartelLink{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid #79508a;background:#24102d;color:#ffe0af;border-radius:999px;padding:7px 10px;font-size:8px;font-weight:950;white-space:nowrap;box-shadow:0 5px 15px #0006}.quartelLink:hover{border-color:#d88147;background:#35152d}
