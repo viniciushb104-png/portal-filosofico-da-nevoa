@@ -1,0 +1,57 @@
+name: Import Paradoxia walking sprites
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - ".github/workflows/import-paradoxia-walk.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  import-walk-sprites:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download original walking sheets
+        env:
+          DIALETICO_B64: "aHR0cHM6Ly9kMmpxcm02b3phOG5iNi5jbG91ZGZyb250Lm5ldC9kYXRhc2V0cy9jNzlhODc4MC01YTNlLTQ4OTYtOGFlYi05Zjk4Y2VkZDc5YTEucG5nP19qd3Q9ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnJaWGxJWVhOb0lqb2lNVFEyWWpRMk1qbGhNelEyT0RFMFpTSXNJbUoxWTJ0bGRDSTZJbkoxYm5kaGVTMWtZWFJoYzJWMGN5SXNJbk4wWVdkbElqb2ljSEp2WkNJc0ltVjRjQ0k2TVRjNU1EVTFNakl6TTMwLnZ4ZUFvaldZZmI2U09iWHBJOFdyWkNBY1pRMERRLUFPM3FQSE5Qa0ZRYVk="
+          CETICO_B64: "aHR0cHM6Ly9kMmpxcm02b3phOG5iNi5jbG91ZGZyb250Lm5ldC9kYXRhc2V0cy82MTMyZTkxOS00ODliLTQyNTgtODMyNy04ZWQ0MDQxOTA1ZmYucG5nP19qd3Q9ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnJaWGxJWVhOb0lqb2lZVGxpTlRnNE56ZzFZekEyTldKak1pSXNJbUoxWTJ0bGRDSTZJbkoxYm5kaGVTMWtZWFJoYzJWMGN5SXNJbk4wWVdkbElqb2ljSEp2WkNJc0ltVjRjQ0k2TVRjNU1EVTNORFExTm4wLkRsa1RTWTA0S253eERmVWFWVnVBT1ZydEN0ZjNBeW9XdnB6bzlNUzB6czQ="
+          ETICO_B64: "aHR0cHM6Ly9kMmpxcm02b3phOG5iNi5jbG91ZGZyb250Lm5ldC9kYXRhc2V0cy8wYmMzNDc0MS0xMjRlLTRkNDItOWNjNi1hNjQ4NTE4ODAyZjgucG5nP19qd3Q9ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnJaWGxJWVhOb0lqb2lOemd3TXpVd1ptUTBaVEkyTXpFMFlpSXNJbUoxWTJ0bGRDSTZJbkoxYm5kaGVTMWtZWFJoYzJWMGN5SXNJbk4wWVdkbElqb2ljSEp2WkNJc0ltVjRjQ0k2TVRjNU1EVTNNVEkyTVgwLjhSNGQwTHdyRGctYm9rSTBJX1lQRWplNlJRQkpfT2J6S1VrQXRTREg2Uk0="
+          EXISTENCIAL_B64: "aHR0cHM6Ly9kMmpxcm02b3phOG5iNi5jbG91ZGZyb250Lm5ldC9kYXRhc2V0cy8zZjUxY2JkMS0wNzg0LTQ5ZGQtOTRmZC1jNzYwNjk0NWNmNjUucG5nP19qd3Q9ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnJaWGxJWVhOb0lqb2laalkxWlRJeVlUWXpaalkyT1dNeU5DSXNJbUoxWTJ0bGRDSTZJbkoxYm5kaGVTMWtZWFJoYzJWMGN5SXNJbk4wWVdkbElqb2ljSEp2WkNJc0ltVjRjQ0k2TVRjNU1EVTBNVGs1TUgwLjEwTm1SSEVZQThhVDhRRzRYdkw5UG9idDZDNkhKSlg1NkE5amxUWG12cE0="
+        run: |
+          set -euo pipefail
+          mkdir -p jogos/paradoxia/assets/walk
+          echo "$DIALETICO_B64" | base64 -d | xargs curl -fL --retry 3 -o jogos/paradoxia/assets/walk/dialetico_walk.png
+          echo "$CETICO_B64" | base64 -d | xargs curl -fL --retry 3 -o jogos/paradoxia/assets/walk/cetico_walk.png
+          echo "$ETICO_B64" | base64 -d | xargs curl -fL --retry 3 -o jogos/paradoxia/assets/walk/etico_walk.png
+          echo "$EXISTENCIAL_B64" | base64 -d | xargs curl -fL --retry 3 -o jogos/paradoxia/assets/walk/existencial_walk.png
+
+      - name: Validate sheets
+        run: |
+          python - <<'PY'
+          import struct
+          from pathlib import Path
+          files=list(Path("jogos/paradoxia/assets/walk").glob("*_walk.png"))
+          assert len(files)==4
+          for p in files:
+              data=p.read_bytes()
+              assert data[:8]==b"\x89PNG\r\n\x1a\n"
+              w,h=struct.unpack(">II",data[16:24])
+              assert (w,h)==(1254,1254)
+              assert len(data)>1_500_000
+              print(p,w,h,len(data))
+          PY
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add jogos/paradoxia/assets/walk/
+          git commit -m "Adiciona sprites de caminhada de Paradoxia"
+          git push
