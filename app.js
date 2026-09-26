@@ -83,7 +83,7 @@ $('#dailyChallenge').onclick=()=>{const day=new Date().toISOString().slice(0,10)
 
 function openMap(){updateMap();$('#mapDialog').showModal()}
 $('#openMapTop').onclick=openMap; $('#openMapHero').onclick=openMap; $('#openMapProgress').onclick=openMap; $('#profileBtn').onclick=()=>{$('#hall').scrollIntoView({behavior:'smooth'})};
-$('[data-close]').forEach(b=>b.onclick=()=>{document.getElementById(b.dataset.close).close();window.nevoaPresenceState={locationKey:'portal',locationLabel:'Portal principal',phase:0,stage:0};}); $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
+$$('[data-close]').forEach(b=>b.onclick=()=>{document.getElementById(b.dataset.close).close();window.nevoaPresenceState={locationKey:'portal',locationLabel:'Portal principal',phase:0,stage:0};}); $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
 $$('[data-game]').forEach(b=>b.onclick=()=>{const d=b.closest('dialog');if(d)d.close();openGame(b.dataset.game)});
 $$('.filter').forEach(btn=>btn.onclick=()=>{$$('.filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;$$('.room').forEach(r=>r.style.display=(f==='all'||r.dataset.tags.includes(f))?'':'none')});
 $$('.level').forEach(el=>el.onclick=()=>{document.querySelector('#jogos').scrollIntoView({behavior:'smooth'});$(`.filter[data-filter="${el.dataset.level}"]`).click()});
