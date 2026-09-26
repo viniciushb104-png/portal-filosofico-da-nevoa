@@ -60,7 +60,7 @@ function reachable(unit){
    const h=terrainHeight(x,y);if(!h)return;
    const jump=Math.abs(h-terrainHeight(n.x,n.y));if(jump>1)return;
    const cost=n.c+1+(jump>0?1:0);if(cost>max||occupied(x,y,unit.id))return;
-   const k=key(x,y);if(!seen.has(k)||cost<seen.get(k)){seen.set(k,cost);queue.push({x,y,cost})}
+   const k=key(x,y);if(!seen.has(k)||cost<seen.get(k)){seen.set(k,cost);queue.push({x,y,c:cost})}
   });
  }
  seen.delete(key(unit.x,unit.y));return seen;
