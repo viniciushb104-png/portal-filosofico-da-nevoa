@@ -71,3 +71,8 @@ section{padding:70px 0}.sectionHead{max-width:820px;text-align:center;margin:0 a
 .loginNote{margin-top:14px;padding:11px 13px;border-radius:12px;background:#0d0812;border:1px solid #3e2449;color:#baa8c6;font-size:11px;line-height:1.5}
 @media(max-width:900px){.loginBtn{padding:9px 10px;font-size:12px}}
 @media(max-width:760px){.loginColumns{grid-template-columns:1fr}.loginShell{max-height:calc(100dvh - 20px);overflow-y:auto}.loginBtn{font-size:0;width:42px;height:42px;padding:0}.loginBtn::after{content:"🔐";font-size:18px}}
+
+.registerBtn{border:1px solid #a75c2e;background:linear-gradient(135deg,#472015,#21100c);color:#ffd5b4;border-radius:12px;padding:10px 13px;font-weight:900;cursor:pointer;white-space:nowrap}
+.registerBtn:hover{border-color:#ff9147;box-shadow:0 0 22px #ff7a2a22}
+@media(max-width:900px){.registerBtn{padding:9px 10px;font-size:12px}}
+@media(max-width:760px){.registerBtn{font-size:0;width:42px;height:42px;padding:0}.registerBtn::after{content:"🎃";font-size:18px}}
