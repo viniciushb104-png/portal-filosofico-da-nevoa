@@ -107,7 +107,8 @@ const stages={
   }, feira_falacias:{
    key:'feira_falacias',title:'Circo das Falácias',subtitle:'Feira das Verdades Duvidosas',icon:'🎪',
    type:'tactical-puzzle',size:{w:10,h:8},turnLimit:12,
-   objective:{type:'logic_targets',text:'Revele os 5 artistas que usam falácias antes do fim do espetáculo.',target:5},
+   objective:{type:'logic_targets',text:'Desmascare os 5 artistas-falácia antes que a plateia perca a confiança.',target:5},
+   battleRules:{credibility:10,wrongAnswerLoss:2,enemyHitLoss:1,winText:'Desmascare as 5 falácias.',loseText:'Credibilidade 0, grupo derrotado ou turno 12 encerrado.'},
    terrain:[
      '0011111100',
      '0111111110',
@@ -125,11 +126,11 @@ const stages={
    ],
    playerSpawns:[{x:4,y:7},{x:5,y:7},{x:3,y:7},{x:6,y:7}],
    enemies:[
-     {id:'populum',name:'Homem do Megafone',icon:'📣',x:2,y:1,hp:2,tag:'fallacy',answer:'ad_populum'},
-     {id:'binary',name:'Acrobata Binário',icon:'⚔️',x:7,y:1,hp:2,tag:'fallacy',answer:'falso_dilema'},
-     {id:'hominem',name:'Palhaço Maldoso',icon:'🤡',x:1,y:4,hp:2,tag:'fallacy',answer:'ad_hominem'},
-     {id:'posthoc',name:'Mágico do Depois',icon:'🪄',x:8,y:4,hp:2,tag:'fallacy',answer:'post_hoc'},
-     {id:'straw',name:'Domador de Espantalhos',icon:'🌾',x:5,y:2,hp:3,tag:'fallacy',answer:'espantalho'}
+     {id:'populum',name:'Homem do Megafone',icon:'📣',x:2,y:1,hp:2,tag:'fallacy',answer:'ad_populum',role:'INIMIGO • Apelo Popular',attackName:'Voz da Multidão',quote:'“Todo mundo acredita, então é verdade!”',threat:2},
+     {id:'binary',name:'Acrobata Binário',icon:'⚔️',x:7,y:1,hp:2,tag:'fallacy',answer:'falso_dilema',role:'INIMIGO • Escolha Forçada',attackName:'Só Duas Opções',quote:'“Ou concorda comigo ou está contra todos!”',threat:2},
+     {id:'hominem',name:'Palhaço Maldoso',icon:'🤡',x:1,y:4,hp:2,tag:'fallacy',answer:'ad_hominem',role:'INIMIGO • Ataque Pessoal',attackName:'Vaia Pessoal',quote:'“Olhe o chapéu dele! Nem escute a proposta.”',threat:2},
+     {id:'posthoc',name:'Mágico do Depois',icon:'🪄',x:8,y:4,hp:2,tag:'fallacy',answer:'post_hoc',role:'INIMIGO • Causa Inventada',attackName:'Depois, Logo Por Causa',quote:'“Aconteceu depois. Então eu causei!”',threat:2},
+     {id:'straw',name:'Domador de Espantalhos',icon:'🌾',x:5,y:2,hp:3,tag:'fallacy',answer:'espantalho',role:'INIMIGO • Distorção',attackName:'Boneco de Palha',quote:'“Vou mudar sua ideia antes de atacar.”',threat:3}
    ],
    props:[
      {id:'spotlight_a',icon:'💡',x:3,y:3,type:'switch'},
@@ -139,7 +140,8 @@ const stages={
    briefing:[
      'O Mestre de Cerimônias espalhou cinco truques argumentativos pelo picadeiro.',
      'Aproxime-se dos artistas e use ANALISAR. Escolher o conceito correto quebra a máscara da falácia.',
-     'Campos de Ideias alteram suas possibilidades durante o turno.'
+     'Campos de Ideias alteram suas possibilidades durante o turno.',
+     'VITÓRIA: desmascare os 5 artistas. DERROTA: Credibilidade 0, todo o grupo KO ou o fim do turno 12.'
    ]
  },
  academia_torre:{
