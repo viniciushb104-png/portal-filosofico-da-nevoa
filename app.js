@@ -54,7 +54,7 @@ const games={
 };
 
 let currentGame=null,currentIndex=0,roundScore=0,locked=false,dailyPending=false;
-function openGame(id){if(id==='socrates'){openSocrates();return}currentGame=id;currentIndex=0;roundScore=0;locked=false;const g=games[id];$('#modalTitle').textContent=g.title;$('#modalTag').textContent=g.tag;$('#modalImg').src=g.img;$('#quiz').style.display='block';$('#scorePanel').style.display='none';renderQuestion();$('#gameDialog').showModal();}
+function openGame(id){if(id==='socrates'){openSocrates();return}currentGame=id;window.nevoaPresenceState={locationKey:'room_'+id,locationLabel:'Sala • '+games[id].title,phase:0,stage:0};currentIndex=0;roundScore=0;locked=false;const g=games[id];$('#modalTitle').textContent=g.title;$('#modalTag').textContent=g.tag;$('#modalImg').src=g.img;$('#quiz').style.display='block';$('#scorePanel').style.display='none';renderQuestion();$('#gameDialog').showModal();}
 function renderQuestion(){const item=games[currentGame].qs[currentIndex];$('#stepText').textContent=`Pergunta ${currentIndex+1} de ${games[currentGame].qs.length}`;$('#stepFill').style.width=((currentIndex)/games[currentGame].qs.length*100+33.33)+'%';$('#question').textContent=item[0];$('#answers').innerHTML='';$('#feedback').style.display='none';$('#nextBtn').style.display='none';locked=false;item[1].forEach((txt,i)=>{const b=document.createElement('button');b.className='ans';b.textContent=txt;b.onclick=()=>answer(i);$('#answers').appendChild(b)});}
 function answer(i){if(locked)return;locked=true;const item=games[currentGame].qs[currentIndex],ok=i===item[2];if(ok)roundScore+=10;$$('.ans',$('#answers')).forEach(b=>b.disabled=true);const f=$('#feedback');f.style.display='block';f.className='feedback '+(ok?'ok':'bad');f.textContent=(ok?'✓ A névoa se abre. ':'✦ A névoa resiste. ')+item[3];$('#scoreText').textContent=roundScore;const n=$('#nextBtn');n.textContent=currentIndex===games[currentGame].qs.length-1?'Ver resultado →':'Próxima pergunta →';n.style.display='inline-block';}
 $('#nextBtn').onclick=()=>{if(currentIndex<games[currentGame].qs.length-1){currentIndex++;renderQuestion()}else finishRound()};
@@ -70,7 +70,7 @@ const socratesRooms=[
  {name:'Câmara da Vida Examinada',icon:'💀',letter:'O',q:'Uma “vida examinada” exige principalmente:',a:['Repetir opiniões comuns.','Refletir sobre escolhas, razões e valores.','Evitar qualquer dúvida.'],ok:1,h:'Exame filosófico envolve razões, valores e revisão das próprias crenças.'}
 ];
 function renderSocrates(){const box=$('#socratesRooms');box.innerHTML='';socratesRooms.forEach((r,i)=>{const b=document.createElement('button');b.className='sRoom '+(i<state.socrates?'done':'')+(i>state.socrates?' locked':'');b.disabled=i>state.socrates;b.innerHTML=`<span>${r.icon}</span><b>${i+1}. ${r.name}</b><small>${i<state.socrates?'Pista encontrada':i===state.socrates?'Disponível':'Trancado'}</small><span class="roomLetter">${i<state.socrates?r.letter:'?'}</span>`;if(i<=state.socrates)b.onclick=()=>playSocrates(i);box.appendChild(b)});const letters=socratesRooms.map((r,i)=>i<state.socrates?r.letter:'_').join(' ');$('#keyRing').textContent=letters;$('#inventoryText').textContent=state.socrates?`${state.socrates} de 7 letras: ${letters}`:'Nenhuma pista coletada.';}
-function openSocrates(){renderSocrates();$('#socratesDialog').showModal();}
+function openSocrates(){window.nevoaPresenceState={locationKey:'socrates_mansion',locationLabel:'Mansão de Sócrates',phase:0,stage:Math.min(7,Number(state.socrates||0)+1)};renderSocrates();$('#socratesDialog').showModal();}
 function playSocrates(i){const r=socratesRooms[i];$('#socratesHint').innerHTML=`<b>${r.name}</b><br>${r.q}`;const answers=document.createElement('div');answers.className='answers';r.a.forEach((txt,j)=>{const b=document.createElement('button');b.className='ans';b.textContent=txt;b.onclick=()=>{if(j===r.ok){$('#socratesHint').innerHTML=`✓ ${r.h}<br><br><b>A letra revelada é ${r.letter}.</b>`;if(i===state.socrates){state.socrates++;state.xp+=15;saveState();checkAchievements();updateUI();renderSocrates();if(state.socrates===7){state.xp+=25;state.achievements.socrates=true;saveState();$('#socratesHint').innerHTML=`🏆 Você reuniu D I A L O G O.<br><br>A senha final é <b>DIÁLOGO</b>. A mansão se abre porque a filosofia socrática nasce do encontro entre perguntas e razões.`;toast('Mansão de Sócrates concluída: +25 XP bônus!')}if(window.NevoaOnline?.getCode()){const sc=state.socrates*15+(state.socrates>=7?25:0);window.NevoaOnline.claimProgress('socrates_mansion',sc).then(applyOnlineClaim).catch(()=>{});}}}else{$('#socratesHint').innerHTML=`✦ A porta permanece fechada.<br>${r.h}`}};answers.appendChild(b)});const panel=$('.guidePanel');panel.querySelectorAll('.answers').forEach(x=>x.remove());panel.appendChild(answers);}
 
 const achievementDefs=[
@@ -83,7 +83,7 @@ $('#dailyChallenge').onclick=()=>{const day=new Date().toISOString().slice(0,10)
 
 function openMap(){updateMap();$('#mapDialog').showModal()}
 $('#openMapTop').onclick=openMap; $('#openMapHero').onclick=openMap; $('#openMapProgress').onclick=openMap; $('#profileBtn').onclick=()=>{$('#hall').scrollIntoView({behavior:'smooth'})};
-$$('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).close()); $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
+$('[data-close]').forEach(b=>b.onclick=()=>{document.getElementById(b.dataset.close).close();window.nevoaPresenceState={locationKey:'portal',locationLabel:'Portal principal',phase:0,stage:0};}); $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
 $$('[data-game]').forEach(b=>b.onclick=()=>{const d=b.closest('dialog');if(d)d.close();openGame(b.dataset.game)});
 $$('.filter').forEach(btn=>btn.onclick=()=>{$$('.filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;$$('.room').forEach(r=>r.style.display=(f==='all'||r.dataset.tags.includes(f))?'':'none')});
 $$('.level').forEach(el=>el.onclick=()=>{document.querySelector('#jogos').scrollIntoView({behavior:'smooth'});$(`.filter[data-filter="${el.dataset.level}"]`).click()});
@@ -191,12 +191,7 @@ async function refreshOnlineRanking(){
 function beginPortalPresence(){
  if(portalPresenceStop){portalPresenceStop();portalPresenceStop=null}
  if(window.NevoaOnline?.getSession()){
-   portalPresenceStop=window.NevoaOnline.startPresence(()=>({
-     locationKey:'portal',
-     locationLabel:'Portal principal',
-     phase:0,
-     stage:0
-   }),22000);
+   portalPresenceStop=window.NevoaOnline.startPresence(()=>window.nevoaPresenceState||({locationKey:'portal',locationLabel:'Portal principal',phase:0,stage:0}),22000);
  }
 }
 async function syncOnlineProfile(showToast=true){
