@@ -92,32 +92,57 @@ const scenes=[
   }
 ];
 
-const WORLD={w:2400,h:1600,points:{
- gate:{x:430,y:1181},market:{x:850,y:845},bridge:{x:1661,y:1021},
- theseus:{x:1015,y:1280},library:{x:1980,y:989},square:{x:1200,y:790},boss:{x:2071,y:285}
+const WORLD={w:1410,h:720,points:{
+ gate:{x:210,y:445},market:{x:690,y:270},bridge:{x:855,y:430},
+ theseus:{x:165,y:620},library:{x:1180,y:610},square:{x:1025,y:400},boss:{x:1110,y:145}
 }};
 const WORLD_NAMES={
- gate:'Portões de Paradoxia',market:'Feira das Verdades Duvidosas',bridge:'Ponte das Escolhas',
- theseus:'Bosque do Abóbora de Teseu',library:'Biblioteca dos Boatos',
- square:'Praça do Livre-Arbítrio',boss:'Castelo da Certeza Absoluta'
+ gate:'Vila das Abóboras',market:'Feira das Ilusões',bridge:'Ponte do Lúmen',
+ theseus:'Floresta das Sombras Doces',library:'Biblioteca Proibida',
+ square:'Praça do Tempo',boss:'Castelo do Paradoxo'
 };
 const INTERACTIONS={
- sign:{x:1284,y:838,action:'Ler',icon:'🪧',speaker:'Placa nº 47',text:'“TODOS DEVEM OBEDECER ESTA PLACA.” Logo abaixo, em letras menores: “NÃO OBEDEÇA PLACAS.” Paradoxia parece orgulhosa da própria contradição.',reward:'+1 Moeda da Névoa • conceito registrado',coins:1,concept:'Contradição e autorreferência'},
- pumpkin:{x:499,y:1131,action:'Falar',icon:'🎃',speaker:'Abóbora Fofoqueira',text:'“Todo mundo que entra no bosque desaparece!” Ela pensa por dois segundos. “Exceto o padeiro. E a bibliotecária. E eu fui ontem buscar cogumelos.”',reward:'+2 Moedas da Névoa • generalização precipitada',coins:2,concept:'Generalização precipitada'},
- mirror:{x:1488,y:1344,action:'Observar',icon:'🪞',speaker:'Reflexo do Lago',text:'Seu reflexo pergunta baixinho: “Você escolheria do mesmo jeito se ninguém soubesse o que você escolheu?” A água não oferece resposta.',reward:'+2 Moedas da Névoa • +1 Autonomia',coins:2,effect:{autonomia:1}},
- owl:{x:1882,y:888,action:'Falar',icon:'🦉',speaker:'Coruja Arquivista',text:'“Uma fonte que concorda com você continua precisando de prova.” Ela entrega um marcador de página e volta a fingir que não estava escutando.',reward:'+2 Moedas da Névoa • pista de investigação',coins:2,concept:'Fontes, evidências e confirmação'},
- shadows:{x:1068,y:262,action:'Examinar',icon:'🔥',speaker:'Parede das Sombras',text:'Sombras enormes parecem monstros. Ao se aproximar, você percebe pequenas estatuetas diante da chama. A aparência mudou; a coisa projetada, não.',reward:'🔮 Segredo descoberto • +3 Moedas da Névoa',coins:3,secret:true,concept:'Aparência e realidade'},
- grave:{x:281,y:688,action:'Ler',icon:'🪦',speaker:'Lápide sem Certeza',text:'“AQUI JAZ UMA OPINIÃO QUE COMEÇAVA COM: TODO MUNDO SABE QUE...” Não há nome. Talvez por segurança.',reward:'🔮 Segredo descoberto • +5 Moedas da Névoa',coins:5,secret:true,concept:'Opinião não é justificação'}
+ sign:{x:1017,y:446,action:'Ler',icon:'🪧',speaker:'Placa nº 47',text:'“TODOS DEVEM OBEDECER ESTA PLACA.” Logo abaixo, em letras menores: “NÃO OBEDEÇA PLACAS.” Paradoxia parece orgulhosa da própria contradição.',reward:'+1 Moeda da Névoa • conceito registrado',coins:1,concept:'Contradição e autorreferência'},
+ pumpkin:{x:230,y:500,action:'Falar',icon:'🎃',speaker:'Abóbora Fofoqueira',text:'“Todo mundo que entra na floresta desaparece!” Ela pensa por dois segundos. “Exceto o padeiro. E a bibliotecária. E eu fui ontem buscar cogumelos.”',reward:'+2 Moedas da Névoa • generalização precipitada',coins:2,concept:'Generalização precipitada'},
+ mirror:{x:735,y:495,action:'Observar',icon:'🪞',speaker:'Espelho das Águas',text:'Na queda-d’água, seu reflexo pergunta: “Você escolheria do mesmo jeito se ninguém soubesse o que você escolheu?” A água não oferece resposta.',reward:'+2 Moedas da Névoa • +1 Autonomia',coins:2,effect:{autonomia:1}},
+ owl:{x:1170,y:555,action:'Falar',icon:'🦉',speaker:'Coruja Arquivista',text:'“Uma fonte que concorda com você continua precisando de prova.” Ela entrega um marcador de página e volta a fingir que não estava escutando.',reward:'+2 Moedas da Névoa • pista de investigação',coins:2,concept:'Fontes, evidências e confirmação'},
+ shadows:{x:138,y:590,action:'Examinar',icon:'🔥',speaker:'Sombra entre as Árvores',text:'Uma criatura enorme parece mover-se na névoa. Ao chegar perto, você encontra apenas galhos, uma lanterna e seu próprio medo completando a figura.',reward:'🔮 Segredo descoberto • +3 Moedas da Névoa',coins:3,secret:true,concept:'Aparência e realidade'},
+ grave:{x:65,y:600,action:'Ler',icon:'🪦',speaker:'Lápide sem Certeza',text:'“AQUI JAZ UMA OPINIÃO QUE COMEÇAVA COM: TODO MUNDO SABE QUE...” Não há nome. Talvez por segurança.',reward:'🔮 Segredo descoberto • +5 Moedas da Névoa',coins:5,secret:true,concept:'Opinião não é justificação'}
 };
+
+/* Áreas e trilhas navegáveis do mapa ilustrado.
+   O jogador pode explorar ilhas e caminhos, mas não caminhar pelo vazio. */
+const WALK_ZONES=[
+ [225,430,215],[385,195,195],[690,255,200],[1025,400,205],
+ [1180,600,180],[1110,145,170],[150,620,175],[620,565,205],[820,500,165]
+];
+const WALK_PATHS=[
+ [225,430,385,195,92],[225,430,690,255,105],[385,195,690,255,88],
+ [690,255,1025,400,100],[1025,400,1180,600,92],[1025,400,1110,145,88],
+ [225,430,150,620,92],[150,620,620,565,100],[620,565,1025,400,108],
+ [620,565,1180,600,96],[690,255,820,500,96],[820,500,1025,400,96]
+];
+function pointSegmentDistance(px,py,ax,ay,bx,by){
+ const abx=bx-ax,aby=by-ay,apx=px-ax,apy=py-ay;
+ const len=abx*abx+aby*aby||1;
+ const t=Math.max(0,Math.min(1,(apx*abx+apy*aby)/len));
+ const x=ax+abx*t,y=ay+aby*t;
+ return Math.hypot(px-x,py-y);
+}
+function isWalkable(x,y){
+ if(x<35||x>WORLD.w-35||y<60||y>WORLD.h-35)return false;
+ if(WALK_ZONES.some(([cx,cy,r])=>Math.hypot(x-cx,y-cy)<=r))return true;
+ return WALK_PATHS.some(([ax,ay,bx,by,w])=>pointSegmentDistance(x,y,ax,ay,bx,by)<=w);
+}
 let moveKeys={up:false,down:false,left:false,right:false};
 let nearbyPoi=null,nearbyExtra=null,lastWorldFrame=0,lastPositionSave=0,accountName='Explorador',worldReady=false;
 let walkFrame=0,lastWalkFrameAt=0;
 
 const fresh=()=>({
- version:3,classKey:null,sceneIndex:0,bossStep:0,score:0,hearts:3,
+ version:4,classKey:null,sceneIndex:0,bossStep:0,score:0,hearts:3,
  stats:{razao:0,etica:0,autonomia:0,dialogo:0},
  flags:{},awards:{},history:[],abilityCharges:2,shield:false,completed:false,lastRank:null,
- world:{x:430,y:1290,dir:'back',place:'Vila das Abóboras'},
+ world:{x:245,y:485,dir:'back',place:'Vila das Abóboras'},
  inventory:{mistCoins:0,secrets:0},
  worldFlags:{}
 });
@@ -142,16 +167,17 @@ function normalize(raw){
  s.hearts=Math.max(1,Math.min(Number(s.hearts)||3,3));
  s.abilityCharges=Math.max(0,Math.min(Number(s.abilityCharges)||0,2));
  const oldVersion=Number(raw?.version)||0;
- s.world=Object.assign({x:430,y:1290,dir:'back',place:'Vila das Abóboras'},raw?.world||{});
- if(oldVersion<3){s.world={x:430,y:1290,dir:'back',place:'Vila das Abóboras'}}
- s.world.x=Math.max(70,Math.min(Number(s.world.x)||430,WORLD.w-70));
- s.world.y=Math.max(100,Math.min(Number(s.world.y)||1290,WORLD.h-55));
+ s.world=Object.assign({x:245,y:485,dir:'back',place:'Vila das Abóboras'},raw?.world||{});
+ if(oldVersion<4){s.world={x:245,y:485,dir:'back',place:'Vila das Abóboras'}}
+ s.world.x=Math.max(35,Math.min(Number(s.world.x)||245,WORLD.w-35));
+ s.world.y=Math.max(60,Math.min(Number(s.world.y)||485,WORLD.h-35));
+ if(!isWalkable(s.world.x,s.world.y))s.world={x:245,y:485,dir:'back',place:'Vila das Abóboras'};
  if(!['front','side','back','action'].includes(s.world.dir))s.world.dir='back';
  s.inventory=Object.assign({mistCoins:0,secrets:0},raw?.inventory||{});
  s.inventory.mistCoins=Math.max(0,Number(s.inventory.mistCoins)||0);
  s.inventory.secrets=Math.max(0,Math.min(2,Number(s.inventory.secrets)||0));
  s.worldFlags=Object.assign({},raw?.worldFlags||{});
- s.version=3;
+ s.version=4;
  return s;
 }
 function portalState(){
@@ -454,19 +480,17 @@ function nearestPlace(){
    const d=Math.hypot(state.world.x-p.x,state.world.y-p.y);
    if(d<dist){dist=d;best=id}
  });
- if(dist<190)return WORLD_NAMES[best];
+ if(dist<125)return WORLD_NAMES[best];
  const x=state.world.x,y=state.world.y;
- if(x<430&&y>480&&y<880)return 'Cemitério dos Conceitos Esquecidos';
- if(x<760&&y<620)return 'Academia dos Porquês';
- if(x>870&&x<1320&&y<430)return 'Ruínas da Caverna';
- if(x<760&&y>900)return 'Vila das Abóboras';
- if(x>820&&x<1260&&y>1090)return 'Bosque do Abóbora de Teseu';
- if(x>1240&&x<1840&&y>1120)return 'Lago do Espelho Interior';
- if(x>1680&&y>690)return 'Distrito da Biblioteca';
- if(x>1700&&y<620)return 'Altos da Certeza Absoluta';
- if(x>1010&&x<1400&&y>590&&y<980)return 'Praça do Livre-Arbítrio';
- if(x>690&&x<1040&&y>650&&y<980)return 'Feira das Verdades Duvidosas';
- return 'Estradas de Paradoxia';
+ if(x<315&&y>535)return 'Floresta das Sombras Doces';
+ if(x<340&&y>330)return 'Vila das Abóboras';
+ if(x<540&&y<315)return 'Academia Filosófica';
+ if(x>545&&x<835&&y<365)return 'Feira das Ilusões';
+ if(x>875&&x<1135&&y>300&&y<510)return 'Praça do Tempo';
+ if(x>1020&&y<285)return 'Altos do Castelo';
+ if(x>1010&&y>500)return 'Biblioteca Proibida';
+ if(x>480&&x<840&&y>430)return 'Caminhos do Lúmen';
+ return 'Estradas Suspensas de Paradoxia';
 }
 function updateInteraction(){
  let bestScene=null,sceneDist=Infinity;
@@ -474,14 +498,14 @@ function updateInteraction(){
    const d=Math.hypot(state.world.x-p.x,state.world.y-p.y);
    if(d<sceneDist){sceneDist=d;bestScene=id}
  });
- nearbyPoi=sceneDist<112?bestScene:null;
+ nearbyPoi=sceneDist<76?bestScene:null;
 
  let bestExtra=null,extraDist=Infinity;
  Object.entries(INTERACTIONS).forEach(([id,p])=>{
    const d=Math.hypot(state.world.x-p.x,state.world.y-p.y);
    if(d<extraDist){extraDist=d;bestExtra=id}
  });
- nearbyExtra=extraDist<92?bestExtra:null;
+ nearbyExtra=extraDist<62?bestExtra:null;
 
  $$('.worldInteract').forEach(el=>el.classList.toggle('near',el.dataset.interaction===nearbyExtra));
  $$('.worldInteract').forEach(el=>el.classList.toggle('discovered',!!state.worldFlags[el.dataset.interaction]));
@@ -509,8 +533,8 @@ function renderWorld(){
  if($('#worldSecrets'))$('#worldSecrets').textContent=state.inventory?.secrets||0;
  updateInteraction();
  const vw=view.clientWidth||900,vh=view.clientHeight||560;
- const tx=Math.max(vw-WORLD.w,Math.min(0,vw/2-state.world.x));
- const ty=Math.max(vh-WORLD.h,Math.min(0,vh/2-state.world.y));
+ const tx=WORLD.w<=vw?(vw-WORLD.w)/2:Math.max(vw-WORLD.w,Math.min(0,vw/2-state.world.x));
+ const ty=WORLD.h<=vh?(vh-WORLD.h)/2:Math.max(vh-WORLD.h,Math.min(0,vh/2-state.world.y));
  layer.style.transform='translate('+Math.round(tx)+'px,'+Math.round(ty)+'px)';
  renderMap();
  renderHUD();
@@ -527,16 +551,27 @@ function worldFrame(ts){
        walkFrame=(walkFrame+1)%4;
        lastWalkFrameAt=ts;
      }
-     const len=Math.hypot(dx,dy)||1,speed=255;
+     const len=Math.hypot(dx,dy)||1,speed=178;
      dx/=len;dy/=len;
-     state.world.x=Math.max(70,Math.min(WORLD.w-70,state.world.x+dx*speed*dt));
-     state.world.y=Math.max(100,Math.min(WORLD.h-55,state.world.y+dy*speed*dt));
+     const nx=Math.max(35,Math.min(WORLD.w-35,state.world.x+dx*speed*dt));
+     const ny=Math.max(60,Math.min(WORLD.h-35,state.world.y+dy*speed*dt));
+     if(isWalkable(nx,ny)){
+       state.world.x=nx;state.world.y=ny;
+       $('#worldPlayer')?.classList.remove('blocked');
+     }else{
+       $('#worldPlayer')?.classList.add('blocked');
+       if(ts-(window.__lastMistHint||0)>2600){
+         window.__lastMistHint=ts;
+         toast('🌫️ A névoa cobre o vazio. Siga as trilhas iluminadas.');
+       }
+     }
      if(Math.abs(dx)>Math.abs(dy))state.world.dir='side';
      else state.world.dir=dy<0?'back':'front';
      if(ts-lastPositionSave>700){lastPositionSave=ts;localStorage.setItem(SAVE_KEY,JSON.stringify(state))}
    }else{
      walkFrame=0;
      lastWalkFrameAt=ts;
+     $('#worldPlayer')?.classList.remove('blocked');
    }
    renderWorld();
  }
@@ -568,11 +603,11 @@ function setupWorldControls(){
    const id=b.dataset.interaction,item=INTERACTIONS[id];
    if(!item)return;
    const d=Math.hypot(state.world.x-item.x,state.world.y-item.y);
-   if(d<105){nearbyExtra=id;interactWorld()}else toast('✨ Parece interessante. Chegue mais perto para interagir.');
+   if(d<68){nearbyExtra=id;interactWorld()}else toast('✨ Parece interessante. Chegue mais perto para interagir.');
  }));
  $('.worldPoi').forEach(b=>b.addEventListener('click',()=>{
    const id=b.dataset.scene,pt=WORLD.points[id],d=Math.hypot(state.world.x-pt.x,state.world.y-pt.y);
-   if(d<120){nearbyPoi=id;interactWorld()}else toast('🗺️ Caminhe até '+WORLD_NAMES[id]+' para interagir.');
+   if(d<82){nearbyPoi=id;interactWorld()}else toast('🗺️ Caminhe até '+WORLD_NAMES[id]+' para interagir.');
  }));
  window.addEventListener('resize',renderWorld);
  requestAnimationFrame(worldFrame);
