@@ -1,0 +1,305 @@
+/* Paradoxia 2.1 — Etapa C
+   Mundo ilustrado jogável, navegação por caminhos e leitura visual de RPG. */
+
+:root{
+  --world-w:1410px;
+  --world-h:720px;
+}
+
+.worldViewport{
+  height:min(67vh,650px) !important;
+  min-height:520px !important;
+  background:
+    radial-gradient(circle at 50% 30%,#4d1a6a33,transparent 48%),
+    linear-gradient(180deg,#120716,#07030a) !important;
+  border-top:1px solid #6b3a78;
+  overflow:hidden !important;
+}
+.worldViewport::before{
+  box-shadow:
+    inset 0 0 85px #0008,
+    inset 0 0 0 1px #a35bc41f !important;
+}
+.worldViewport::after{
+  background:
+    linear-gradient(180deg,#1b0b2512,transparent 22%,transparent 70%,#05020852),
+    radial-gradient(circle at 50% 45%,transparent 0 67%,#0006 100%) !important;
+}
+
+.worldLayer{
+  width:var(--world-w) !important;
+  height:var(--world-h) !important;
+  background:
+    linear-gradient(#160a1e11,#160a1e11),
+    url("assets/world/paradoxia_world_playable.webp") 0 0 / 1410px 800px no-repeat !important;
+  background-color:#110817 !important;
+  isolation:isolate;
+  will-change:transform;
+}
+
+/* O mapa anterior continua no HTML como fallback, mas a arte ilustrada é a camada oficial. */
+.worldArt,.worldSky,.worldMoon,.regionLabel{display:none !important}
+
+.worldLayer::before{
+  content:"" !important;
+  position:absolute;inset:0 !important;
+  z-index:2 !important;
+  pointer-events:none;
+  opacity:1 !important;
+  background:
+    radial-gradient(circle at 13% 56%,#ff9e3626 0 3%,transparent 12%),
+    radial-gradient(circle at 48% 35%,#ff8c3524 0 3%,transparent 12%),
+    radial-gradient(circle at 74% 52%,#ffd36e1e 0 2%,transparent 12%),
+    radial-gradient(circle at 80% 14%,#c14fff18 0 5%,transparent 17%),
+    linear-gradient(180deg,transparent 0 72%,#08040bbd 100%) !important;
+  background-size:auto !important;
+}
+.worldLayer::after{
+  content:"";
+  position:absolute;inset:0;
+  z-index:3;pointer-events:none;
+  background:
+    linear-gradient(90deg,#05020832,transparent 7%,transparent 93%,#05020832),
+    linear-gradient(180deg,#31134012,transparent 25%,transparent 73%,#08040b6e);
+  mix-blend-mode:multiply;
+}
+
+/* Névoa agora acompanha as ilhas em vez de cobrir o cenário inteiro. */
+.mistBand{
+  z-index:4 !important;
+  height:95px !important;
+  width:440px !important;
+  filter:blur(24px) !important;
+  opacity:.14 !important;
+  pointer-events:none;
+}
+.m1{left:350px !important;top:435px !important;background:#d19be0 !important;animation:mistWorld 12s ease-in-out infinite alternate !important}
+.m2{left:870px !important;top:515px !important;right:auto !important;background:#9c82e3 !important;animation:mistWorld 15s ease-in-out infinite alternate-reverse !important}
+@keyframes mistWorld{to{transform:translateX(85px) scale(1.06);opacity:.22}}
+
+/* Pontos principais: discretos de longe, claros de perto. */
+.worldPoi{
+  z-index:18 !important;
+  width:auto !important;height:auto !important;
+  opacity:.62;
+  filter:saturate(.82);
+}
+.worldPoi span{
+  width:42px !important;height:42px !important;
+  font-size:20px !important;
+  border:2px solid #e3b56a !important;
+  background:
+    radial-gradient(circle at 35% 25%,#40243f,#130a17 72%) !important;
+  box-shadow:
+    0 7px 16px #000a,
+    0 0 0 4px #160a1aaa,
+    0 0 19px #f7a34e38 !important;
+}
+.worldPoi b{
+  margin-top:4px !important;
+  padding:3px 7px !important;
+  border-color:#76503c !important;
+  border-radius:999px !important;
+  background:#0a050ce8 !important;
+  color:#f0d8b7 !important;
+  font-size:7px !important;
+  letter-spacing:.02em;
+  opacity:.78;
+}
+.worldPoi:hover,.worldPoi.current{opacity:1;filter:none}
+.worldPoi.current span{
+  border-color:#ffd37a !important;
+  background:radial-gradient(circle at 35% 25%,#793119,#231016 72%) !important;
+  box-shadow:
+    0 8px 18px #000b,
+    0 0 0 5px #4a2112aa,
+    0 0 32px #ff933bba !important;
+  animation:questBeacon 1.35s ease-in-out infinite alternate;
+}
+.worldPoi.current b{opacity:1;color:#ffe2bb !important}
+.worldPoi.done{opacity:.48 !important;filter:saturate(.45)}
+.worldPoi.done span{border-color:#67c59b !important;background:radial-gradient(circle,#18392d,#0a1611) !important}
+.worldPoi.locked{opacity:.24 !important;filter:grayscale(.2) saturate(.45) !important}
+@keyframes questBeacon{
+  to{transform:translateY(-4px) scale(1.08);box-shadow:0 8px 18px #000b,0 0 0 8px #4a211266,0 0 45px #ff9a46dd}
+}
+
+/* Objetos opcionais: parecem parte do mundo, não botões de interface. */
+.worldInteract{z-index:19 !important}
+.worldInteract span{
+  width:31px !important;height:31px !important;
+  font-size:16px !important;
+  border:1px solid #d1a866 !important;
+  background:#150a18d8 !important;
+  box-shadow:0 5px 11px #000a,0 0 11px #f0a14c22 !important;
+  opacity:.72;
+}
+.worldInteract:hover span,.worldInteract.near span{
+  opacity:1;
+  transform:translateY(-4px) scale(1.18) !important;
+  border-color:#ffe29a !important;
+  box-shadow:0 7px 15px #000b,0 0 23px #ffb45c88 !important;
+}
+.secretProp{opacity:.22 !important}
+.secretProp.discovered,.secretProp.near{opacity:1 !important}
+
+/* Viajantes no mapa: menores que o jogador. */
+.worldNpc{
+  z-index:13 !important;
+  width:90px !important;height:92px !important;
+  filter:drop-shadow(0 8px 8px #0008);
+}
+.worldNpc .spriteArt{
+  transform:translateX(-50%) scale(.125) !important;
+}
+.worldNpc small{
+  display:none !important;
+}
+.worldNpc:hover small{display:block !important}
+
+/* Player: agora cabe no cenário e não parece um boneco gigante sobre um mapa. */
+.worldPlayer{
+  z-index:28 !important;
+  width:116px !important;
+  height:132px !important;
+  pointer-events:none;
+}
+.worldPlayer .spriteArt{
+  transform:translateX(-50%) scale(.315) !important;
+  filter:
+    drop-shadow(0 10px 7px #000c)
+    drop-shadow(0 0 5px #ffcb7a40) !important;
+}
+.worldPlayer.flip .spriteArt{
+  transform:translateX(-50%) scaleX(-1) scale(.315) !important;
+}
+.worldPlayer::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:50%;bottom:9px;
+  width:60px;height:18px;
+  border-radius:50%;
+  transform:translateX(-50%);
+  background:#05020888;
+  filter:blur(3px);
+}
+.worldPlayer span{
+  bottom:-2px !important;
+  padding:4px 8px !important;
+  font-size:8px !important;
+  border-color:#744789 !important;
+  background:#08040ddd !important;
+}
+
+/* Vida ambiental sobre a ilustração. */
+.ambientNpc{
+  z-index:10 !important;
+  font-size:20px !important;
+  filter:drop-shadow(0 4px 5px #000a) !important;
+  opacity:.78;
+}
+.ambientNpc.ghost{opacity:.56}
+.ambientNpc.cat{font-size:17px !important}
+.ambientNpc.book{font-size:17px !important}
+.ambientNpc.owl{font-size:18px !important}
+
+/* Caixa de interação reposicionada para não cobrir o personagem. */
+.interactionPrompt{
+  z-index:65 !important;
+  bottom:76px !important;
+  padding:7px 11px !important;
+  border-radius:999px !important;
+  background:#120812f2 !important;
+  border-color:#c67b43 !important;
+  box-shadow:0 8px 24px #000a,0 0 18px #ff984b28 !important;
+}
+.interactionPrompt b{font-size:9px !important}
+.interactionPrompt span{font-size:7px !important}
+
+.worldCompass{
+  z-index:64 !important;
+  top:12px !important;right:12px !important;
+  background:#09050dd9 !important;
+  border-color:#8b5c93 !important;
+  box-shadow:0 10px 28px #0008;
+}
+.worldCompass>span{
+  width:48px !important;height:48px !important;
+  border-color:#d191c9 !important;
+  background:
+    radial-gradient(circle,#30143d,#100815) !important;
+}
+
+/* HUD superior com cara de aventura, não de painel administrativo. */
+.worldTopline{
+  min-height:60px !important;
+  background:
+    radial-gradient(circle at 12% 0,#57215833,transparent 27%),
+    linear-gradient(90deg,#130818,#24100d 50%,#100715) !important;
+}
+.questNow{
+  color:#f6ddb6 !important;
+  font-family:Georgia,serif;
+  font-size:11px !important;
+}
+.worldLoot span{
+  box-shadow:inset 0 0 14px #0006,0 5px 12px #0005;
+}
+
+/* O fundo já traz seus próprios landmarks e letreiros.
+   Duplicatas antigas ficam fora da leitura visual. */
+.academyLabel,.villageLabel,.ruinsLabel,.plazaLabel,.forestLabel,.lakeLabel,.libraryLabel,.castleLabel,.cemeteryLabel{
+  display:none !important;
+}
+
+/* Barragem visual no limite inferior do recorte, escondendo resíduos da arte conceitual. */
+.worldLayer .foregroundVeil{
+  position:absolute;
+  left:0;right:0;bottom:0;height:74px;
+  z-index:15;pointer-events:none;
+  background:
+    linear-gradient(180deg,transparent,#08040bd4 68%,#050208 100%);
+}
+.worldLayer .foregroundVeil::before{
+  content:"";
+  position:absolute;left:0;right:0;bottom:15px;height:38px;
+  opacity:.45;
+  background:
+    radial-gradient(ellipse at 8% 100%,#1a251b 0 34px,transparent 36px),
+    radial-gradient(ellipse at 22% 100%,#2a172d 0 48px,transparent 50px),
+    radial-gradient(ellipse at 41% 100%,#19251a 0 36px,transparent 38px),
+    radial-gradient(ellipse at 62% 100%,#28182d 0 46px,transparent 48px),
+    radial-gradient(ellipse at 82% 100%,#19251a 0 44px,transparent 46px),
+    radial-gradient(ellipse at 96% 100%,#2b182d 0 37px,transparent 39px);
+}
+
+/* Feedback quando o jogador encosta na borda de uma ilha/caminho. */
+.worldPlayer.blocked .spriteArt{
+  filter:
+    drop-shadow(0 10px 7px #000c)
+    drop-shadow(0 0 11px #b56dd477) !important;
+}
+
+@media(max-width:900px){
+  .worldViewport{height:62vh !important;min-height:480px !important}
+  .worldPlayer .spriteArt{transform:translateX(-50%) scale(.29) !important}
+  .worldPlayer.flip .spriteArt{transform:translateX(-50%) scaleX(-1) scale(.29) !important}
+  .worldNpc .spriteArt{transform:translateX(-50%) scale(.11) !important}
+}
+@media(max-width:620px){
+  .worldViewport{height:58vh !important;min-height:420px !important}
+  .worldPlayer{width:104px !important;height:120px !important}
+  .worldPlayer .spriteArt{transform:translateX(-50%) scale(.27) !important}
+  .worldPlayer.flip .spriteArt{transform:translateX(-50%) scaleX(-1) scale(.27) !important}
+  .worldPoi span{width:37px !important;height:37px !important;font-size:18px !important}
+  .worldPoi b{display:none !important}
+  .worldInteract span{width:28px !important;height:28px !important;font-size:14px !important}
+  .worldCompass{transform:scale(.88);transform-origin:top right}
+}
+@media(max-height:520px) and (orientation:landscape){
+  .worldViewport{height:calc(100vh - 155px) !important;min-height:330px !important}
+  .worldTopline{min-height:48px !important}
+  .worldPlayer .spriteArt{transform:translateX(-50%) scale(.25) !important}
+  .worldPlayer.flip .spriteArt{transform:translateX(-50%) scaleX(-1) scale(.25) !important}
+}
