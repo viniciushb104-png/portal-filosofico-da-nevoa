@@ -239,6 +239,7 @@ function render(){
  [...state.units,...state.enemies].filter(u=>u.alive).forEach(u=>{
   const el=document.createElement('button');el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'');el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
   el.innerHTML='<span class="unitSprite">'+u.icon+'</span><span class="unitName">'+u.name+'</span><span class="hp"><i style="width:'+Math.max(0,u.hp/u.maxHp*100)+'%"></i></span>';
+  window.ParadoxiaSpriteRuntime?.decorateUnitElement(el,u);
   board.appendChild(el);
  });
  $('#battleLog').innerHTML=state.log.slice(0,6).map(x=>'<li>'+x+'</li>').join('');
