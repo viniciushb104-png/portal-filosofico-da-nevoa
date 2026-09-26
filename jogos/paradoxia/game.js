@@ -348,6 +348,16 @@ function renderScene(){
  $('#sceneTitle').textContent=sc.title;$('#sceneText').textContent=sc.text;
  $('#conceptBox').hidden=true;$('#conceptBox').textContent='';
  const box=$('#choices');box.innerHTML='';
+ if(sc.type==='dilemma'&&state.flags[sc.id]){
+   $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Conceito registrado:</b> '+sc.concept;
+   showFeedback('Você já tomou uma posição neste dilema. Continue a jornada para descobrir as consequências.','neutral');
+   addContinue();renderHUD();renderMap();return;
+ }
+ if(sc.type==='battle'&&state.awards[sc.id]){
+   $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Conceito registrado:</b> '+sc.concept;
+   showFeedback('Este confronto já foi resolvido. O caminho à frente está aberto.','good');
+   addContinue('Atravessar a área →');renderHUD();renderMap();return;
+ }
  if(sc.type==='dilemma'){
    sc.choices.forEach(ch=>{
      const b=document.createElement('button');b.className='choice';
@@ -463,6 +473,7 @@ function setupWorldControls(){
    if(keyMap[e.key]){e.preventDefault();setMove(keyMap[e.key],true)}
    if((e.key==='e'||e.key==='E'||e.key==='Enter')&&!e.repeat){e.preventDefault();interactWorld()}
  });
+ window.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('sceneOpen'))closeScene()});
  window.addEventListener('keyup',e=>{if(keyMap[e.key])setMove(keyMap[e.key],false)});
  $('.dpad button[data-move]').forEach(b=>{
    const k=b.dataset.move;
