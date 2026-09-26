@@ -283,4 +283,12 @@ async function enterGameMode(){
 }
 if($('#gameModeBtn'))$('#gameModeBtn').onclick=enterGameMode;
 setHud();render();
+if(window.NevoaOnline){
+  window.NevoaOnline.startPresence(()=>({
+    locationKey:'platform_plato',
+    locationLabel:'Fase 2 • Platão • Etapa '+currentStage,
+    phase:2,
+    stage:currentStage
+  }),20000);
+}
 })();
