@@ -1,0 +1,44 @@
+/* Portal Filosófico da Névoa — páginas de autenticação */
+body.authPage{min-height:100dvh;overflow-x:hidden;background:
+radial-gradient(900px 600px at 10% 0,#45125b 0,transparent 58%),
+radial-gradient(760px 540px at 94% 12%,#5b210d 0,transparent 55%),
+linear-gradient(180deg,#050309,#0c0612 58%,#050308);}
+
+.authPage::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.25;background:
+radial-gradient(circle at 20% 20%,#d65aff33 0 1px,transparent 2px),
+radial-gradient(circle at 75% 30%,#ff8b3d33 0 1px,transparent 2px);
+background-size:70px 70px,95px 95px}
+
+.authTop{position:relative;z-index:3;height:76px;border-bottom:1px solid #48265b;background:#07040ddd;backdrop-filter:blur(18px)}
+.authTop .wrap{height:100%;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.authBrand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none}
+.authSigilSmall{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 25%,#c654f0,#351044);border:1px solid #9d4dbb;box-shadow:0 0 25px #a744d744;font-size:22px}
+.authBrand b,.authBrand small{display:block}.authBrand b{font-family:Georgia,serif;font-size:17px}.authBrand small{color:#ad96ba;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.authBack{color:#e6d3ef;text-decoration:none;border:1px solid #50305f;background:#12091a;border-radius:12px;padding:10px 13px;font-weight:850;font-size:12px}
+.authBack:hover{border-color:#bd58df;color:#fff}
+
+.authMain{position:relative;z-index:2;min-height:calc(100dvh - 76px);display:grid;place-items:center;padding:34px 20px 48px}
+.authLayout{width:min(1080px,100%);display:grid;grid-template-columns:.92fr 1.08fr;gap:28px;align-items:center}
+.authLore{padding:20px}.authLore .eyebrow{margin-bottom:10px}.authLore h1{font-size:clamp(48px,7vw,82px);line-height:.9;text-transform:uppercase;margin:0 0 17px;color:#ff7924;text-shadow:0 3px #3a0e00,0 0 34px #ff6b1f3b}.authLore h1 span{display:block;color:#c84fff}.authLore>p{color:#d9c8e4;line-height:1.7;max-width:520px}
+.authRunes{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.authRunes span{border:1px solid #5f3470;background:#120919;border-radius:999px;padding:7px 10px;font-size:10px;color:#e9d5f3}
+.authQuote{margin-top:22px;border-left:2px solid #ff7a29;padding:10px 0 10px 14px;color:#bfa9ca;font-family:Georgia,serif;font-style:italic;line-height:1.55}
+
+.authCard{position:relative;overflow:hidden;border:1px solid #75408b;border-radius:28px;background:radial-gradient(circle at 50% 0,#40164f 0,transparent 36%),linear-gradient(145deg,#170a21,#0a0610);box-shadow:0 32px 100px #000b;padding:29px}
+.authCard.orange{border-color:#955027;background:radial-gradient(circle at 50% 0,#552511 0,transparent 36%),linear-gradient(145deg,#1c0c17,#0b060d)}
+.authCard::after{content:"";position:absolute;inset:auto -120px -170px auto;width:330px;height:330px;border-radius:50%;background:#b84be51a;filter:blur(10px);pointer-events:none}.authCard.orange::after{background:#ff76251c}
+.authIcon{position:relative;width:74px;height:74px;border-radius:50%;display:grid;place-items:center;font-size:37px;border:1px solid #b453d7;background:#25102f;box-shadow:0 0 32px #b64bda40;margin-bottom:13px}.orange .authIcon{border-color:#d67635;background:#35170f;box-shadow:0 0 32px #ff762538}
+.authCard h2{position:relative;font-size:34px;margin:5px 0 7px}.authLead{position:relative;color:#bca8c8;line-height:1.55;margin:0 0 19px;font-size:13px}
+
+.authForm{position:relative;display:grid;gap:13px}
+.authForm label{display:grid;gap:6px;color:#e4d5ec;font-size:11px;font-weight:900;letter-spacing:.04em}.authForm label small{font-weight:600;color:#9f89ad}
+.authForm input{width:100%;appearance:none;background:#08050d;border:1px solid #543063;border-radius:13px;color:#fff;padding:13px 14px;font:inherit;outline:none;box-shadow:inset 0 0 0 1px #0006}
+.authForm input::placeholder{color:#6f5d79}.authForm input:focus{border-color:#c958ef;box-shadow:0 0 0 3px #b548e322}.orange .authForm input:focus{border-color:#ef803a;box-shadow:0 0 0 3px #ff762522}
+.pinRow{display:grid;grid-template-columns:1fr auto;gap:8px}.pinToggle{appearance:none;border:1px solid #51305f;background:#12091a;color:#e6d3ef;border-radius:12px;padding:0 13px;cursor:pointer;font-weight:850}
+.authSubmit{appearance:none;border:1px solid #c45aeb;background:linear-gradient(180deg,#a73ee0,#642097);color:#fff;border-radius:14px;padding:13px 18px;font-weight:950;cursor:pointer;box-shadow:0 0 30px #a944d936;margin-top:3px}.orange .authSubmit{border-color:#ef7c35;background:linear-gradient(180deg,#f27a2c,#9e3515);box-shadow:0 0 30px #ff6f2535}.authSubmit:hover{transform:translateY(-1px);filter:brightness(1.08)}.authSubmit:disabled{opacity:.55;cursor:wait}
+.authStatus{display:none;border-radius:13px;padding:11px 12px;font-size:12px;line-height:1.5}.authStatus.show{display:block}.authStatus.ok{background:#0d251d;border:1px solid #2f9e76;color:#acffdc}.authStatus.bad{background:#2a1017;border:1px solid #a54156;color:#ffc4cc}.authStatus.info{background:#161026;border:1px solid #67407a;color:#ead8f3}
+.authSwitch{position:relative;margin-top:17px;padding-top:16px;border-top:1px solid #34203e;color:#ab97b8;font-size:12px;text-align:center}.authSwitch a{color:#ffb268;font-weight:900;text-decoration:none}.authSwitch a:hover{text-decoration:underline}
+.authPrivacy{position:relative;margin-top:14px;padding:10px 12px;border-radius:12px;background:#0b0710;border:1px solid #34203e;color:#887794;font-size:10px;line-height:1.5}
+.authLogged{display:none;position:relative;padding:15px;border-radius:15px;border:1px solid #2e8c6e;background:#0d211a;margin-bottom:16px}.authLogged.show{display:block}.authLogged b,.authLogged small{display:block}.authLogged small{color:#9bd9c3;margin-top:4px}
+
+@media(max-width:820px){.authLayout{grid-template-columns:1fr;max-width:620px}.authLore{text-align:center;padding:8px 4px}.authLore>p{margin-left:auto;margin-right:auto}.authRunes{justify-content:center}.authQuote{display:none}.authMain{align-items:start;padding-top:24px}.authCard{padding:22px 18px}.authLore h1{font-size:52px}.authTop .wrap{padding:0 12px}.authBrand small{display:none}}
+@media(max-width:470px){.authBrand b{font-size:14px}.authBack{padding:9px 10px}.authLore h1{font-size:43px}.authCard h2{font-size:29px}.authIcon{width:62px;height:62px;font-size:31px}.authMain{padding-left:12px;padding-right:12px}.pinRow{grid-template-columns:1fr 52px}.pinToggle{padding:0}}
