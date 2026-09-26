@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#150712">
+<title>Circo das Falácias — Paradoxia</title>
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+<div class="stars" aria-hidden="true"></div>
+<header class="topbar">
+  <a href="../../index.html">← Paradoxia</a>
+  <div><b>🎪 Circo das Falácias</b><small>Feira das Verdades Duvidosas</small></div>
+  <div class="mode" id="modeBadge">Prática</div>
+</header>
+
+<main>
+  <section class="intro" id="intro">
+    <div class="marquee">
+      <span>✦</span>
+      <div>
+        <small>ATO ESPECIAL DE PARADOXIA</small>
+        <h1>Circo das Falácias</h1>
+        <p>O Mestre de Cerimônias promete revelar “a verdade definitiva”. O problema é que cada artista usa um truque diferente para convencer a plateia.</p>
+      </div>
+      <span>✦</span>
+    </div>
+    <div class="rules">
+      <div><b>🎯 5 atos</b><small>uma falácia por ato</small></div>
+      <div><b>💡 Holofote</b><small>aponte para a fala correta</small></div>
+      <div><b>🏆 até 1000</b><small>pontos da temporada</small></div>
+    </div>
+    <button id="startBtn" class="bigBtn">Entrar no picadeiro</button>
+    <p class="loginHint" id="loginHint" hidden>Você está como visitante. Pode jogar normalmente, mas esta tentativa não entra no ranking. <a href="../../../login.html">Entrar</a></p>
+  </section>
+
+  <section class="game" id="game" hidden>
+    <div class="hud">
+      <div><small>ATO</small><b><span id="actNow">1</span>/5</b></div>
+      <div><small>ACERTOS</small><b id="hits">0</b></div>
+      <div><small>PLACAR LOCAL</small><b id="localScore">0</b></div>
+      <div class="timer"><small>TEMPO</small><b id="timer">00:00</b></div>
+    </div>
+
+    <div class="tent">
+      <div class="tentTop" aria-hidden="true"><span></span><i></i><span></span><i></i><span></span></div>
+      <div class="curtain left"></div><div class="curtain right"></div>
+      <div class="lights" aria-hidden="true"></div>
+
+      <div class="ringmaster">
+        <div class="rmFace" id="rmFace">🎩</div>
+        <div class="speech">
+          <small id="actPerformer">Mestre de Cerimônias</small>
+          <h2 id="actTitle">Prepare-se para o primeiro ato.</h2>
+          <p id="actPrompt"></p>
+        </div>
+      </div>
+
+      <div class="ring">
+        <div class="spotlight" id="spotlight"></div>
+        <div class="choiceRow" id="choiceRow"></div>
+        <div class="playerMark" id="playerMark"><span>🎭</span><small>VOCÊ</small></div>
+      </div>
+
+      <div class="feedback" id="feedback" hidden>
+        <b id="feedbackTitle"></b>
+        <p id="feedbackText"></p>
+        <button id="nextBtn">Próximo ato →</button>
+      </div>
+    </div>
+
+    <div class="controlsHint">Clique/toque em uma fala • no teclado use ← → e Enter</div>
+  </section>
+
+  <section class="result" id="result" hidden>
+    <div class="resultCard">
+      <div class="resultIcon" id="resultIcon">🎪</div>
+      <small>ESPETÁCULO ENCERRADO</small>
+      <h2 id="resultTitle">O circo sobreviveu.</h2>
+      <p id="resultText"></p>
+      <div class="resultStats">
+        <div><span>🎯</span><b id="finalHits">0/5</b><small>identificações</small></div>
+        <div><span>⏱️</span><b id="finalTime">00:00</b><small>tempo</small></div>
+        <div><span>🏆</span><b id="finalPoints">—</b><small>pontos da temporada</small></div>
+      </div>
+      <div id="serverMessage" class="serverMessage"></div>
+      <div class="actions">
+        <button id="retryBtn">↻ Jogar novamente</button>
+        <a href="../../index.html">← Voltar ao mapa</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="../../../online.js?v=7.6"></script>
+<script src="../competition-client.js?v=1"></script>
+<script src="game.js?v=1"></script>
+</body>
+</html>
