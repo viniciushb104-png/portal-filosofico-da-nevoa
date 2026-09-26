@@ -92,10 +92,23 @@ const scenes=[
   }
 ];
 
+const WORLD={w:1600,h:900,points:{
+ gate:{x:208,y:630},market:{x:576,y:405},bridge:{x:848,y:477},
+ theseus:{x:672,y:702},library:{x:1168,y:639},square:{x:1152,y:351},boss:{x:1392,y:162}
+}};
+const WORLD_NAMES={
+ gate:'Portões de Paradoxia',market:'Feira das Verdades Duvidosas',bridge:'Ponte das Escolhas',
+ theseus:'Bosque do Abóbora de Teseu',library:'Biblioteca dos Boatos',
+ square:'Praça do Livre-Arbítrio',boss:'Castelo da Certeza Absoluta'
+};
+let moveKeys={up:false,down:false,left:false,right:false};
+let nearbyPoi=null,lastWorldFrame=0,lastPositionSave=0,accountName='Explorador',worldReady=false;
+
 const fresh=()=>({
- version:1,classKey:null,sceneIndex:0,bossStep:0,score:0,hearts:3,
+ version:2,classKey:null,sceneIndex:0,bossStep:0,score:0,hearts:3,
  stats:{razao:0,etica:0,autonomia:0,dialogo:0},
- flags:{},awards:{},history:[],abilityCharges:2,shield:false,completed:false,lastRank:null
+ flags:{},awards:{},history:[],abilityCharges:2,shield:false,completed:false,lastRank:null,
+ world:{x:270,y:720,dir:'front',place:'Vila das Abóboras'}
 });
 let state=fresh();
 let presenceStop=null;
@@ -117,6 +130,10 @@ function normalize(raw){
  s.score=Math.max(0,Math.min(Number(s.score)||0,120));
  s.hearts=Math.max(1,Math.min(Number(s.hearts)||3,3));
  s.abilityCharges=Math.max(0,Math.min(Number(s.abilityCharges)||0,2));
+ s.world=Object.assign({x:270,y:720,dir:'front',place:'Vila das Abóboras'},raw?.world||{});
+ s.world.x=Math.max(70,Math.min(Number(s.world.x)||270,WORLD.w-70));
+ s.world.y=Math.max(100,Math.min(Number(s.world.y)||720,WORLD.h-55));
+ if(!['front','side','back','action'].includes(s.world.dir))s.world.dir='front';
  return s;
 }
 function portalState(){
@@ -173,8 +190,8 @@ async function loadInitial(){
 function renderClasses(){
  const box=$('#classGrid');box.innerHTML='';
  Object.entries(classes).forEach(([key,c])=>{
-   const b=document.createElement('button');b.className='classCard';
-   b.innerHTML=`<span>${c.icon}</span><b>${c.name}</b><small>${c.desc}</small><em>✦ ${c.ability}</em>`;
+   const b=document.createElement('button');b.className='classCard';b.dataset.class=key;
+   b.innerHTML=`<div class="classSprite"><div class="spriteArt"></div></div><span>${c.icon}</span><b>${c.name}</b><small>${c.desc}</small><em>✦ ${c.ability}</em>`;
    b.onclick=()=>chooseClass(key);box.appendChild(b);
  });
 }
@@ -185,8 +202,10 @@ function chooseClass(key){
  saveLocal();
  $('#startOverlay').classList.remove('show');
  render();
+ setupWorldControls();
  startPresence();
- toast(c.icon+' Classe escolhida: '+c.name);
+ setTimeout(()=>$('#worldViewport')?.focus(),180);
+ toast(c.icon+' Classe escolhida: '+c.name+' — explore Paradoxia!');
 }
 function applyEffects(effects={}){
  Object.entries(effects).forEach(([k,v])=>{if(k in state.stats)state.stats[k]=Math.max(0,state.stats[k]+v)});
@@ -258,8 +277,10 @@ function resolveBoss(index){
  }
 }
 function nextScene(){
+ closeScene();
  state.sceneIndex=Math.min(scenes.length-1,state.sceneIndex+1);state.hearts=3;state.shield=false;
- saveLocal();render();window.scrollTo({top:0,behavior:'smooth'});
+ saveLocal();render();
+ toast('🗺️ Nova região filosófica desbloqueada no mapa.');
 }
 
 function useAbility(){
@@ -286,7 +307,7 @@ function renderHUD(){
  $('#hudClass').textContent=c?c.name:'Não escolhida';
  $('#hudXP').textContent=state.score+' / 120';
  $('#hudHearts').textContent='❤️'.repeat(state.hearts)+' · '+state.hearts+'/3';
- $('#hudPlace').textContent=scene().location;
+ $('#hudPlace').textContent=state.world?.place||scene().location;
  ['razao','etica','autonomia','dialogo'].forEach(k=>{
    $('#stat'+cap(k)).textContent=state.stats[k];
    $('#bar'+cap(k)).style.width=Math.min(100,state.stats[k]*16)+'%';
@@ -301,11 +322,19 @@ function renderHUD(){
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
 function renderMap(){
  const ids=scenes.map(s=>s.id);
- $$('.mapNode').forEach(n=>{
+ $('.mapNode').forEach(n=>{
    const idx=ids.indexOf(n.dataset.node);
    n.classList.toggle('done',idx<state.sceneIndex||state.completed);
    n.classList.toggle('active',idx===state.sceneIndex&&!state.completed);
  });
+ $('.worldPoi').forEach(n=>{
+   const idx=ids.indexOf(n.dataset.scene);
+   n.classList.toggle('done',idx<state.sceneIndex||state.completed);
+   n.classList.toggle('current',idx===state.sceneIndex&&!state.completed);
+   n.classList.toggle('locked',idx>state.sceneIndex&&!state.completed);
+ });
+ const q=$('#questNow');
+ if(q)q.textContent=state.completed?'Paradoxia reconheceu sua jornada. Explore livremente.':'Vá até '+scene().location+' e investigue o desafio.';
 }
 function renderLog(){
  const box=$('#logList');
@@ -343,7 +372,113 @@ function renderScene(){
  }
  renderHUD();renderMap();
 }
-function render(){renderHUD();renderMap();renderLog();renderScene()}
+function render(){renderHUD();renderMap();renderLog();renderScene();renderWorld()}
+
+
+function openScene(){
+ if(state.completed)return toast('🏆 Você já concluiu este capítulo. Continue explorando ou jogue outro caminho.');
+ const card=$('#sceneCard');if(!card)return;
+ renderScene();card.classList.add('open');document.body.classList.add('sceneOpen');
+ state.world.dir='action';renderWorld();
+ setTimeout(()=>{if(state.world.dir==='action'){state.world.dir='front';renderWorld()}},450);
+}
+function closeScene(){
+ $('#sceneCard')?.classList.remove('open');document.body.classList.remove('sceneOpen');
+}
+function interactWorld(){
+ if(document.body.classList.contains('sceneOpen'))return;
+ if(!nearbyPoi){toast('Explore o mapa e aproxime-se de um ponto de interesse.');return}
+ const ids=scenes.map(s=>s.id),idx=ids.indexOf(nearbyPoi);
+ if(idx<state.sceneIndex||state.completed){toast('📜 Você já investigou esta região.');return}
+ if(idx>state.sceneIndex){toast('🌫️ A névoa ainda protege este desafio. Siga a missão atual.');return}
+ openScene();
+}
+function nearestPlace(){
+ let best=null,dist=Infinity;
+ Object.entries(WORLD.points).forEach(([id,p])=>{
+   const d=Math.hypot(state.world.x-p.x,state.world.y-p.y);
+   if(d<dist){dist=d;best=id}
+ });
+ if(dist<180)return WORLD_NAMES[best];
+ if(state.world.x<480&&state.world.y<500)return 'Academia Filosófica';
+ if(state.world.x<500&&state.world.y>=500)return 'Vila das Abóboras';
+ if(state.world.x<930&&state.world.y>600)return 'Floresta das Sombras Doces';
+ if(state.world.x>1190&&state.world.y<330)return 'Altos do Castelo';
+ return 'Estradas de Paradoxia';
+}
+function updateInteraction(){
+ let best=null,dist=Infinity;
+ Object.entries(WORLD.points).forEach(([id,p])=>{
+   const d=Math.hypot(state.world.x-p.x,state.world.y-p.y);
+   if(d<dist){dist=d;best=id}
+ });
+ nearbyPoi=dist<105?best:null;
+ const prompt=$('#interactionPrompt');
+ if(prompt)prompt.hidden=!nearbyPoi;
+ state.world.place=nearestPlace();
+ const wp=$('#worldPlace');if(wp)wp.textContent=state.world.place;
+}
+function renderWorld(){
+ const p=$('#worldPlayer'),sprite=$('#playerSprite'),layer=$('#worldLayer'),view=$('#worldViewport');
+ if(!p||!layer||!view||!state.classKey)return;
+ p.className='worldPlayer '+state.classKey+' pose-'+(state.world.dir||'front')+(moveKeys.left?' flip':'');
+ p.style.left=state.world.x+'px';p.style.top=state.world.y+'px';
+ p.classList.toggle('walking',moveKeys.up||moveKeys.down||moveKeys.left||moveKeys.right);
+ $('#playerLabel').textContent=accountName||classes[state.classKey].name;
+ updateInteraction();
+ const vw=view.clientWidth||900,vh=view.clientHeight||560;
+ const tx=Math.max(vw-WORLD.w,Math.min(0,vw/2-state.world.x));
+ const ty=Math.max(vh-WORLD.h,Math.min(0,vh/2-state.world.y));
+ layer.style.transform='translate('+Math.round(tx)+'px,'+Math.round(ty)+'px)';
+ renderMap();
+ renderHUD();
+}
+function worldFrame(ts){
+ if(!lastWorldFrame)lastWorldFrame=ts;
+ const dt=Math.min(.04,(ts-lastWorldFrame)/1000);lastWorldFrame=ts;
+ if(state.classKey&&!document.body.classList.contains('sceneOpen')&&!$('#startOverlay')?.classList.contains('show')){
+   let dx=(moveKeys.right?1:0)-(moveKeys.left?1:0);
+   let dy=(moveKeys.down?1:0)-(moveKeys.up?1:0);
+   if(dx||dy){
+     const len=Math.hypot(dx,dy)||1,speed=255;
+     dx/=len;dy/=len;
+     state.world.x=Math.max(70,Math.min(WORLD.w-70,state.world.x+dx*speed*dt));
+     state.world.y=Math.max(100,Math.min(WORLD.h-55,state.world.y+dy*speed*dt));
+     if(Math.abs(dx)>Math.abs(dy))state.world.dir='side';
+     else state.world.dir=dy<0?'back':'front';
+     if(ts-lastPositionSave>700){lastPositionSave=ts;localStorage.setItem(SAVE_KEY,JSON.stringify(state))}
+   }
+   renderWorld();
+ }
+ requestAnimationFrame(worldFrame);
+}
+function setMove(key,on){
+ if(key in moveKeys){moveKeys[key]=on;if(!on&&!Object.values(moveKeys).some(Boolean)&&state.world.dir==='side')state.world.dir='front';renderWorld()}
+}
+function setupWorldControls(){
+ if(worldReady)return;worldReady=true;
+ const keyMap={ArrowUp:'up',w:'up',W:'up',ArrowDown:'down',s:'down',S:'down',ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right'};
+ window.addEventListener('keydown',e=>{
+   if(document.body.classList.contains('sceneOpen'))return;
+   if(keyMap[e.key]){e.preventDefault();setMove(keyMap[e.key],true)}
+   if((e.key==='e'||e.key==='E'||e.key==='Enter')&&!e.repeat){e.preventDefault();interactWorld()}
+ });
+ window.addEventListener('keyup',e=>{if(keyMap[e.key])setMove(keyMap[e.key],false)});
+ $('.dpad button[data-move]').forEach(b=>{
+   const k=b.dataset.move;
+   const down=e=>{e.preventDefault();setMove(k,true)};
+   const up=e=>{e.preventDefault();setMove(k,false)};
+   b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up);
+ });
+ $('#interactMobile')?.addEventListener('click',interactWorld);
+ $('#sceneClose')?.addEventListener('click',closeScene);
+ $('.worldPoi').forEach(b=>b.addEventListener('click',()=>{
+   const id=b.dataset.scene,pt=WORLD.points[id],d=Math.hypot(state.world.x-pt.x,state.world.y-pt.y);
+   if(d<120){nearbyPoi=id;interactWorld()}else toast('🗺️ Caminhe até '+WORLD_NAMES[id]+' para interagir.');
+ }));
+ window.addEventListener('resize',renderWorld);
+ requestAnimationFrame(worldFrame);
+}
 
 function dominantEnding(){
  const entries=Object.entries(state.stats).sort((a,b)=>b[1]-a[1]);
@@ -357,7 +492,7 @@ function dominantEnding(){
  return endings[key];
 }
 async function finishGame(){
- renderHUD();
+ closeScene();renderHUD();
  const [title,text]=dominantEnding();
  $('#endingTitle').textContent=title;$('#endingText').textContent=text;
  $('#endingXP').textContent=state.score+' XP';
@@ -382,7 +517,7 @@ function startPresence(){
  if(window.NevoaOnline?.getSession()){
    presenceStop=window.NevoaOnline.startPresence(()=>({
      locationKey:'rpg_paradoxia_'+scene().id,
-     locationLabel:'RPG Paradoxia • '+scene().location,
+     locationLabel:'RPG Paradoxia • '+(state.world?.place||scene().location),
      phase:10,
      stage:state.sceneIndex+1
    }),20000);
@@ -393,7 +528,7 @@ async function initAccount(){
  if(window.NevoaOnline?.getSession()){
    try{
      const p=await window.NevoaOnline.sessionProfile();
-     if(p){badge.classList.add('online');badge.innerHTML='<span class="dot"></span><span>'+p.nickname+' • '+p.xp+' XP</span>';startPresence()}
+     if(p){accountName=p.nickname;badge.classList.add('online');badge.innerHTML='<span class="dot"></span><span>'+p.nickname+' • '+p.xp+' XP</span>';startPresence();renderWorld()}
    }catch(e){}
  }else{
    badge.onclick=()=>location.href='../../login.html';
@@ -406,9 +541,11 @@ async function init(){
  $('#guestWarning').hidden=!!window.NevoaOnline?.getSession();
  $('#abilityBtn').onclick=useAbility;
  $('#replayBtn').onclick=replay;
+ setupWorldControls();
  if(state.classKey){
    $('#startOverlay').classList.remove('show');
    render();
+   setTimeout(()=>$('#worldViewport')?.focus(),160);
    if(state.completed)finishGame();
  }else{
    state=fresh();renderHUD();renderMap();renderLog();
