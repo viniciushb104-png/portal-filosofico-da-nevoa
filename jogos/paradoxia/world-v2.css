@@ -1,0 +1,282 @@
+/* Paradoxia 2.0 — mundo visual
+   Camadas vetoriais, regiões com identidade própria e interações ambientais. */
+
+.worldShell{
+  border-color:#74418a;
+  background:
+    radial-gradient(circle at 50% 0,#3f1550 0,transparent 34%),
+    linear-gradient(180deg,#100717,#08040c);
+  box-shadow:0 35px 110px #000b,0 0 50px #7b2ba81a;
+}
+
+.worldTopline{
+  min-height:64px;
+  padding:10px 15px;
+  background:
+    linear-gradient(90deg,#1c0b27 0,#26100d 50%,#15081f 100%);
+  border-bottom-color:#60336f;
+}
+.worldTopline::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,#b453d8,#ef7938,transparent);
+  opacity:.75;
+}
+.worldLoot{display:flex;gap:8px;align-items:center;margin-left:auto}
+.worldLoot span{
+  display:flex;align-items:center;gap:4px;
+  border:1px solid #563063;background:#100817;
+  color:#e9d9f0;border-radius:999px;padding:7px 9px;
+  font-size:9px;font-weight:900;
+}
+.worldLoot span:first-child{border-color:#88612d;color:#ffd58f;background:#1e140a}
+.worldLoot span:last-child{border-color:#4c5788;color:#c9d4ff;background:#0c1020}
+
+.worldViewport{
+  height:min(72vh,760px);
+  min-height:560px;
+  background:
+    radial-gradient(circle at 82% 10%,#ff994122 0 8%,transparent 22%),
+    radial-gradient(circle at 18% 24%,#b85ce01a 0 10%,transparent 28%),
+    linear-gradient(180deg,#211033,#151328 45%,#0d1718 100%);
+  box-shadow:inset 0 0 80px #0008;
+}
+.worldViewport::before{
+  content:"";
+  position:absolute;inset:0;z-index:35;pointer-events:none;
+  box-shadow:inset 0 0 110px #000b,inset 0 -45px 80px #06030a88;
+}
+.worldViewport::after{
+  content:"";
+  position:absolute;inset:0;z-index:34;pointer-events:none;
+  background:
+    linear-gradient(180deg,#3d184719,transparent 22%,transparent 76%,#05030844),
+    radial-gradient(circle at 50% 45%,transparent 0 55%,#0005 100%);
+}
+
+.worldLayer{
+  width:2400px !important;
+  height:1600px !important;
+  background:#13221f !important;
+  transition:none !important;
+}
+.worldLayer::before{
+  background:
+    radial-gradient(circle at 5% 8%,#ffffff13 0 1.2px,transparent 2px),
+    radial-gradient(circle at 47% 5%,#ffd59419 0 1.3px,transparent 2.3px),
+    radial-gradient(circle at 87% 13%,#ffffff12 0 1.1px,transparent 2px) !important;
+  background-size:84px 84px,127px 127px,151px 151px !important;
+  opacity:.75;
+  z-index:1;
+}
+.worldArt{position:absolute;inset:0;width:2400px;height:1600px;z-index:0;overflow:visible}
+.terrainPatch{opacity:.95;filter:drop-shadow(0 18px 28px #0005)}
+.tPurple{fill:#202036;stroke:#4c3b61;stroke-width:12}
+.tOrange{fill:#2e211d;stroke:#64402d;stroke-width:12}
+.tForest{fill:#152b20;stroke:#2e5038;stroke-width:12}
+.tBlue{fill:#13272c;stroke:#31515a;stroke-width:12}
+.tCastle{fill:#1e1427;stroke:#52325d;stroke-width:12}
+.roads{filter:drop-shadow(0 8px 7px #0007)}
+.roadEdge{filter:drop-shadow(0 5px 5px #0006)}
+.lakeShape{stroke:#39576d;stroke-width:14;filter:drop-shadow(0 18px 26px #0007)}
+.lakeShine{animation:lakeShimmer 4s ease-in-out infinite alternate}
+.lakeShine.s2{animation-delay:-2s}
+@keyframes lakeShimmer{to{stroke-opacity:.5;transform:translateY(7px)}}
+.fireflies circle{filter:drop-shadow(0 0 8px #ffd47a);animation:firefly 2.4s ease-in-out infinite alternate}
+.fireflies circle:nth-child(2n){animation-delay:-1s}.fireflies circle:nth-child(3n){animation-delay:-1.7s}
+@keyframes firefly{to{opacity:.25;transform:translateY(-12px)}}
+
+.worldSky{
+  inset:0 0 66% 0 !important;
+  z-index:2;
+  background:
+    radial-gradient(circle at 82% 26%,#ff993b1f 0 11%,transparent 25%),
+    linear-gradient(180deg,#271238cf,transparent) !important;
+}
+.worldMoon{
+  width:285px !important;height:285px !important;
+  right:115px !important;top:45px !important;
+  z-index:3;
+  background:
+    radial-gradient(circle at 33% 29%,#fff5cf 0 14%,#ffd88f 27%,#f09a49 58%,#a83c25 100%) !important;
+  box-shadow:0 0 110px #ff983f66,0 0 210px #c352bd2d !important;
+  opacity:.9 !important;
+}
+.worldMoon::after{
+  content:"";
+  position:absolute;width:56px;height:56px;border-radius:50%;
+  left:55px;top:62px;background:#c7784870;
+  box-shadow:88px -14px 0 9px #c778483e,117px 74px 0 15px #b967493b;
+}
+.mistBand{position:absolute;z-index:4;height:150px;width:760px;border-radius:50%;filter:blur(26px);opacity:.2;pointer-events:none}
+.m1{left:120px;top:760px;background:#c178d6;animation:mistDrift 10s ease-in-out infinite alternate}
+.m2{right:70px;top:1040px;background:#72b5c6;animation:mistDrift 13s ease-in-out infinite alternate-reverse}
+@keyframes mistDrift{to{transform:translateX(120px) scale(1.08);opacity:.28}}
+
+.regionLabel{
+  position:absolute;z-index:5;
+  text-align:center;pointer-events:none;
+  transform:translate(-50%,-50%);
+  filter:drop-shadow(0 10px 14px #000a);
+}
+.regionLabel span{display:block;font-size:28px;margin-bottom:4px}
+.regionLabel b,.regionLabel small{
+  display:block;background:#0a0610d9;backdrop-filter:blur(7px);
+  border:1px solid #573165;padding:4px 9px;
+}
+.regionLabel b{
+  color:#ffe2bd;font-family:Georgia,serif;font-size:12px;
+  border-radius:10px 10px 0 0;
+}
+.regionLabel small{
+  color:#b9a5c4;font-size:7px;border-top:0;border-radius:0 0 10px 10px;
+  letter-spacing:.04em;
+}
+.academyLabel{left:27%;top:18%}
+.villageLabel{left:18%;top:66%}
+.ruinsLabel{left:46%;top:11%}
+.plazaLabel{left:50%;top:40%}
+.forestLabel{left:41%;top:86%}
+.lakeLabel{left:63%;top:88%}
+.libraryLabel{left:82%;top:55%}
+.castleLabel{left:86%;top:11%}
+.cemeteryLabel{left:11%;top:36%;opacity:.68}
+
+.worldPoi{
+  z-index:12 !important;
+  transition:opacity .2s,filter .2s,transform .2s !important;
+}
+.worldPoi span{
+  width:66px !important;height:66px !important;
+  background:
+    radial-gradient(circle at 35% 25%,#2b1737,#110817 72%) !important;
+  border-color:#82509a !important;
+  box-shadow:0 0 0 8px #0b0711aa,0 0 30px #b653dc38 !important;
+}
+.worldPoi b{
+  font-size:9px !important;padding:5px 9px !important;
+  background:#09050de8 !important;
+}
+.worldPoi.current span{
+  border-color:#ff9f55 !important;
+  background:radial-gradient(circle at 35% 25%,#552415,#1b0d11 72%) !important;
+  box-shadow:0 0 0 8px #4a2112a8,0 0 42px #ff7b2f9c !important;
+}
+.worldPoi.current b{border-color:#b86232;color:#ffd6ad}
+.worldPoi.done span{border-color:#4bb68b !important;background:radial-gradient(circle,#13352a,#081711) !important}
+.worldPoi.locked{opacity:.46 !important;filter:saturate(.6)}
+
+.worldInteract{
+  position:absolute;z-index:14;
+  border:0;background:transparent;padding:0;
+  transform:translate(-50%,-50%);
+  cursor:pointer;color:#fff;
+}
+.worldInteract span{
+  display:grid;place-items:center;
+  width:50px;height:50px;border-radius:50%;
+  background:#0e0814d6;border:1px solid #674076;
+  font-size:25px;
+  box-shadow:0 8px 20px #0008,0 0 0 5px #0b071099;
+  transition:.2s;
+}
+.worldInteract:hover span,.worldInteract.near span{
+  transform:translateY(-3px) scale(1.08);
+  border-color:#e38a46;
+  box-shadow:0 10px 22px #0009,0 0 24px #ff853c55;
+}
+.secretProp{opacity:.55}
+.secretProp.discovered{opacity:1}
+.signInteract span{font-size:24px}
+.mirrorInteract span{border-color:#557ea3;box-shadow:0 8px 20px #0008,0 0 25px #6eb5dc35}
+.graveInteract span{border-color:#59686c;background:#0c1113d9}
+
+.worldNpc{z-index:10 !important}
+.worldNpc small{
+  border-color:#694078 !important;
+  background:#08050ddc !important;
+  color:#f2e5f7 !important;
+  box-shadow:0 4px 12px #0008;
+}
+.ambientNpc{z-index:7 !important}
+.aGhost1{animation-duration:3.4s}.aGhost2{animation-duration:4.1s}
+.book{animation:bookFloat 3s ease-in-out infinite alternate}
+@keyframes bookFloat{to{transform:translateY(-13px) rotate(8deg)}}
+
+.worldDialogue{
+  position:absolute;z-index:70;
+  left:16px;right:16px;bottom:16px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;
+  padding:14px 48px 14px 14px;
+  border:1px solid #87509b;
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 8% 20%,#4a1d5c66,transparent 24%),
+    linear-gradient(135deg,#120818f5,#0a0610f5);
+  box-shadow:0 18px 55px #000c,0 0 32px #a946d72c;
+  backdrop-filter:blur(12px);
+}
+.worldDialogue[hidden]{display:none}
+.worldDialogueIcon{
+  width:48px;height:48px;border-radius:50%;
+  display:grid;place-items:center;font-size:26px;
+  border:1px solid #9e5bb4;background:#26102f;
+}
+.worldDialogue small{display:block;color:#ffbe75;font-weight:950;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.worldDialogue p{margin:4px 0 5px;color:#f0e4f5;font-family:Georgia,serif;font-size:16px;line-height:1.45}
+.worldDialogue em{display:block;color:#83ddb9;font-size:9px;font-style:normal;font-weight:850}
+.worldDialogue>button{
+  position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;
+  border:1px solid #654072;background:#160b1e;color:#fff;cursor:pointer;
+}
+
+.interactionPrompt{
+  bottom:104px !important;
+  border-color:#d8793d !important;
+  background:#1b0c12f2 !important;
+  animation:promptPop 1.2s ease-in-out infinite alternate;
+}
+@keyframes promptPop{to{transform:translate(-50%,-5px)}}
+.worldCompass{
+  top:12px !important;right:12px !important;
+  border-color:#704382 !important;
+  background:#09050dcc !important;
+}
+.worldCompass>span{
+  border-color:#b45bce !important;
+  background:#1c0b25;
+}
+
+.academyArt,.libraryArt,.castleArt,.villageArt,.marketArt,.ruinsArt,.cemeteryArt,.forestArt{
+  filter:drop-shadow(0 18px 18px #0009);
+}
+.castleArt{animation:castlePulse 4.5s ease-in-out infinite alternate}
+@keyframes castlePulse{to{filter:drop-shadow(0 20px 20px #000a) drop-shadow(0 0 18px #d34b7c44)}}
+.plazaRunes circle{filter:drop-shadow(0 0 9px #ffd58d);animation:runeGlow 2s ease-in-out infinite alternate}
+@keyframes runeGlow{to{opacity:.35}}
+
+@media(max-width:900px){
+  .worldViewport{height:66vh;min-height:500px}
+  .worldLoot{margin-left:0}
+  .worldTopline{flex-wrap:wrap}
+  .questNow{min-width:55%}
+  .worldDialogue{bottom:88px}
+}
+@media(max-width:620px){
+  .worldViewport{height:61vh;min-height:430px}
+  .worldTopline{display:grid;grid-template-columns:1fr auto}
+  .worldHint{display:none !important}
+  .worldLoot{justify-self:end}
+  .regionLabel b{font-size:10px}
+  .regionLabel small{display:none}
+  .regionLabel span{font-size:22px}
+  .worldPoi span{width:58px !important;height:58px !important;font-size:25px !important}
+  .worldInteract span{width:45px;height:45px;font-size:22px}
+  .worldDialogue{left:8px;right:8px;bottom:90px;padding:12px 42px 12px 11px}
+  .worldDialogue p{font-size:14px}
+  .worldDialogueIcon{width:42px;height:42px;font-size:23px}
+}
+@media(prefers-reduced-motion:reduce){
+  .lakeShine,.fireflies circle,.mistBand,.castleArt,.plazaRunes circle,.interactionPrompt{animation:none !important}
+}
