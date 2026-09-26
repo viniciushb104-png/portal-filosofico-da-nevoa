@@ -12,7 +12,7 @@ const classes={
 
 const scenes=[
   {
-    id:'gate',type:'dilemma',icon:'🚪',badge:'DILEMA POLÍTICO',location:'Portões de Paradoxia',speaker:'Guarda-Fantasma Mnésio',
+    id:'gate',type:'dilemma',icon:'🚪',badge:'DILEMA POLÍTICO',location:'Vila das Abóboras',speaker:'Guarda-Fantasma Mnésio',
     title:'A cidade quer uma regra para conter o caos.',
     text:'Na noite passada, três diabretes trocaram todas as placas da cidade por charadas. O Conselho propõe um toque de recolher para TODOS os jovens seres mágicos. A multidão exige uma resposta rápida.',
     concept:'Justiça, liberdade e proporcionalidade',
@@ -23,7 +23,7 @@ const scenes=[
     ]
   },
   {
-    id:'market',type:'battle',icon:'🎪',badge:'DUELO DE ARGUMENTOS',location:'Feira das Verdades Duvidosas',speaker:'Eco Popular, mascate espectral',
+    id:'market',type:'battle',icon:'🎪',badge:'DUELO DE ARGUMENTOS',location:'Feira das Ilusões',speaker:'Eco Popular, mascate espectral',
     title:'“Nove em cada dez fantasmas compraram. Então funciona!”',
     text:'O Eco Popular vende “Poção Instantânea de Sabedoria”. Sua única prova é que quase todo mundo na feira comprou uma garrafa.',
     concept:'Falácia de apelo à popularidade',
@@ -35,7 +35,7 @@ const scenes=[
     ]
   },
   {
-    id:'bridge',type:'dilemma',icon:'🌉',badge:'DILEMA ÉTICO',location:'Ponte das Escolhas',speaker:'Engenheira-Bruxa Têmis',
+    id:'bridge',type:'dilemma',icon:'🌉',badge:'DILEMA ÉTICO',location:'Ponte do Lúmen',speaker:'Engenheira-Bruxa Têmis',
     title:'Há energia para restaurar apenas uma parte da cidade.',
     text:'Uma tempestade desligou dois serviços: a ponte usada diariamente por centenas de moradores e o Arquivo das Memórias, onde documentos históricos raros correm risco de se perder. A bateria mágica só consegue restaurar completamente um deles hoje.',
     concept:'Consequências, bens públicos e justiça distributiva',
@@ -46,7 +46,7 @@ const scenes=[
     ]
   },
   {
-    id:'theseus',type:'dilemma',icon:'🎃',badge:'ENIGMA DE IDENTIDADE',location:'Bosque do Abóbora de Teseu',speaker:'Sir Cucurbita, cavaleiro-abóbora',
+    id:'theseus',type:'dilemma',icon:'🎃',badge:'ENIGMA DE IDENTIDADE',location:'Floresta das Sombras Doces',speaker:'Sir Cucurbita, cavaleiro-abóbora',
     title:'Se todas as peças foram trocadas, ele ainda é o mesmo?',
     text:'Sir Cucurbita foi remendado durante cem Halloweens. Primeiro trocaram sua capa, depois a armadura, depois o cabo da espada, até que nenhuma peça original restou. Mesmo assim ele lembra de todas as aventuras.',
     concept:'Identidade e paradoxo do Navio de Teseu',
@@ -57,7 +57,7 @@ const scenes=[
     ]
   },
   {
-    id:'library',type:'battle',icon:'📚',badge:'INVESTIGAÇÃO',location:'Biblioteca dos Boatos',speaker:'Bibliotecária Coruja Hipátia',
+    id:'library',type:'battle',icon:'📚',badge:'INVESTIGAÇÃO',location:'Biblioteca Proibida',speaker:'Bibliotecária Coruja Hipátia',
     title:'Dois pergaminhos contam histórias opostas.',
     text:'Um pergaminho anônimo afirma que o castelo foi construído por gigantes. Outro, escrito cem anos depois, diz que foram magos. Nenhum deles apresenta provas suficientes sozinho. Qual é o melhor próximo passo?',
     concept:'Epistemologia, fontes e justificação',
@@ -69,7 +69,7 @@ const scenes=[
     ]
   },
   {
-    id:'square',type:'dilemma',icon:'🕰️',badge:'DILEMA EXISTENCIAL',location:'Praça do Livre-Arbítrio',speaker:'Relógio Profeta',
+    id:'square',type:'dilemma',icon:'🕰️',badge:'DILEMA EXISTENCIAL',location:'Praça do Tempo',speaker:'Relógio Profeta',
     title:'O relógio diz que já conhece sua próxima escolha.',
     text:'O Relógio Profeta anuncia: “Em dez segundos você escolherá a porta da esquerda.” Há duas portas idênticas. Se você obedecer, parece confirmar a previsão. Se escolher a direita só para contrariá-la, a previsão ainda influenciou sua decisão.',
     concept:'Liberdade, determinação e responsabilidade',
@@ -80,7 +80,7 @@ const scenes=[
     ]
   },
   {
-    id:'boss',type:'boss',icon:'👑',badge:'CHEFE • DEBATE FINAL',location:'Castelo da Certeza Absoluta',speaker:'Lorde Certeza Absoluta',
+    id:'boss',type:'boss',icon:'👑',badge:'CHEFE • DEBATE FINAL',location:'Castelo do Paradoxo',speaker:'Lorde Certeza Absoluta',
     title:'“Pensar demais só atrapalha. Eu ofereço respostas simples para tudo!”',
     text:'O lorde ergue três argumentos para fechar Paradoxia numa única verdade obrigatória. Você não precisa derrotá-lo pela força — basta impedir que seus atalhos lógicos passem por argumentos sólidos.',
     concept:'Falácias, argumentação e pensamento crítico',
