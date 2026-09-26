@@ -1,0 +1,61 @@
+/* Paradoxia — animação real de caminhada
+   Sheets 4 x 3: quatro quadros por direção.
+   Linha 1 = frente, linha 2 = lateral, linha 3 = costas. */
+
+.worldPlayer .spriteArt{
+  --walk-x:0%;
+  --walk-y:0%;
+  width:313.5px !important;
+  height:418px !important;
+  background-size:400% 300% !important;
+  background-repeat:no-repeat !important;
+  background-position:var(--walk-x) var(--walk-y) !important;
+  image-rendering:auto !important;
+  transform:translateX(-50%) scale(.42) !important;
+  transform-origin:50% 100% !important;
+  filter:drop-shadow(0 14px 9px #000b);
+  animation:none !important;
+}
+
+/* Um sheet completo de caminhada para cada classe. */
+.worldPlayer.dialetico .spriteArt{background-image:url("assets/walk/dialetico_walk.png") !important}
+.worldPlayer.cetico .spriteArt{background-image:url("assets/walk/cetico_walk.png") !important}
+.worldPlayer.etico .spriteArt{background-image:url("assets/walk/etico_walk.png") !important}
+.worldPlayer.existencial .spriteArt{background-image:url("assets/walk/existencial_walk.png") !important}
+
+/* Direção */
+.worldPlayer.pose-front .spriteArt{--walk-y:0%}
+.worldPlayer.pose-side .spriteArt{--walk-y:50%}
+.worldPlayer.pose-back .spriteArt{--walk-y:100%}
+/* A folha de caminhada não possui uma quarta linha de ação.
+   Durante interação usamos a frente em um quadro expressivo. */
+.worldPlayer.pose-action .spriteArt{--walk-y:0%}
+
+/* Quadro da passada */
+.worldPlayer.frame-0 .spriteArt{--walk-x:0%}
+.worldPlayer.frame-1 .spriteArt{--walk-x:33.333333%}
+.worldPlayer.frame-2 .spriteArt{--walk-x:66.666667%}
+.worldPlayer.frame-3 .spriteArt{--walk-x:100%}
+
+.worldPlayer.flip .spriteArt{
+  transform:translateX(-50%) scaleX(-1) scale(.42) !important;
+}
+
+/* Pequeno deslocamento vertical sem borrar o desenho.
+   O frame continua sendo a principal fonte do movimento. */
+.worldPlayer.walking{filter:drop-shadow(0 14px 8px #0009)}
+.worldPlayer.walking .spriteArt{animation:none !important}
+
+@media(max-width:900px){
+  .worldPlayer .spriteArt{transform:translateX(-50%) scale(.39) !important}
+  .worldPlayer.flip .spriteArt{transform:translateX(-50%) scaleX(-1) scale(.39) !important}
+}
+@media(max-width:620px){
+  .worldPlayer .spriteArt{transform:translateX(-50%) scale(.355) !important}
+  .worldPlayer.flip .spriteArt{transform:translateX(-50%) scaleX(-1) scale(.355) !important}
+}
+@media(prefers-reduced-motion:reduce){
+  .worldPlayer.frame-1 .spriteArt,
+  .worldPlayer.frame-2 .spriteArt,
+  .worldPlayer.frame-3 .spriteArt{--walk-x:0%}
+}
