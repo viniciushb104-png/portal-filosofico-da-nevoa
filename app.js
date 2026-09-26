@@ -227,9 +227,24 @@ async function initOnlineHall(){
    }else setOnlineProfile(null);
  }
 }
-function openLogin(){if($('#loginDialog'))$('#loginDialog').showModal()}
+function openLogin(){
+ const d=$('#loginDialog');if(!d)return;
+ if(typeof d.showModal==='function')d.showModal();else d.setAttribute('open','');
+ setTimeout(()=>$('#loginUsername')?.focus(),80);
+}
+function openRegister(){
+ const d=$('#loginDialog');if(!d)return;
+ if(typeof d.showModal==='function')d.showModal();else d.setAttribute('open','');
+ setTimeout(()=>{
+   const el=$('#registerUsername');
+   el?.scrollIntoView({behavior:'smooth',block:'center'});
+   el?.focus();
+ },100);
+}
 $('#loginBtn').onclick=()=>window.NevoaOnline?.getSession()?$('#hall').scrollIntoView({behavior:'smooth'}):openLogin();
+$('#registerBtn').onclick=openRegister;
 $('#openLoginHall').onclick=openLogin;
+$('#openRegisterHall').onclick=openRegister;
 
 $('#loginSubmit').onclick=async()=>{
  const user=($('#loginUsername').value||'').trim();
