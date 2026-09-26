@@ -24,3 +24,11 @@
 .marketMissionLabel{left:50.5%;top:35.4%}
 .bridgeMissionLabel{left:60.5%;top:55.8%}
 .competitionMission.focused{border-color:#d77d45;box-shadow:0 0 0 2px #d77d4535,0 0 28px #c45f3133}
+
+.missionLaunch{display:inline-flex;align-items:center;justify-content:center;margin-top:9px;padding:8px 10px;border-radius:10px;border:1px solid #b86d3f;background:linear-gradient(#7d2e24,#4d1717);color:#ffe7bd!important;text-decoration:none;font-size:8px;font-weight:950;letter-spacing:.05em}
+.missionLaunch:hover{filter:brightness(1.12)}
+.missionEntrance{position:absolute;z-index:18;transform:translate(-50%,-50%);display:grid;place-items:center;text-decoration:none;filter:drop-shadow(0 8px 12px #000a)}
+.missionEntrance span{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;border:2px solid #ec9a4a;background:#411426;box-shadow:0 0 0 5px #120813cc,0 0 25px #ff9a4a55;font-size:21px;animation:entrancePulse 1.4s ease-in-out infinite alternate}
+.missionEntrance b{margin-top:5px;padding:4px 7px;border-radius:999px;background:#120813e8;border:1px solid #8e4c3d;color:#ffd99e;font-size:6px;letter-spacing:.08em;white-space:nowrap}
+@keyframes entrancePulse{to{transform:translateY(-4px) scale(1.06);box-shadow:0 0 0 5px #35111dcc,0 0 34px #ff9a4a88}}
+@media(prefers-reduced-motion:reduce){.missionEntrance span{animation:none}}
