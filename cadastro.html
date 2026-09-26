@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12070b">
+<title>Cadastrar • Portal Filosófico da Névoa</title>
+<link rel="stylesheet" href="styles.css?v=7.3">
+<link rel="stylesheet" href="auth.css?v=1">
+</head>
+<body class="authPage" data-auth="register">
+<header class="authTop"><div class="wrap">
+  <a class="authBrand" href="index.html"><span class="authSigilSmall">🎃</span><span><b>Portal Filosófico da Névoa</b><small>Adentre o Portal</small></span></a>
+  <a class="authBack" href="index.html">← Voltar ao Portal</a>
+</div></header>
+<main class="authMain">
+  <div class="authLayout">
+    <section class="authLore">
+      <div class="eyebrow">Novo Explorador</div>
+      <h1>Escreva seu <span>Nome no Grimório</span></h1>
+      <p>Crie sua conta uma única vez. A partir daí o Portal salva sua jornada online e você entra na disputa de XP com a turma.</p>
+      <div class="authRunes"><span>🧙 Apelido único</span><span>🔢 PIN simples</span><span>🏫 Turma opcional</span><span>🏆 Ranking global</span></div>
+      <div class="authQuote">“Todo portal começa com uma escolha: atravessar ou permanecer diante da porta.”</div>
+    </section>
+    <section class="authCard orange">
+      <div class="authIcon">🎃</div>
+      <div class="eyebrow">Cadastro da Névoa</div>
+      <h2>Crie sua conta</h2>
+      <p class="authLead">Escolha um apelido que você vai lembrar. Depois crie um PIN de 4 a 6 números.</p>
+      <div id="authLogged" class="authLogged"></div>
+      <form id="authForm" class="authForm">
+        <label>Seu apelido <small>Evite nome completo.</small>
+          <input id="username" type="text" maxlength="24" autocomplete="nickname" placeholder="Ex.: MagoPedro" required>
+        </label>
+        <label>Turma <small>Opcional — ex.: 7ºB, 1ªEM.</small>
+          <input id="className" type="text" maxlength="16" placeholder="Ex.: 7ºB">
+        </label>
+        <label>Crie seu PIN <small>Use 4 a 6 números e não compartilhe com colegas.</small>
+          <div class="pinRow"><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password" placeholder="4 a 6 números" required><button class="pinToggle" type="button" aria-label="Mostrar PIN">👁</button></div>
+        </label>
+        <div id="authStatus" class="authStatus" aria-live="polite"></div>
+        <button id="authSubmit" class="authSubmit" type="submit">🎃 Criar minha conta</button>
+      </form>
+      <div class="authSwitch">Já fez cadastro? <a href="login.html">🔐 Entrar na minha conta</a></div>
+      <div class="authPrivacy">Se este aparelho já possui progresso antigo/Código da Névoa, o cadastro tenta vinculá-lo automaticamente para preservar sua jornada.</div>
+    </section>
+  </div>
+</main>
+<script src="online.js?v=7.3"></script>
+<script src="auth.js?v=1"></script>
+</body>
+</html>
