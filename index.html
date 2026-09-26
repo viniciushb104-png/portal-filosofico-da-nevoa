@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#09060f">
 <meta name="description" content="Portal Filosófico da Névoa — jogos, enigmas e aventuras filosóficas com estética Halloween anime/cartoon, BNCC e Currículo Paulista.">
 <title>Portal Filosófico da Névoa</title>
-<link rel="stylesheet" href="styles.css?v=7.4">
+<link rel="stylesheet" href="styles.css?v=7.5">
 </head>
 <body>
 <canvas id="mist" aria-hidden="true"></canvas>
@@ -79,6 +79,7 @@
   <div class="wrap featureGrid">
     <button class="feature featured" data-game="socrates"><span class="featureIcon">🏚️</span><span><small>AVENTURA PRINCIPAL</small><b>A Mansão de Sócrates</b><em>7 cômodos • senha final</em></span><i>→</i></button>
     <a class="feature platformFeature" href="jogos/plataforma-filosofica/"><span class="featureIcon">🎮</span><span><small>NOVO • JOGO DE PLATAFORMA</small><b>O Labirinto dos Filósofos</b><em>2 fases • 4 etapas por fase • 3 tentativas • mobile</em></span><i>→</i></a>
+    <a class="feature rpgFeature" href="jogos/paradoxia/"><span class="featureIcon">🎭</span><span><small>NOVO • RPG FILOSÓFICO</small><b>Paradoxia — O Reino das Escolhas</b><em>Classes • dilemas • falácias • +120 XP</em></span><i>→</i></a>
     <a class="feature" href="grimorio-de-colorir/"><span class="featureIcon">🎨</span><span><small>NOVO • ARTE & FILOSOFIA</small><b>Grimório de Colorir</b><em>6 páginas para baixar e imprimir</em></span><i>→</i></a>
     <button class="feature" id="dailyChallenge"><span class="featureIcon">🌙</span><span><small>DESAFIO DO DIA</small><b>Enigma da Meia-Noite</b><em>+15 XP na primeira conclusão</em></span><i>→</i></button>
     <button class="feature" id="achievementBtn"><span class="featureIcon">🏆</span><span><small>CONQUISTAS</small><b id="achievementCount">0 de 8</b><em>Insígnias da Névoa</em></span><i>→</i></button>
@@ -99,6 +100,7 @@
       <button class="filter" data-filter="logica">Lógica</button>
       <button class="filter" data-filter="etica">Ética</button>
       <button class="filter" data-filter="conhecimento">Conhecimento</button>
+      <button class="filter" data-filter="rpg">RPG Filosófico</button>
     </div>
 
     <div class="rooms">
@@ -151,6 +153,15 @@
         <div class="roomArch"><img src="" data-media="dilemas" alt="Dilemas da Meia-Noite"><div class="roomNumber">VIII</div></div>
         <div class="roomBody"><div class="tag">ARGUMENTAÇÃO</div><h3>Dilemas da Meia-Noite</h3><p>Situações sem respostas automáticas, feitas para testar razões, objeções e revisão de ideias.</p><div class="meta"><span>3 desafios</span><span>+30 XP</span></div></div>
         <button class="enter orange" data-game="dilemas">Entrar na sala →</button>
+      </article>
+      <article class="room rpgRoom" data-tags="fund em etica logica conhecimento rpg" data-room="paradoxia">
+        <div class="roomArch rpgRoomArt">
+          <div class="rpgMoon"></div>
+          <span class="rpgCastle">🏰</span><span class="rpgPumpkin">🎃</span><span class="rpgGhost">👻</span>
+          <div class="roomNumber">IX</div>
+        </div>
+        <div class="roomBody"><div class="tag">RPG • ÉTICA • LÓGICA • EPISTEMOLOGIA</div><h3>Paradoxia — O Reino das Escolhas</h3><p>Escolha uma classe filosófica, atravesse um mundo caótico de Halloween e enfrente dilemas, falácias e decisões que mudam seu caminho.</p><div class="meta"><span>Capítulo I</span><span>+120 XP</span></div></div>
+        <a class="enter rpgEnter" href="jogos/paradoxia/">Adentrar Paradoxia →</a>
       </article>
     </div>
   </div>
@@ -412,7 +423,7 @@
 <script src="media/poster_guardiao.js"></script>
 <script src="media/poster_espelho.js"></script>
 <script src="media/init.js"></script>
-<script src="online.js?v=7.4"></script>
-<script src="app.js?v=7.4"></script>
+<script src="online.js?v=7.5"></script>
+<script src="app.js?v=7.5"></script>
 </body>
 </html>
