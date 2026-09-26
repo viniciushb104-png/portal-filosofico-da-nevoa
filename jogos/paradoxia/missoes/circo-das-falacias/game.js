@@ -92,7 +92,19 @@ function key(e){
  if(e.key==='ArrowRight'){selected=(selected+1)%3;setSpot();e.preventDefault()}
  if(e.key==='Enter'||e.key===' '){choose(selected);e.preventDefault()}
 }
+function loadPlayerClass(){
+ let key='dialetico';
+ try{
+   const save=JSON.parse(localStorage.getItem('paradoxiaSaveV1')||'{}');
+   if(['dialetico','cetico','etico','existencial'].includes(save.classKey))key=save.classKey;
+ }catch(e){}
+ const names={dialetico:'Dialético',cetico:'Cético',etico:'Guardião Ético',existencial:'Andarilho Existencial'};
+ const avatar=$('#playerAvatar');
+ if(avatar)avatar.style.backgroundImage='url("../../assets/walk/'+key+'_walk.png")';
+ const label=$('#playerClassLabel');if(label)label.textContent=names[key]||'VOCÊ';
+}
 function init(){
+ loadPlayerClass();
  const logged=!!window.NevoaOnline?.getSession();$('#loginHint').hidden=logged;$('#modeBadge').textContent=logged?'Competição disponível':'Prática';$('#modeBadge').classList.toggle('online',logged);
  $('#startBtn').addEventListener('click',start);$('#nextBtn').addEventListener('click',next);$('#retryBtn').addEventListener('click',reset);window.addEventListener('keydown',key);
 }
