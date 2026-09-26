@@ -111,6 +111,7 @@ const INTERACTIONS={
 };
 let moveKeys={up:false,down:false,left:false,right:false};
 let nearbyPoi=null,nearbyExtra=null,lastWorldFrame=0,lastPositionSave=0,accountName='Explorador',worldReady=false;
+let walkFrame=0,lastWalkFrameAt=0;
 
 const fresh=()=>({
  version:3,classKey:null,sceneIndex:0,bossStep:0,score:0,hearts:3,
@@ -406,8 +407,8 @@ function openScene(){
  if(state.completed)return toast('🏆 Você já concluiu este capítulo. Continue explorando ou jogue outro caminho.');
  const card=$('#sceneCard');if(!card)return;
  renderScene();card.classList.add('open');document.body.classList.add('sceneOpen');
- state.world.dir='action';renderWorld();
- setTimeout(()=>{if(state.world.dir==='action'){state.world.dir='front';renderWorld()}},450);
+ walkFrame=2;state.world.dir='action';renderWorld();
+ setTimeout(()=>{if(state.world.dir==='action'){walkFrame=0;state.world.dir='front';renderWorld()}},450);
 }
 function closeScene(){
  $('#sceneCard')?.classList.remove('open');document.body.classList.remove('sceneOpen');
@@ -499,7 +500,8 @@ function updateInteraction(){
 function renderWorld(){
  const p=$('#worldPlayer'),sprite=$('#playerSprite'),layer=$('#worldLayer'),view=$('#worldViewport');
  if(!p||!layer||!view||!state.classKey)return;
- p.className='worldPlayer '+state.classKey+' pose-'+(state.world.dir||'front')+(moveKeys.left?' flip':'');
+ const moving=moveKeys.up||moveKeys.down||moveKeys.left||moveKeys.right;
+ p.className='worldPlayer '+state.classKey+' pose-'+(state.world.dir||'front')+' frame-'+walkFrame+(moveKeys.left?' flip':'')+(moving?' walking':'');
  p.style.left=state.world.x+'px';p.style.top=state.world.y+'px';
  p.classList.toggle('walking',moveKeys.up||moveKeys.down||moveKeys.left||moveKeys.right);
  $('#playerLabel').textContent=accountName||classes[state.classKey].name;
@@ -520,6 +522,11 @@ function worldFrame(ts){
    let dx=(moveKeys.right?1:0)-(moveKeys.left?1:0);
    let dy=(moveKeys.down?1:0)-(moveKeys.up?1:0);
    if(dx||dy){
+     if(!lastWalkFrameAt)lastWalkFrameAt=ts;
+     if(ts-lastWalkFrameAt>=125){
+       walkFrame=(walkFrame+1)%4;
+       lastWalkFrameAt=ts;
+     }
      const len=Math.hypot(dx,dy)||1,speed=255;
      dx/=len;dy/=len;
      state.world.x=Math.max(70,Math.min(WORLD.w-70,state.world.x+dx*speed*dt));
@@ -527,13 +534,16 @@ function worldFrame(ts){
      if(Math.abs(dx)>Math.abs(dy))state.world.dir='side';
      else state.world.dir=dy<0?'back':'front';
      if(ts-lastPositionSave>700){lastPositionSave=ts;localStorage.setItem(SAVE_KEY,JSON.stringify(state))}
+   }else{
+     walkFrame=0;
+     lastWalkFrameAt=ts;
    }
    renderWorld();
  }
  requestAnimationFrame(worldFrame);
 }
 function setMove(key,on){
- if(key in moveKeys){moveKeys[key]=on;if(!on&&!Object.values(moveKeys).some(Boolean)&&state.world.dir==='side')state.world.dir='front';renderWorld()}
+ if(key in moveKeys){moveKeys[key]=on;if(!on&&!Object.values(moveKeys).some(Boolean)){walkFrame=0;lastWalkFrameAt=0;if(state.world.dir==='side')state.world.dir='front';}renderWorld()}
 }
 function setupWorldControls(){
  if(worldReady)return;worldReady=true;
