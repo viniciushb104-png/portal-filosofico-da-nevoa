@@ -1,133 +1,115 @@
-# Paradoxia 2.0 — Documento Mestre do Mundo
+# Paradoxia 2.1 — Documento Mestre do Mundo
 
-## Objetivo
+## Etapa C concluída
 
-Paradoxia deve funcionar como um pequeno RPG filosófico de exploração: o aluno caminha por um reino de Halloween, encontra personagens, objetos, segredos e situações filosóficas antes de chegar aos desafios principais. A filosofia aparece no mundo, e não apenas em telas de perguntas.
+O mapa deixa de ser um cenário vetorial simples e passa a usar a arte ilustrada oficial do reino como base jogável.
 
-## Dimensões e câmera
+### Estrutura técnica
 
-- Mundo lógico: **2400 × 1600 px**
-- Câmera acompanha o personagem.
-- Desktop: WASD ou setas; E/Enter interage.
-- Mobile: direcional + botão de interação.
-- Os sprites HD são renderizados em alta resolução e reduzidos na tela.
+- mundo lógico: **1410 × 720 px**
+- arte-base: `assets/world/paradoxia_world_playable.webp`
+- CSS final do mundo: `world-v3.css`
+- sprites animados: `assets/walk/*_walk.png`
+- animação: quatro quadros por direção
+- câmera acompanha o jogador
+- caminhos e ilhas possuem zonas navegáveis
+- o jogador não atravessa o vazio entre as ilhas
 
-## Regiões oficiais
+## Regiões diegéticas oficiais
 
 ### Vila das Abóboras
-Função: início, humor, tutorial natural e encontros simples.
-Tema filosófico: senso comum, tradição, generalizações.
+Início e zona acolhedora.
+Temas: senso comum, tradição, generalizações.
 
-### Academia dos Porquês
-Função: hub acadêmico e futura área de treinamento.
-Tema: diálogo, lógica, argumentação e história da filosofia.
+### Academia Filosófica
+Centro de estudo e futura área de treino.
+Temas: diálogo, lógica e argumentação.
 
-### Feira das Verdades Duvidosas
-Função: região caótica e cômica.
-Tema: falácias, persuasão, popularidade e evidência.
+### Feira das Ilusões
+Área caótica, festiva e persuasiva.
+Temas: falácias, popularidade, aparência e evidência.
 
-### Praça do Livre-Arbítrio
-Função: hub central do mapa.
-Tema: liberdade, responsabilidade e escolhas.
+### Ponte do Lúmen
+Ligação entre regiões e espaço de decisões.
+Temas: consequências, justiça e escolhas.
 
-### Ponte das Escolhas
-Função: travessia e dilemas.
-Tema: ética, consequências, princípios e justiça.
+### Praça do Tempo
+Hub central do mapa.
+Temas: liberdade, determinação e responsabilidade.
 
-### Bosque do Abóbora de Teseu
-Função: exploração contemplativa.
-Tema: identidade, memória, continuidade e mudança.
+### Floresta das Sombras Doces
+Área de exploração e identidade.
+Temas: aparência, medo, memória e identidade.
 
-### Lago do Espelho Interior
-Função: área de reflexão e segredos.
-Tema: autonomia, autenticidade e responsabilidade.
+### Biblioteca Proibida
+Área de investigação.
+Temas: fontes, evidências e justificação.
 
-### Biblioteca dos Boatos
-Função: investigação.
-Tema: fontes, evidências, justificação e confiabilidade.
+### Castelo do Paradoxo
+Objetivo visual permanente e chefe do capítulo.
+Temas: dogmatismo, argumentação e pensamento crítico.
 
-### Ruínas da Caverna
-Função: conexão com a aventura de Platão.
-Tema: aparência e realidade.
+## Filosofia ambiental
 
-### Cemitério dos Conceitos Esquecidos
-Função: área secreta, curiosidades e humor.
-Tema: opiniões abandonadas, argumentos ruins e conceitos esquecidos.
+O mapa possui interações opcionais que não funcionam como prova:
 
-### Castelo da Certeza Absoluta
-Função: objetivo visual permanente e chefe do capítulo.
-Tema: dogmatismo, argumentação e pensamento crítico.
+- Placa nº 47 — contradição e autorreferência
+- Abóbora Fofoqueira — generalização precipitada
+- Espelho das Águas — autonomia
+- Coruja Arquivista — fontes e evidências
+- Sombra entre as Árvores — aparência e realidade
+- Lápide sem Certeza — opinião e justificação
 
-## Interações ambientais V1
+As interações ambientais dão **Moedas da Névoa**, segredos e registros no Grimório, mas não aumentam o XP competitivo do capítulo.
 
-| ID | Região | Interação | Resultado |
-| --- | --- | --- | --- |
-| sign | Praça | Placa contraditória | Contradição e autorreferência |
-| pumpkin | Vila | Abóbora Fofoqueira | Generalização precipitada |
-| mirror | Lago | Espelho Interior | +1 Autonomia |
-| owl | Biblioteca | Coruja Arquivista | Fontes e evidências |
-| shadows | Ruínas | Parede das Sombras | Segredo + aparência/realidade |
-| grave | Cemitério | Lápide sem Certeza | Segredo + opinião/justificação |
+## Navegação
 
-As interações ambientais **não concedem XP do ranking**. Elas dão Moedas da Névoa, segredos e registros no Grimório. Isso preserva os 120 XP do capítulo principal.
+A função `isWalkable(x,y)` usa áreas circulares e corredores entre pontos importantes.
 
-## Economia inicial
+Objetivo:
+- impedir que o personagem caminhe pelo vazio;
+- permitir atalhos e exploração;
+- não transformar o mapa em trilho rígido;
+- manter controles simples no celular.
 
-### Moedas da Névoa
-Moeda de exploração. Nesta versão funciona como recompensa visual persistente no save do RPG.
-
-Futuro:
-- cosméticos;
-- títulos;
-- pequenos itens;
-- decoração de perfil;
-- pistas opcionais.
-
-### Segredos
-Contador separado. V1 possui 2 segredos:
-- Parede das Sombras;
-- Lápide sem Certeza.
+Ao tentar sair das ilhas, a névoa indica que o jogador deve procurar uma trilha iluminada.
 
 ## Hierarquia visual
 
 1. personagem jogável;
-2. missão atual;
-3. landmarks;
+2. objetivo atual;
+3. landmarks ilustrados;
 4. NPCs e objetos interativos;
 5. segredos;
-6. decoração.
+6. efeitos ambientais.
 
-## Filosofia ambiental
+Os ícones de desafio ficam discretos normalmente. A missão atual recebe brilho e pulsação.
 
-Regra: nem toda ideia deve virar pergunta.
+## Preservação
 
-Exemplos:
-- placas contraditórias;
-- NPCs que generalizam;
-- objetos que levantam questões;
-- arquitetura que sugere um conceito;
-- diálogos opcionais;
-- segredos filosóficos.
+Continuam funcionando:
+- login e cadastro do portal;
+- save local e online;
+- ranking e XP;
+- quatro classes;
+- Razão, Ética, Autonomia e Diálogo;
+- dilemas;
+- duelos de argumentos;
+- chefe final;
+- Moedas da Névoa e segredos;
+- sprites HD;
+- controles desktop e mobile.
 
-## Próxima expansão — Etapa 3
+## Próxima etapa
 
-- NPCs com nomes e personalidade;
+A próxima expansão não deve redesenhar novamente o mapa. Deve **povoá-lo**:
+
+- NPCs nomeados e com personalidade;
 - missões secundárias;
-- colecionáveis espalhados;
-- baús e objetos;
-- vendedor de ideias na Feira;
-- páginas perdidas na Biblioteca;
-- gato preto itinerante;
-- eventos aleatórios;
+- páginas perdidas;
+- objetos e baús;
+- vendedor da Feira;
+- gato itinerante;
+- eventos opcionais;
 - interiores selecionados;
-- atalhos reais e passagens escondidas.
-
-## Regras de preservação
-
-- Não remover os desafios principais existentes.
-- Não quebrar login, save online, ranking ou XP.
-- Não expor localização física do aluno.
-- Manter conteúdo educativo, divertido e não ofensivo.
-- Evitar punição moral em dilemas abertos.
-- Falácias e questões conceituais verificáveis podem ter correção objetiva.
-- Priorizar desempenho em celular.
+- passagens secretas reais.
