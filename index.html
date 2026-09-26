@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#09060f">
 <meta name="description" content="Portal Filosófico da Névoa — jogos, enigmas e aventuras filosóficas com estética Halloween anime/cartoon, BNCC e Currículo Paulista.">
 <title>Portal Filosófico da Névoa</title>
-<link rel="stylesheet" href="styles.css?v=7.1">
+<link rel="stylesheet" href="styles.css?v=7.4">
 </head>
 <body>
 <canvas id="mist" aria-hidden="true"></canvas>
@@ -37,8 +37,8 @@
       <a href="#sobre">Sobre</a>
     </div>
     <button class="iconBtn" id="soundBtn" title="Som ambiente" aria-label="Ativar ou desativar som">🔇</button>
-    <button class="loginBtn" id="loginBtn">🔐 Entrar</button>
-    <button class="registerBtn" id="registerBtn">🎃 Cadastrar</button>
+    <a class="authNavBtn authLoginBtn" id="loginBtn" href="login.html"><span>🔐</span><b>Entrar</b></a>
+    <a class="authNavBtn authRegisterBtn" id="registerBtn" href="cadastro.html"><span>🎃</span><b>Cadastrar</b></a>
     <button class="profileBtn" id="profileBtn"><span class="profileOrb">☠</span><span><b id="profileRank">Aprendiz</b><small id="profileXP">0 XP</small></span></button>
   </div>
 </nav>
@@ -261,8 +261,8 @@
       </div>
 
       <div class="accountActions">
-        <button class="smallBtn" id="openLoginHall">🔐 Entrar</button>
-        <button class="smallBtn" id="openRegisterHall">🎃 Criar conta</button>
+        <a class="smallBtn authHallLink" id="openLoginHall" href="login.html">🔐 Entrar</a>
+        <a class="smallBtn authHallLink create" id="openRegisterHall" href="cadastro.html">🎃 Criar conta</a>
         <button class="smallBtn subtle" id="syncOnline">☁️ Sincronizar agora</button>
         <button class="smallBtn subtle" id="logoutOnline" hidden>🚪 Sair</button>
         <button class="smallBtn subtle" id="openCertificate">📜 Certificado</button>
@@ -304,46 +304,6 @@
 </main>
 
 <footer><div class="wrap"><div class="footerMantra">PENSAR • QUESTIONAR • ARGUMENTAR • TRANSFORMAR</div><p>Portal Filosófico da Névoa • versão 5 preparada para animações Gemini</p></div></footer>
-
-<!-- LOGIN DO EXPLORADOR -->
-<dialog id="loginDialog" class="wideDialog loginDialog">
-  <div class="modalShell loginShell">
-    <button class="closeBtn" data-close="loginDialog" aria-label="Fechar">×</button>
-    <div class="eyebrow">🔐 Conta da Névoa</div>
-    <h2>Entre e continue de onde parou</h2>
-    <p class="modalLead">Sem e-mail. Use apenas um apelido e um PIN numérico.</p>
-
-    <div class="loginColumns">
-      <section class="loginPane">
-        <span class="loginIcon">🦇</span>
-        <h3>Já tenho conta</h3>
-        <label>Apelido
-          <input id="loginUsername" type="text" maxlength="24" autocomplete="username" placeholder="Ex.: Luiz7B">
-        </label>
-        <label>PIN
-          <input id="loginPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="current-password" placeholder="4 a 6 números">
-        </label>
-        <button class="mainBtn" id="loginSubmit">Entrar</button>
-      </section>
-
-      <section class="loginPane createPane">
-        <span class="loginIcon">🎃</span>
-        <h3>Primeira vez</h3>
-        <label>Escolha um apelido
-          <input id="registerUsername" type="text" maxlength="24" autocomplete="nickname" placeholder="Ex.: MagoPedro">
-        </label>
-        <label>Turma <small>(opcional)</small>
-          <input id="registerClass" type="text" maxlength="16" placeholder="Ex.: 7ºB">
-        </label>
-        <label>Crie um PIN
-          <input id="registerPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password" placeholder="4 a 6 números">
-        </label>
-        <button class="mainBtn" id="registerSubmit">Criar conta</button>
-      </section>
-    </div>
-    <div class="loginNote">Se este aparelho já tiver um Código da Névoa antigo, ao criar a conta tentaremos vinculá-lo automaticamente para preservar o progresso.</div>
-  </div>
-</dialog>
 
 <!-- MAPA -->
 <dialog id="mapDialog" class="wideDialog">
@@ -452,7 +412,7 @@
 <script src="media/poster_guardiao.js"></script>
 <script src="media/poster_espelho.js"></script>
 <script src="media/init.js"></script>
-<script src="online.js?v=7.1"></script>
-<script src="app.js?v=7.2"></script>
+<script src="online.js?v=7.4"></script>
+<script src="app.js?v=7.4"></script>
 </body>
 </html>
