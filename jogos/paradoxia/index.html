@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="sprites-hd.css?v=2">
 <link rel="stylesheet" href="world-v2.css?v=2">
 <link rel="stylesheet" href="walk-sprites.css?v=1">
+<link rel="stylesheet" href="world-v3.css?v=1">
 <link rel="preload" as="image" href="assets/dialetico_sheet_hd.png">
 <link rel="preload" as="image" href="assets/cetico_sheet_hd.png">
 <link rel="preload" as="image" href="assets/etico_sheet_hd.png">
@@ -17,6 +18,7 @@
 <link rel="preload" as="image" href="assets/walk/cetico_walk.png">
 <link rel="preload" as="image" href="assets/walk/etico_walk.png">
 <link rel="preload" as="image" href="assets/walk/existencial_walk.png">
+<link rel="preload" as="image" href="assets/world/paradoxia_world_playable.webp">
 </head>
 <body>
 <div class="fog fogA"></div><div class="fog fogB"></div>
@@ -232,32 +234,34 @@
         <div class="regionLabel castleLabel"><span>👑</span><b>Castelo da Certeza Absoluta</b><small>O objetivo distante</small></div>
         <div class="regionLabel cemeteryLabel"><span>☠️</span><b>Cemitério dos Conceitos</b><small>Área secreta</small></div>
 
-        <button class="worldPoi" data-scene="gate" style="left:17.9%;top:73.8%"><span>🚪</span><b>Portões</b></button>
-        <button class="worldPoi" data-scene="market" style="left:35.4%;top:52.8%"><span>🎪</span><b>Feira</b></button>
-        <button class="worldPoi" data-scene="bridge" style="left:69.2%;top:63.8%"><span>🌉</span><b>Ponte</b></button>
-        <button class="worldPoi" data-scene="theseus" style="left:42.3%;top:80%"><span>🎃</span><b>Sir Cucurbita</b></button>
-        <button class="worldPoi" data-scene="library" style="left:82.5%;top:61.8%"><span>📚</span><b>Biblioteca</b></button>
-        <button class="worldPoi" data-scene="square" style="left:50%;top:49.4%"><span>🕰️</span><b>Praça</b></button>
-        <button class="worldPoi bossPoi" data-scene="boss" style="left:86.3%;top:17.8%"><span>👑</span><b>Castelo</b></button>
+        <button class="worldPoi" data-scene="gate" style="left:14.9%;top:61.8%"><span>🚪</span><b>Portões</b></button>
+        <button class="worldPoi" data-scene="market" style="left:48.9%;top:37.5%"><span>🎪</span><b>Feira</b></button>
+        <button class="worldPoi" data-scene="bridge" style="left:60.6%;top:59.7%"><span>🌉</span><b>Ponte</b></button>
+        <button class="worldPoi" data-scene="theseus" style="left:11.7%;top:86.1%"><span>🎃</span><b>Sir Cucurbita</b></button>
+        <button class="worldPoi" data-scene="library" style="left:83.7%;top:84.7%"><span>📚</span><b>Biblioteca</b></button>
+        <button class="worldPoi" data-scene="square" style="left:72.7%;top:55.6%"><span>🕰️</span><b>Praça</b></button>
+        <button class="worldPoi bossPoi" data-scene="boss" style="left:78.7%;top:20.1%"><span>👑</span><b>Castelo</b></button>
 
-        <button class="worldInteract signInteract" data-interaction="sign" style="left:53.5%;top:52.4%"><span>🪧</span></button>
-        <button class="worldInteract pumpkinInteract" data-interaction="pumpkin" style="left:20.8%;top:70.7%"><span>🎃</span></button>
-        <button class="worldInteract mirrorInteract" data-interaction="mirror" style="left:62%;top:84%"><span>🪞</span></button>
-        <button class="worldInteract owlInteract" data-interaction="owl" style="left:78.4%;top:55.5%"><span>🦉</span></button>
-        <button class="worldInteract ruinsInteract" data-interaction="shadows" style="left:44.5%;top:16.4%"><span>🔥</span></button>
-        <button class="worldInteract graveInteract secretProp" data-interaction="grave" style="left:11.7%;top:43%"><span>🪦</span></button>
+        <button class="worldInteract signInteract" data-interaction="sign" style="left:72.1%;top:62.0%"><span>🪧</span></button>
+        <button class="worldInteract pumpkinInteract" data-interaction="pumpkin" style="left:16.3%;top:69.4%"><span>🎃</span></button>
+        <button class="worldInteract mirrorInteract" data-interaction="mirror" style="left:52.1%;top:68.8%"><span>🪞</span></button>
+        <button class="worldInteract owlInteract" data-interaction="owl" style="left:83.0%;top:77.1%"><span>🦉</span></button>
+        <button class="worldInteract ruinsInteract" data-interaction="shadows" style="left:9.8%;top:81.9%"><span>🔥</span></button>
+        <button class="worldInteract graveInteract secretProp" data-interaction="grave" style="left:4.6%;top:83.3%"><span>🪦</span></button>
 
-        <div class="worldNpc npcDialetico" style="left:29%;top:29%"><div class="spriteArt"></div><small>Estudiosa Dialética</small></div>
-        <div class="worldNpc npcCetico" style="left:38%;top:47%"><div class="spriteArt"></div><small>Investigadora Cética</small></div>
-        <div class="worldNpc npcEtico" style="left:75%;top:68%"><div class="spriteArt"></div><small>Guardiã Ética</small></div>
-        <div class="worldNpc npcExistencial" style="left:57%;top:42%"><div class="spriteArt"></div><small>Andarilho</small></div>
+        <div class="worldNpc npcDialetico" style="left:31.0%;top:32.0%"><div class="spriteArt"></div><small>Estudiosa Dialética</small></div>
+        <div class="worldNpc npcCetico" style="left:50.7%;top:47.5%"><div class="spriteArt"></div><small>Investigadora Cética</small></div>
+        <div class="worldNpc npcEtico" style="left:73.8%;top:67.5%"><div class="spriteArt"></div><small>Guardiã Ética</small></div>
+        <div class="worldNpc npcExistencial" style="left:62.5%;top:42.5%"><div class="spriteArt"></div><small>Andarilho</small></div>
 
-        <div class="ambientNpc ghost aGhost1" style="left:31%;top:76%">👻</div>
-        <div class="ambientNpc ghost aGhost2" style="left:72%;top:28%">👻</div>
-        <div class="ambientNpc cat" style="left:48%;top:55%">🐈‍⬛</div>
-        <div class="ambientNpc pumpkin" style="left:24%;top:77%">🎃</div>
-        <div class="ambientNpc book" style="left:80%;top:58%">📖</div>
-        <div class="ambientNpc owl" style="left:66%;top:14%">🦉</div>
+        <div class="ambientNpc ghost aGhost1" style="left:25.0%;top:61.0%">👻</div>
+        <div class="ambientNpc ghost aGhost2" style="left:68.0%;top:22.0%">👻</div>
+        <div class="ambientNpc cat" style="left:42.0%;top:62.0%">🐈‍⬛</div>
+        <div class="ambientNpc pumpkin" style="left:19.0%;top:67.0%">🎃</div>
+        <div class="ambientNpc book" style="left:82.0%;top:72.0%">📖</div>
+        <div class="ambientNpc owl" style="left:54.0%;top:16.0%">🦉</div>
+
+        <div class="foregroundVeil" aria-hidden="true"></div>
 
         <div class="worldPlayer" id="worldPlayer">
           <div class="spriteArt" id="playerSprite"></div>
@@ -367,6 +371,6 @@
 <div class="toast" id="toast"></div>
 
 <script src="../../online.js?v=7.5"></script>
-<script src="game.js?v=5"></script>
+<script src="game.js?v=6"></script>
 </body>
 </html>
