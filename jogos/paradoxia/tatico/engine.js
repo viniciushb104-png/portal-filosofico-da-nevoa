@@ -38,11 +38,11 @@ function loadParty(){
 }
 function initState(){
  state={
-  turn:1,phase:'player',selected:null,mode:'select',
+  turn:1,phase:'deploy',selected:null,mode:'select',
   units:loadParty(),
   enemies:clone(stage.enemies||[]).map((e,i)=>({...e,team:'enemy',maxHp:e.hp||3,sp:0,acted:false,moved:false,alive:true,id:e.id||'e'+i,move:e.move||2,range:e.range||1})),
   props:clone(stage.props||[]),switches:{},answers:{},revealed:0,analysisCount:0,log:[],score:0,startedAt:Date.now(),
-  competitive:false,attempt:null,ended:false
+  competitive:false,attempt:null,ended:false,chain:0,maxChain:0
  };
 }
 function terrainHeight(x,y){const row=stage.terrain[y];return row?Number(row[x]||0):0}
@@ -50,6 +50,55 @@ function occupied(x,y,ignore=null){return [...state.units,...state.enemies].find
 function selection(){return [...state.units,...state.enemies].find(u=>u.id===state.selected)||null}
 function ideaAt(x,y){return (stage.ideaFields||[]).find(f=>f.x===x&&f.y===y)}
 function propAt(x,y){return state.props.find(p=>p.x===x&&p.y===y)}
+
+function assistCount(attacker,target){
+ return state.units.filter(a=>a.alive&&a.id!==attacker.id&&!a.acted&&dist(a,target)<=1).length;
+}
+function objectiveProgress(){
+ const type=stage.objective.type,target=stage.objective.target,used=Object.keys(state.switches);
+ if(type==='logic_targets'||type==='investigate')return {current:state.revealed,target:Number(target)};
+ if(type==='collect')return {current:used.filter(id=>state.props.find(p=>p.id===id)?.type==='collect').length,target:Number(target)};
+ if(type==='mirror')return {current:used.filter(id=>id.startsWith('mirror')).length,target:Number(target)};
+ if(type==='switches')return {current:used.filter(id=>state.props.find(p=>p.id===id)?.type==='switch').length,target:Number(target)};
+ if(type==='duel')return {current:state.analysisCount,target:Number(target)};
+ if(type==='boss')return {current:used.filter(id=>id.startsWith('seal')).length,target:Number(target)};
+ if(type==='reach'||type==='escort')return {current:0,target:1};
+ return {current:0,target:1};
+}
+function renderInspector(){
+ const u=selection(),name=$('#inspectName'),hp=$('#inspectHp'),sp=$('#inspectSp'),text=$('#inspectText');
+ if(!name||!hp||!sp||!text)return;
+ if(!u){name.textContent='Selecione uma unidade';hp.textContent='—';sp.textContent='—';text.textContent='Clique em um integrante do esquadrão para ver seus recursos.';return}
+ name.textContent=u.icon+' '+u.name+' • Nv.'+(u.level||1);
+ hp.textContent=Math.max(0,u.hp)+'/'+u.maxHp;sp.textContent=(u.sp??0)+'/'+(u.maxSp??0);
+ const assists=state.enemies.filter(en=>en.alive&&dist(u,en)<=u.range).reduce((n,en)=>Math.max(n,assistCount(u,en)),0);
+ text.textContent='MOV '+u.move+' • ALC '+u.range+(u.guard?' • Protegido':'')+(assists?' • até '+assists+' assistência(s)':'');
+}
+function renderDeployment(){
+ const host=$('#deployGrid');if(!host)return;
+ host.innerHTML=state.units.map((u,i)=>'<article class="deployUnit"><div class="dAvatar">'+u.icon+'</div><b>'+(i+1)+'. '+u.name+'</b><small>posição inicial '+(i+1)+' • MOV '+u.move+' • ALC '+u.range+'</small><div class="deployArrows"><button data-deploy-left="'+i+'" type="button">←</button><button data-deploy-right="'+i+'" type="button">→</button></div></article>').join('');
+ $('[data-deploy-left]').forEach(b=>b.onclick=()=>shiftDeploy(Number(b.dataset.deployLeft),-1));
+ $('[data-deploy-right]').forEach(b=>b.onclick=()=>shiftDeploy(Number(b.dataset.deployRight),1));
+}
+function shiftDeploy(i,dir){
+ const j=i+dir;if(j<0||j>=state.units.length)return;
+ [state.units[i],state.units[j]]=[state.units[j],state.units[i]];
+ state.units.forEach((u,n)=>{const sp=stage.playerSpawns[n]||stage.playerSpawns[0];u.x=sp.x;u.y=sp.y});
+ renderDeployment();render();
+}
+async function confirmDeployment(){
+ await prepareCompetition();
+ state.phase='player';state.mode='select';state.startedAt=Date.now();
+ $('#deployOverlay').classList.remove('show');showTurnBanner('SEU TURNO',false);render();
+}
+function manualEndTurn(){
+ if(state.phase!=='player'||state.ended)return;
+ state.units.filter(u=>u.alive&&!u.acted).forEach(u=>{u.acted=true;u.moved=true});
+ state.selected=null;state.mode='select';$('#commandBox').hidden=true;enemyPhase();
+}
+function showTurnBanner(label,enemy=false){
+ const b=$('#turnBanner');if(!b)return;b.textContent=label;b.classList.toggle('enemy',enemy);b.animate?.([{opacity:.45,transform:'translateX(-50%) translateY(-6px)'},{opacity:1,transform:'translateX(-50%) translateY(0)'}],{duration:260});
+}
 
 function reachable(unit){
  const max=unit.move||3,seen=new Map([[key(unit.x,unit.y),0]]),queue=[{x:unit.x,y:unit.y,c:0}];
@@ -136,17 +185,19 @@ function openLogicChoice(u,e){
 }
 function resolveLogicChoice(u,e,choice){
  $('#logicOverlay').classList.remove('show');state.answers[e.id]=choice;state.analysisCount++;
- const correct=choice===e.answer;
+ const correct=choice===e.answer,assists=assistCount(u,e);
  e.hp=0;e.alive=false;state.revealed++;
- state.score+=correct?120:45;
- state.log.unshift((correct?'✨ ':'🎭 ')+e.name+': '+(correct?'falácia identificada.':'primeira leitura registrada.'));
+ state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);
+ state.score+=(correct?120:45)+(assists*20);
+ state.log.unshift((correct?'✨ ':'🎭 ')+e.name+': '+(correct?'falácia identificada.':'primeira leitura registrada.')+(assists?' • '+assists+' aliado(s) sustentaram a análise.':''));
  toast(correct?'Falácia desmascarada!':'Resposta registrada — a máscara caiu, mas o ranking lembrará a primeira análise.');
  finishUnit(u);
 }
 function doAttack(u,e){
- let dmg=1;if(u.skillPending){dmg=2;state.score+=10;u.skillPending=null}
+ const assists=assistCount(u,e);let dmg=1+Math.min(2,assists);if(u.skillPending){dmg+=1;state.score+=10;u.skillPending=null}
+ state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);state.score+=assists*15
  if(e.guard){e.guard=0;dmg=Math.max(0,dmg-1)}
- e.hp-=dmg;state.analysisCount++;state.log.unshift('⚔️ '+u.name+' analisou '+e.name+' (-'+dmg+').');
+ e.hp-=dmg;state.analysisCount++;state.log.unshift('⚔️ '+u.name+' analisou '+e.name+' (-'+dmg+')'+(assists?' com '+assists+' assistência(s).':'') );
  if(e.hp<=0){e.alive=false;state.score+=80;state.revealed++;state.log.unshift('✨ '+e.name+' foi superado.')}
  finishUnit(u);
 }
@@ -163,7 +214,7 @@ function finishUnit(u){
  if(!state.units.some(x=>x.alive&&!x.acted))enemyPhase();else render();
 }
 function enemyPhase(){
- state.phase='enemy';render();
+ state.phase='enemy';state.chain=0;state.selected=null;state.mode='select';$('#commandBox').hidden=true;showTurnBanner('TURNO INIMIGO',true);render();
  setTimeout(()=>{
   state.enemies.filter(e=>e.alive).forEach(e=>{
    const targets=state.units.filter(u=>u.alive);if(!targets.length)return;
@@ -174,7 +225,7 @@ function enemyPhase(){
     for(const [mx,my] of candidates){const nx=e.x+mx,ny=e.y+my;if(terrainHeight(nx,ny)&&!occupied(nx,ny,e.id)){e.x=nx;e.y=ny;break}}
    }
   });
-  state.turn++;state.phase='player';
+  state.turn++;state.phase='player';state.chain=0;showTurnBanner('SEU TURNO',false);
   state.units.filter(u=>u.alive).forEach(u=>{u.acted=false;u.moved=false;u.range=u.baseRange;u.move=u.baseMove;u.sp=Math.min(u.maxSp,u.sp+1)});
   if(state.turn>stage.turnLimit)return end(false,'O limite de turnos acabou.');
   if(!state.units.some(u=>u.alive))return end(false,'Seu grupo ficou sem argumentos para continuar.');
@@ -226,18 +277,22 @@ async function end(win,msg){
 }
 function render(){
  $('#stageTitle').textContent=stage.title;$('#stageSubtitle').textContent=stage.subtitle;$('#objectiveText').textContent=stage.objective.text;$('#turnValue').textContent=state.turn+'/'+stage.turnLimit;$('#phaseValue').textContent=state.phase==='player'?'SEU TURNO':state.phase==='enemy'?'TURNO INIMIGO':'MISSÃO ENCERRADA';$('#scoreValue').textContent=state.score;
+ const prog=objectiveProgress();if($('#objectiveProgress'))$('#objectiveProgress').textContent=prog.current+'/'+prog.target;if($('#chainValue'))$('#chainValue').textContent='×'+state.chain;renderInspector();
+
  const board=$('#tacticalBoard');board.style.setProperty('--cols',stage.size.w);board.style.setProperty('--rows',stage.size.h);board.innerHTML='';
  const reach=selection()&&state.mode==='move'?reachable(selection()):new Map();
  for(let y=0;y<stage.size.h;y++)for(let x=0;x<stage.size.w;x++){
   const h=terrainHeight(x,y);if(!h)continue;
   const t=document.createElement('button');t.className='tile h'+h;t.dataset.x=x;t.dataset.y=y;t.style.setProperty('--x',x);t.style.setProperty('--y',y);t.style.setProperty('--h',h);
   if(reach.has(key(x,y)))t.classList.add('reachable');
+  const sel=selection();if(sel&&state.mode==='attack'&&state.enemies.some(en=>en.alive&&en.x===x&&en.y===y&&dist(sel,en)<=(sel.skillPending?.range??sel.range)))t.classList.add('attackable');
+
   const f=ideaAt(x,y);if(f){t.classList.add('idea','idea-'+f.type);t.title=f.label+' — '+f.effect}
   const p=propAt(x,y);if(p)t.innerHTML='<span class="prop '+(state.switches[p.id]?'used':'')+'">'+p.icon+'</span>';
   t.onclick=()=>tileClick(x,y);board.appendChild(t);
  }
  [...state.units,...state.enemies].filter(u=>u.alive).forEach(u=>{
-  const el=document.createElement('button');el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'');el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
+  const el=document.createElement('button');const sel=selection();const assisted=u.team==='player'&&sel&&u.id!==sel.id&&state.enemies.some(en=>en.alive&&dist(u,en)<=1&&dist(sel,en)<=(sel.skillPending?.range??sel.range));el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'')+(assisted?' assisted':'');el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
   el.innerHTML='<span class="unitSprite">'+u.icon+'</span><span class="unitName">'+u.name+'</span><span class="hp"><i style="width:'+Math.max(0,u.hp/u.maxHp*100)+'%"></i></span>';
   window.ParadoxiaSpriteRuntime?.decorateUnitElement(el,u);
   board.appendChild(el);
@@ -258,9 +313,9 @@ function briefing(){
  stage=D().stages[stageKey]||D().stages.feira_falacias;initState();
  $('#briefIcon').textContent=stage.icon;$('#briefTitle').textContent=stage.title;$('#briefSubtitle').textContent=stage.subtitle;$('#briefObjective').textContent=stage.objective.text;$('#briefList').innerHTML=stage.briefing.map(x=>'<li>'+x+'</li>').join('');$('#briefOverlay').classList.add('show');render();
 }
-async function start(){await prepareCompetition();$('#briefOverlay').classList.remove('show');render()}
+async function start(){ $('#briefOverlay').classList.remove('show');$('#deployOverlay').classList.add('show');renderDeployment();render()}
 function init(){
- $('#startMission').onclick=start;$('#retryMission').onclick=()=>location.reload();$('#backToMap').href='../index.html';briefing();
+ $('#startMission').onclick=start;$('#confirmDeploy').onclick=confirmDeployment;$('#endTurnBtn').onclick=manualEndTurn;$('#retryMission').onclick=()=>location.reload();$('#backToMap').href='../index.html';briefing();
 }
 window.addEventListener('DOMContentLoaded',init);
 })();
