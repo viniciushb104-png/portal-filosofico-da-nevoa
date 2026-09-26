@@ -265,7 +265,7 @@ async function end(win,msg){
  if(state.ended)return;state.ended=true;state.phase='end';$('#commandBox').hidden=true;
  const bonus=win?Math.max(0,(stage.turnLimit-state.turn)*20):0,score=Math.max(0,state.score+bonus);
  await awardProgress(win);
- $('#resultOverlay').classList.add('show');$('#resultTitle').textContent=win?'Missão concluída!':'Missão encerrada';$('#resultText').textContent=msg;$('#resultScore').textContent=score;$('#resultTurns').textContent=state.turn;
+ $('#resultOverlay').classList.add('show');$('#resultTitle').textContent=win?'Missão concluída!':'Missão encerrada';$('#resultText').textContent=msg;$('#resultScore').textContent=score;$('#resultTurns').textContent=state.turn;if($('#resultChain'))$('#resultChain').textContent='×'+state.maxChain;
  const server=$('#serverResult');server.textContent='';
  if(win&&state.competitive&&state.attempt){
   server.textContent='Validando resultado no servidor…';
@@ -276,7 +276,7 @@ async function end(win,msg){
  }
 }
 function render(){
- $('#stageTitle').textContent=stage.title;$('#stageSubtitle').textContent=stage.subtitle;$('#objectiveText').textContent=stage.objective.text;$('#turnValue').textContent=state.turn+'/'+stage.turnLimit;$('#phaseValue').textContent=state.phase==='player'?'SEU TURNO':state.phase==='enemy'?'TURNO INIMIGO':'MISSÃO ENCERRADA';$('#scoreValue').textContent=state.score;
+ $('#stageTitle').textContent=stage.title;$('#stageSubtitle').textContent=stage.subtitle;$('#objectiveText').textContent=stage.objective.text;$('#turnValue').textContent=state.turn+'/'+stage.turnLimit;$('#phaseValue').textContent=state.phase==='deploy'?'IMPLANTAÇÃO':state.phase==='player'?'SEU TURNO':state.phase==='enemy'?'TURNO INIMIGO':'MISSÃO ENCERRADA';$('#scoreValue').textContent=state.score;
  const prog=objectiveProgress();if($('#objectiveProgress'))$('#objectiveProgress').textContent=prog.current+'/'+prog.target;if($('#chainValue'))$('#chainValue').textContent='×'+state.chain;renderInspector();
 
  const board=$('#tacticalBoard');board.style.setProperty('--cols',stage.size.w);board.style.setProperty('--rows',stage.size.h);board.innerHTML='';
