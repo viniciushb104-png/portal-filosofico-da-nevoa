@@ -145,6 +145,15 @@ async function loadRpgState(){
   const row=first(await rpc('load_rpg_state',{p_token:token}));
   return row||null;
 }
+async function loadParadoxiaTacticalProfile(){
+  const token=getSession();if(!token)return null;
+  return first(await rpc('load_paradoxia_tactical_profile',{p_token:token}));
+}
+async function saveParadoxiaTacticalProfile(profileData){
+  const token=getSession();if(!token)throw new Error('Entre na conta para salvar o esquadrão online.');
+  await rpc('save_paradoxia_tactical_profile',{p_token:token,p_profile_data:profileData||{}});
+  return true;
+}
 async function activeParadoxiaSeason(){
   return first(await rpc('get_active_paradoxia_season',{}));
 }
@@ -217,6 +226,7 @@ window.NevoaOnline={
   createExplorer,restoreExplorer,getProgress,loadExplorer,
   registerStudent,loginStudent,sessionProfile,accountSnapshot,logout,
   leaderboard,claimProgress,claimDaily,heartbeat,startPresence,saveRpgState,loadRpgState,
+  loadParadoxiaTacticalProfile,saveParadoxiaTacticalProfile,
   activeParadoxiaSeason,paradoxiaMissions,startParadoxiaAttempt,recordParadoxiaCheckpoint,
   finishParadoxiaAttempt,paradoxiaLeaderboard,paradoxiaCompetitionStatus,watchParadoxiaLeaderboard,
   syncLocal
