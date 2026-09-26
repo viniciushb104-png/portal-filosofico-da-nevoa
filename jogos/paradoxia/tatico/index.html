@@ -1,8 +1,24 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d0712"><title>Paradoxia Tático</title><link rel="stylesheet" href="style.css?v=2"></head>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d0712"><title>Paradoxia Tático</title><link rel="stylesheet" href="style.css?v=3"></head>
 <body>
 <header class="battleTop"><div class="topLinks"><a href="../index.html">← Mapa</a><a href="../quartel/">⚔ Quartel</a></div><div><small id="stageSubtitle">Paradoxia</small><b id="stageTitle">Missão Tática</b><small id="competitionState">prática</small></div><div class="battleMeta"><span>Turno <b id="turnValue">1</b></span><span id="phaseValue">SEU TURNO</span><span>✦ <b id="scoreValue">0</b></span></div></header>
 <main class="battleShell">
- <aside class="objectivePanel"><small>OBJETIVO</small><p id="objectiveText"></p><div class="legend"><span>🧠 Razão</span><span>⚖️ Ética</span><span>🗝️ Autonomia</span><span>💬 Diálogo</span></div><div class="logBox"><b>Registro do turno</b><ul id="battleLog"></ul></div></aside>
+ <aside class="objectivePanel">
+  <small>MISSÃO</small><p id="objectiveText"></p>
+  <div class="winLose">
+    <div class="winRule"><small>VITÓRIA</small><b id="winCondition">Cumprir o objetivo</b></div>
+    <div class="loseRule"><small>DERROTA</small><b id="loseCondition">Grupo KO ou limite de turnos</b></div>
+  </div>
+  <div class="credibilityBox" id="credibilityBox" hidden>
+    <div><small>CREDIBILIDADE DA PLATEIA</small><b id="credibilityValue">10/10</b></div>
+    <div class="credibilityBar"><i id="credibilityFill"></i></div>
+  </div>
+  <div class="enemyPanel">
+    <div class="enemyPanelHead"><b>☠ INIMIGOS</b><small>clique para inspecionar</small></div>
+    <div id="enemyRoster" class="enemyRoster"></div>
+  </div>
+  <div class="legend"><span>🧠 Razão</span><span>⚖️ Ética</span><span>🗝️ Autonomia</span><span>💬 Diálogo</span></div>
+  <div class="logBox"><b>Registro do turno</b><ul id="battleLog"></ul></div>
+</aside>
  <section class="boardViewport">
   <div class="turnBanner" id="turnBanner">SEU TURNO</div>
   <div class="battleStatus">
@@ -20,7 +36,9 @@
  </section>
  <aside class="commandBox" id="commandBox" hidden><small>COMANDOS</small><b id="commandUnit"></b><div id="commandButtons"></div></aside>
 </main>
-<div class="overlay" id="briefOverlay"><div class="briefCard"><div id="briefIcon" class="briefIcon">🎪</div><small>MISSÃO DE PARADOXIA</small><h1 id="briefTitle"></h1><p id="briefSubtitle"></p><div class="briefObjective"><b>Objetivo</b><span id="briefObjective"></span></div><ul id="briefList"></ul><button id="startMission">Começar missão</button></div></div>
+<div class="overlay" id="briefOverlay"><div class="briefCard"><div id="briefIcon" class="briefIcon">🎪</div><small>MISSÃO DE PARADOXIA</small><h1 id="briefTitle"></h1><p id="briefSubtitle"></p><div class="briefObjective"><b>Objetivo</b><span id="briefObjective"></span></div>
+<div class="briefRules"><div><small>VITÓRIA</small><b id="briefWin">Cumprir objetivo</b></div><div><small>DERROTA</small><b id="briefLose">Grupo KO ou limite</b></div></div>
+<ul id="briefList"></ul><button id="startMission">Começar missão</button></div></div>
 <div class="overlay" id="deployOverlay">
     <div class="briefCard deployCard">
       <div class="briefIcon">⚔️</div>
@@ -35,4 +53,4 @@
   <div class="overlay" id="resultOverlay"><div class="briefCard"><div class="briefIcon">🏆</div><small>RESULTADO</small><h1 id="resultTitle"></h1><p id="resultText"></p><div class="resultGrid"><div><b id="resultScore">0</b><small>pontos locais</small></div><div><b id="resultTurns">0</b><small>turnos</small></div><div><b id="resultChain">×0</b><small>melhor cadeia</small></div></div><p id="serverResult" class="serverResult"></p><div class="endButtons"><button id="retryMission">↻ Repetir</button><a id="backToMap" href="../index.html">← Voltar ao mapa</a></div></div></div>
 <div class="overlay logicOverlay" id="logicOverlay"><div class="briefCard logicCard"><div class="briefIcon">🧠</div><small>ANÁLISE CONCEITUAL</small><h1 id="logicTarget">Alvo</h1><p id="logicText"></p><div id="logicChoices" class="logicChoices"></div></div></div>
 <div class="toast" id="tacticalToast"></div>
-<script src="../../../online.js?v=7.7"></script><script src="../missoes/competition-client.js?v=1"></script><script src="stages.js?v=2"></script><script src="sprite-runtime.js?v=1"></script><script src="engine.js?v=5"></script></body></html>
+<script src="../../../online.js?v=7.7"></script><script src="../missoes/competition-client.js?v=1"></script><script src="stages.js?v=2"></script><script src="sprite-runtime.js?v=1"></script><script src="engine.js?v=6"></script></body></html>
