@@ -45,3 +45,29 @@ section{padding:70px 0}.sectionHead{max-width:820px;text-align:center;margin:0 a
 .explorerCodeBox{margin:14px 0;padding:15px;border-radius:16px;border:1px solid #b36535;background:linear-gradient(135deg,#25110d,#180b19)}.explorerCodeBox small,.explorerCodeBox strong{display:block}.explorerCodeBox small{font-size:9px;letter-spacing:.12em;color:#ffc586}.explorerCodeBox strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:22px;color:#fff;margin:7px 0 10px;word-break:break-all}
 .compactActions{margin-top:8px}.rankingHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.rankingHead h3{margin:5px 0 0}.rankMedal{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#25142e;border:1px solid #613572;margin-right:8px}.hallItem.me{border-color:#d97b35;background:linear-gradient(90deg,#22100c,#160b20)}.hallItem.me .hallBadge{border-color:#d97b35;color:#ffd2a8}.hallItem.loading{opacity:.65}
 @media(max-width:760px){.rankingHead{align-items:stretch;flex-direction:column}.onlineCreateForm input:nth-child(2){max-width:none}.explorerCodeBox strong{font-size:18px}}
+
+/* V7 — login simples, ranking XP e presença dentro do jogo */
+.loginBtn{border:1px solid #704184;background:linear-gradient(135deg,#261132,#150a1d);color:#f6eaff;border-radius:12px;padding:10px 13px;font-weight:900;cursor:pointer;white-space:nowrap}
+.loginBtn.logged{border-color:#2c9b75;background:#10271f;color:#a9ffda}
+.accountActions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
+.legacyRecovery{margin-top:12px;border:1px dashed #4e2b5d;border-radius:14px;padding:10px 12px;background:#0c0712}
+.legacyRecovery summary{cursor:pointer;font-weight:850;color:#cdb7da}
+.rankingLead{margin:5px 0 0;color:#b9a5c6;font-size:12px}
+.onlineStatus{display:inline-flex;align-items:center;gap:6px;margin-top:4px}
+.statusDot{width:8px;height:8px;border-radius:50%;background:#65536c;display:inline-block}
+.statusDot.on{background:#4be1a8;box-shadow:0 0 12px #4be1a877}
+.statusDot.off{background:#6b5b70}
+.hallLocation{color:#f0bf7e!important}
+.loginShell{width:min(900px,calc(100vw - 24px))}
+.loginColumns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.loginPane{background:#120919;border:1px solid #4d2b5d;border-radius:18px;padding:18px}
+.loginPane.createPane{border-color:#744125;background:linear-gradient(145deg,#1a0c16,#1b0e0a)}
+.loginPane h3{font-family:Georgia,serif;font-size:25px;margin:5px 0 14px}
+.loginIcon{font-size:34px}
+.loginPane label{display:grid;gap:6px;text-align:left;font-size:12px;font-weight:850;color:#d9c8e3;margin:10px 0}
+.loginPane input{width:100%;background:#09050d;border:1px solid #563167;color:#fff;border-radius:12px;padding:12px 13px;font:inherit;outline:none}
+.loginPane input:focus{border-color:#c55cf0;box-shadow:0 0 0 3px #b653df22}
+.loginPane .mainBtn{width:100%;margin-top:8px}
+.loginNote{margin-top:14px;padding:11px 13px;border-radius:12px;background:#0d0812;border:1px solid #3e2449;color:#baa8c6;font-size:11px;line-height:1.5}
+@media(max-width:900px){.loginBtn{padding:9px 10px;font-size:12px}}
+@media(max-width:760px){.loginColumns{grid-template-columns:1fr}.loginShell{max-height:calc(100dvh - 20px);overflow-y:auto}.loginBtn{font-size:0;width:42px;height:42px;padding:0}.loginBtn::after{content:"🔐";font-size:18px}}
