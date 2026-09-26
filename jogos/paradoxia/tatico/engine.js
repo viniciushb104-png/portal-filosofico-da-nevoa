@@ -146,26 +146,50 @@ function reachable(unit){
 function tileClick(x,y){
  if(state.phase!=='player'||state.ended)return;
  const hit=occupied(x,y),sel=selection();
+
+ // Nenhuma unidade selecionada: aliado abre comandos; inimigo abre ficha.
  if(!sel){
-  if(hit?.team==='enemy'){state.inspectTarget=hit.id;render();return}
-  if(hit?.team==='player'&&!hit.acted){state.inspectTarget=null;state.selected=hit.id;state.mode='move';render()}
-  return;
+   if(hit?.team==='enemy'){state.inspectTarget=hit.id;render();return}
+   if(hit?.team==='player'&&!hit.acted){
+     state.inspectTarget=null;state.selected=hit.id;state.mode='command';
+     render();openCommand(hit);return;
+   }
+   return;
  }
+
+ // Clicar num inimigo com aliado selecionado tenta atacar imediatamente.
+ if(hit?.team==='enemy'){
+   const range=sel.skillPending?.range??sel.range;
+   if(dist(sel,hit)<=range){
+     state.inspectTarget=hit.id;
+     if(hit.answer&&!hit.solved&&!sel.skillPending){openLogicChoice(sel,hit);return}
+     doAttack(sel,hit);return;
+   }
+   state.inspectTarget=hit.id;
+   toast('☠ '+hit.name+' está fora do alcance. Use Mover para chegar mais perto.');
+   render();return;
+ }
+
+ // Modo de movimento escolhido pelo menu.
  if(state.mode==='move'&&!sel.moved){
-  if(hit?.team==='enemy'){state.inspectTarget=hit.id;state.selected=null;state.mode='select';$('#commandBox').hidden=true;render();return}
-  if(hit?.id===sel.id){openCommand(sel);return}
-  const r=reachable(sel);
-  if(r.has(key(x,y))){sel.x=x;sel.y=y;sel.moved=true;state.mode='command';state.inspectTarget=null;applyIdea(sel);render();openCommand(sel)}
-  return;
+   if(hit?.id===sel.id){state.mode='command';render();openCommand(sel);return}
+   const r=reachable(sel);
+   if(r.has(key(x,y))){
+     sel.x=x;sel.y=y;sel.moved=true;state.mode='command';state.inspectTarget=null;
+     applyIdea(sel);render();openCommand(sel);return;
+   }
+   toast('Essa casa não está no alcance de movimento.');
+   return;
  }
+
+ // Ataque aguardando alvo.
  if(state.mode==='attack'){
-  const range=sel.skillPending?.range??sel.range;
-  if(hit?.team==='enemy'&&dist(sel,hit)<=range){
-   if(hit.answer&&!hit.solved&&!sel.skillPending){openLogicChoice(sel,hit);return}
-   doAttack(sel,hit);return;
-  }
-  toast('Alvo fora do alcance.');
+   toast('Escolha um inimigo destacado em vermelho.');
+   return;
  }
+
+ // Clicar de novo no aliado reabre comandos.
+ if(hit?.id===sel.id){state.mode='command';render();openCommand(sel);return}
 }
 function applyIdea(unit){
  const f=ideaAt(unit.x,unit.y);if(!f)return;
@@ -178,26 +202,36 @@ function applyIdea(unit){
 function openCommand(u){state.mode='command';renderCommands(u)}
 function renderCommands(u){
  const box=$('#commandBox');box.hidden=false;$('#commandUnit').textContent=u.icon+' '+u.name+' • Nv.'+u.level;
+ const canMove=!u.moved;
  $('#commandButtons').innerHTML=
-   '<button data-cmd="attack">⚔️ Analisar</button>'+
+   '<button data-cmd="move" '+(canMove?'':'disabled')+'>👣 Mover'+(canMove?'':' • usado')+'</button>'+
+   '<button data-cmd="attack">⚔️ Analisar / Atacar</button>'+
    '<button data-cmd="skill">✦ Habilidades</button>'+
    '<button data-cmd="interact">🔎 Interagir</button>'+
    '<button data-cmd="wait">✓ Encerrar ação</button>'+
-   '<button data-cmd="cancel">↶ Voltar</button>';
- $('#commandButtons button').forEach(b=>b.onclick=()=>command(b.dataset.cmd));
+   '<button data-cmd="cancel">↶ Trocar unidade</button>';
+ $('#commandButtons button').forEach(b=>b.onclick=()=>{if(!b.disabled)command(b.dataset.cmd)});
 }
 function command(cmd){
  const u=selection();if(!u)return;
- if(cmd==='attack'){state.mode='attack';$('#commandBox').hidden=true;toast('Escolha um alvo dentro do alcance.');render();return}
+ if(cmd==='move'){
+   if(u.moved)return toast('Esta unidade já se moveu neste turno.');
+   state.mode='move';$('#commandBox').hidden=true;toast('👣 Casas verdes = movimento possível.');render();return;
+ }
+ if(cmd==='attack'){
+   state.mode='attack';$('#commandBox').hidden=true;
+   const targets=state.enemies.filter(en=>en.alive&&dist(u,en)<=(u.skillPending?.range??u.range));
+   toast(targets.length?'⚔️ Clique em um inimigo vermelho para atacar.':'Nenhum inimigo no alcance. Você pode voltar e mover.');
+   render();return}
  if(cmd==='skill'){renderSkills(u);return}
  if(cmd==='interact'){interact(u);return}
  if(cmd==='wait'){finishUnit(u);return}
- if(cmd==='cancel'){state.selected=null;state.mode='select';$('#commandBox').hidden=true;render()}
+ if(cmd==='cancel'){state.selected=null;state.inspectTarget=null;state.mode='select';$('#commandBox').hidden=true;render()}
 }
 function renderSkills(u){
  const list=D().common.classes[u.classKey]?.skills||[];
  $('#commandButtons').innerHTML=list.map(s=>'<button class="skillBtn" data-skill="'+s.key+'"><span>✦ '+s.name+'</span><small>'+s.desc+' • '+s.cost+' SP</small></button>').join('')+'<button data-skill="back">↶ Voltar</button>';
- $('#commandButtons button').forEach(b=>b.onclick=()=>{const k=b.dataset.skill;if(k==='back')return renderCommands(u);useSkill(u,k)});
+ $$('#commandButtons button').forEach(b=>b.onclick=()=>{const k=b.dataset.skill;if(k==='back')return renderCommands(u);useSkill(u,k)});
 }
 function useSkill(u,k){
  const skill=D().common.classes[u.classKey]?.skills.find(s=>s.key===k);if(!skill)return;
@@ -212,7 +246,7 @@ function openLogicChoice(u,e){
  state.mode='logic';const box=$('#logicOverlay');box.classList.add('show');
  $('#logicTarget').textContent=e.icon+' '+e.name;$('#logicText').textContent='Qual conceito descreve o truque argumentativo deste alvo?';
  $('#logicChoices').innerHTML=FALLACIES.map(f=>'<button data-concept="'+f.key+'"><b>'+f.label+'</b><small>'+f.desc+'</small></button>').join('');
- $('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
+ $$('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
 }
 function resolveLogicChoice(u,e,choice){
  $('#logicOverlay').classList.remove('show');state.analysisCount++;state.answers[e.id]=choice;
