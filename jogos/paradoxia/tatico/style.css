@@ -13,3 +13,27 @@
 .tile.attackable{outline:3px solid #cc5865;box-shadow:0 8px 0 #321014,0 0 22px #d94f5c55}
 @media(max-width:820px){.battleStatus{top:auto;bottom:8px;right:8px}.unitInspector{left:8px;bottom:8px;width:175px}.deployGrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.turnBanner{top:8px}.battleStatus{gap:4px}.battleStatus>div{display:none}.battleStatus>button{font-size:6px;padding:6px 7px}.unitInspector{width:150px;padding:8px}.unitInspector p{display:none}.deployGrid{grid-template-columns:1fr 1fr}}
+
+/* Leitura de batalha: inimigos, vitória e derrota */
+.battleShell{grid-template-columns:240px minmax(0,1fr) 220px}
+.objectivePanel{overflow:auto}
+.winLose{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.winLose>div{padding:8px;border-radius:9px;border:1px solid #3b2a40;background:#100a14}
+.winLose small,.briefRules small{display:block;font-size:6px;font-weight:950;letter-spacing:.08em}
+.winLose b,.briefRules b{display:block;margin-top:3px;font-size:7px;line-height:1.35}
+.winRule{border-color:#2f654f!important;background:#0c1813!important}.winRule small,.winRule b{color:#94dfba}
+.loseRule{border-color:#71343d!important;background:#1c0d12!important}.loseRule small,.loseRule b{color:#ef9da5}
+.credibilityBox{margin:9px 0;padding:9px;border:1px solid #694d2e;border-radius:10px;background:#1a1209}
+.credibilityBox>div:first-child{display:flex;justify-content:space-between;gap:6px;align-items:center}
+.credibilityBox small{font-size:6px;color:#b99a72;font-weight:950}.credibilityBox b{font-size:9px;color:#ffd18c}
+.credibilityBar{height:7px;margin-top:7px;background:#2b1712;border-radius:99px;overflow:hidden}.credibilityBar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#d64e5d,#e6a14e,#75ce9b);transition:width .25s}
+.enemyPanel{margin:10px 0;padding-top:9px;border-top:1px solid #34243a}
+.enemyPanelHead{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-bottom:6px}.enemyPanelHead b{font-size:8px;color:#f0a3a8}.enemyPanelHead small{font-size:6px;color:#756a79}
+.enemyRoster{display:grid;gap:5px}.enemyCard{width:100%;border:1px solid #542c34;border-radius:9px;background:#170b10;color:#eed9dc;padding:7px;text-align:left;cursor:pointer}.enemyCard:hover,.enemyCard.active{border-color:#d85764;background:#241015;box-shadow:0 0 16px #cf4b5940}.enemyCard.defeated{opacity:.45;filter:grayscale(.5)}.enemyCard .eTop{display:grid;grid-template-columns:24px 1fr auto;gap:6px;align-items:center}.enemyCard .eIcon{font-size:18px}.enemyCard b{display:block;font-size:7px;color:#ffd0d3}.enemyCard em{font-style:normal;font-size:5px;color:#c46e76;font-weight:950}.enemyCard small{display:block;margin-top:2px;font-size:5px;color:#806f73}.enemyCard .eHp{font-size:6px;color:#e7a0a6}.enemyCard .eStatus{margin-top:5px;padding-top:4px;border-top:1px solid #321b20;font-size:5px;color:#ad8c91}
+.briefRules{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0}.briefRules>div{padding:9px;border:1px solid #3e2d43;border-radius:10px;background:#100a14}.briefRules>div:first-child{border-color:#2e634d}.briefRules>div:first-child small,.briefRules>div:first-child b{color:#96dfba}.briefRules>div:last-child{border-color:#71343d}.briefRules>div:last-child small,.briefRules>div:last-child b{color:#ef9da5}
+.unit.enemy{filter:drop-shadow(0 10px 8px #000a) drop-shadow(0 0 10px #a92f3f88)}.unit.enemy::before{content:"☠ INIMIGO";position:absolute;left:50%;top:-14px;transform:translateX(-50%);padding:2px 5px;border-radius:999px;background:#6e1f2a;border:1px solid #e05c68;color:#ffd7db;font-size:5px;font-weight:950;white-space:nowrap;box-shadow:0 3px 10px #0009}.unit.enemy .unitSprite{border-color:#e05b67!important;background:#351018!important;box-shadow:0 0 0 3px #55151f88,0 0 18px #d84c5966}.unit.enemy .unitName{background:#290c12;border:1px solid #6e2630;border-radius:999px;padding:2px 4px;color:#ffcbd0}.unit.enemy.targeted .unitSprite{box-shadow:0 0 0 4px #ffcc6655,0 0 28px #ff5b6eaa}
+.tile.danger{box-shadow:0 8px 0 #2c0f14,0 0 15px #c93d4b35}.tile.danger::after{content:"";position:absolute;inset:4px;border:1px dashed #b6455044;pointer-events:none}
+.inspectBars em{font-style:normal;color:#8e7d93}.unitInspector.enemyInspect{border-color:#7b3540;background:#170b11e9}.unitInspector.enemyInspect>small{color:#e16b78}.unitInspector.enemyInspect>b{color:#ffd0d4}
+.resultCard{position:relative;overflow:hidden}.resultCard.victory{border-color:#4c9b78!important;box-shadow:0 30px 90px #000c,0 0 45px #45b47a33}.resultCard.defeat{border-color:#a64552!important;box-shadow:0 30px 90px #000c,0 0 45px #c33f5033}.resultCard.victory h1{color:#b7f0cf!important}.resultCard.defeat h1{color:#ffc0c6!important}
+.resultCard.victory::before,.resultCard.defeat::before{content:"";position:absolute;inset:0;pointer-events:none}.resultCard.victory::before{background:radial-gradient(circle at 50% 0,#56bc7b22,transparent 45%)}.resultCard.defeat::before{background:radial-gradient(circle at 50% 0,#c94b5b22,transparent 45%)}
+@media(max-width:820px){.battleShell{grid-template-columns:1fr}.objectivePanel{width:220px!important;max-height:54vh!important}.enemyPanel{display:block}.winLose{grid-template-columns:1fr}.briefRules{grid-template-columns:1fr}}
