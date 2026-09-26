@@ -135,6 +135,16 @@ function startPresence(getState,interval=25000){
   document.addEventListener('visibilitychange',onVis);
   return ()=>{stopped=true;if(timer)clearInterval(timer);document.removeEventListener('visibilitychange',onVis)};
 }
+async function saveRpgState(saveData,chapter=1,sceneKey='inicio'){
+  const token=getSession();if(!token)return false;
+  await rpc('save_rpg_state',{p_token:token,p_chapter:chapter,p_scene_key:sceneKey,p_save_data:saveData});
+  return true;
+}
+async function loadRpgState(){
+  const token=getSession();if(!token)return null;
+  const row=first(await rpc('load_rpg_state',{p_token:token}));
+  return row||null;
+}
 async function syncLocal(state){
   if((!getSession()&&!getCode())||!state)return null;
   const tasks=[];
@@ -148,6 +158,7 @@ async function syncLocal(state){
   }
   if(Number(c.plataforma||0)>0)tasks.push(claimProgress('platform_socrates',Number(c.plataforma||0)));
   if(Number(c.plataoPlataforma||0)>0)tasks.push(claimProgress('platform_plato',Number(c.plataoPlataforma||0)));
+  if(Number(c.rpgParadoxia||0)>0)tasks.push(claimProgress('rpg_paradoxia',Number(c.rpgParadoxia||0)));
   const today=new Date().toISOString().slice(0,10);
   if(state.daily===today)tasks.push(claimDaily());
   await Promise.allSettled(tasks);
@@ -158,7 +169,7 @@ window.NevoaOnline={
   rpc,getCode,setCode,getSession,setSession,
   createExplorer,restoreExplorer,getProgress,loadExplorer,
   registerStudent,loginStudent,sessionProfile,accountSnapshot,logout,
-  leaderboard,claimProgress,claimDaily,heartbeat,startPresence,syncLocal
+  leaderboard,claimProgress,claimDaily,heartbeat,startPresence,saveRpgState,loadRpgState,syncLocal
 };
 window.dispatchEvent(new Event('nevoa-online-ready'));
 })();
