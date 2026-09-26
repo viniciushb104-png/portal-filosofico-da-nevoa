@@ -291,7 +291,7 @@ function loseHeart(){
 }
 function resolveBattle(index){
  const sc=scene(),opt=sc.options[index];
- $$$$('.choice').forEach(b=>b.disabled=true);
+ $$$$$('.choice').forEach(b=>b.disabled=true);
  if(opt.correct){
    awardOnce(sc.id,15);addConcept(sc.concept);
    showFeedback('✓ '+opt.feedback,'good');
@@ -306,7 +306,7 @@ function resolveBattle(index){
 }
 function resolveBoss(index){
  const sc=scene(),q=sc.questions[state.bossStep];
- $$$$('.choice').forEach(b=>b.disabled=true);
+ $$$$$('.choice').forEach(b=>b.disabled=true);
  if(index===q.ok){
    awardOnce('boss_'+state.bossStep,15);addConcept(sc.concept);
    showFeedback('✓ '+q.f,'good');
@@ -366,12 +366,12 @@ function renderHUD(){
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
 function renderMap(){
  const ids=scenes.map(s=>s.id);
- $$$('.mapNode').forEach(n=>{
+ $$$$('.mapNode').forEach(n=>{
    const idx=ids.indexOf(n.dataset.node);
    n.classList.toggle('done',idx<state.sceneIndex||state.completed);
    n.classList.toggle('active',idx===state.sceneIndex&&!state.completed);
  });
- $$$('.worldPoi').forEach(n=>{
+ $$$$('.worldPoi').forEach(n=>{
    const idx=ids.indexOf(n.dataset.scene);
    n.classList.toggle('done',idx<state.sceneIndex||state.completed);
    n.classList.toggle('current',idx===state.sceneIndex&&!state.completed);
@@ -507,8 +507,8 @@ function updateInteraction(){
  });
  nearbyExtra=extraDist<62?bestExtra:null;
 
- $$$('.worldInteract').forEach(el=>el.classList.toggle('near',el.dataset.interaction===nearbyExtra));
- $$$('.worldInteract').forEach(el=>el.classList.toggle('discovered',!!state.worldFlags[el.dataset.interaction]));
+ $$$$('.worldInteract').forEach(el=>el.classList.toggle('near',el.dataset.interaction===nearbyExtra));
+ $$$$('.worldInteract').forEach(el=>el.classList.toggle('discovered',!!state.worldFlags[el.dataset.interaction]));
 
  const prompt=$('#interactionPrompt'),label=$('#interactionLabel');
  const hasTarget=!!nearbyExtra||!!nearbyPoi;
@@ -590,7 +590,7 @@ function setupWorldControls(){
  });
  window.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.body.classList.contains('sceneOpen'))closeScene();else closeWorldDialogue()}});
  window.addEventListener('keyup',e=>{if(keyMap[e.key])setMove(keyMap[e.key],false)});
- $$$('.dpad button[data-move]').forEach(b=>{
+ $$$$('.dpad button[data-move]').forEach(b=>{
    const k=b.dataset.move;
    const down=e=>{e.preventDefault();setMove(k,true)};
    const up=e=>{e.preventDefault();setMove(k,false)};
@@ -599,13 +599,13 @@ function setupWorldControls(){
  $('#interactMobile')?.addEventListener('click',interactWorld);
  $('#sceneClose')?.addEventListener('click',closeScene);
  $('#worldDialogueClose')?.addEventListener('click',closeWorldDialogue);
- $$('.worldInteract').forEach(b=>b.addEventListener('click',()=>{
+ $$$('.worldInteract').forEach(b=>b.addEventListener('click',()=>{
    const id=b.dataset.interaction,item=INTERACTIONS[id];
    if(!item)return;
    const d=Math.hypot(state.world.x-item.x,state.world.y-item.y);
    if(d<68){nearbyExtra=id;interactWorld()}else toast('✨ Parece interessante. Chegue mais perto para interagir.');
  }));
- $$('.worldPoi').forEach(b=>b.addEventListener('click',()=>{
+ $$$('.worldPoi').forEach(b=>b.addEventListener('click',()=>{
    const id=b.dataset.scene,pt=WORLD.points[id],d=Math.hypot(state.world.x-pt.x,state.world.y-pt.y);
    if(d<82){nearbyPoi=id;interactWorld()}else toast('🗺️ Caminhe até '+WORLD_NAMES[id]+' para interagir.');
  }));
