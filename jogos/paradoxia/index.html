@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="world-v2.css?v=2">
 <link rel="stylesheet" href="walk-sprites.css?v=1">
 <link rel="stylesheet" href="world-v3.css?v=2">
+<link rel="stylesheet" href="competition.css?v=1">
 <link rel="preload" as="image" href="assets/dialetico_sheet_hd.png">
 <link rel="preload" as="image" href="assets/cetico_sheet_hd.png">
 <link rel="preload" as="image" href="assets/etico_sheet_hd.png">
@@ -328,6 +329,40 @@
     </section>
   </section>
 
+  <section class="competitionHub" id="competitionHub">
+    <div class="competitionHead">
+      <div>
+        <small>CAMPEONATO ONLINE DE PARADOXIA</small>
+        <h2 id="competitionSeason">Temporada da Névoa</h2>
+        <p><span id="competitionNotice">Ranking geral</span> • <span id="competitionEnds">carregando temporada…</span></p>
+      </div>
+      <div class="liveBadge"><i></i> ATUALIZAÇÃO AO VIVO</div>
+    </div>
+
+    <div class="competitionSummary">
+      <div class="compMetric"><span>Meus pontos</span><b id="myCompPoints">0</b><small>melhores resultados</small></div>
+      <div class="compMetric"><span>Ranking geral</span><b id="myCompRank">—</b><small>temporada atual</small></div>
+      <div class="compMetric"><span>Ranking da turma</span><b id="myClassRank">—</b><small>mesma turma cadastrada</small></div>
+      <div class="compMetric"><span>Missões concluídas</span><b id="myMissionCount">0</b><small>competitivas</small></div>
+    </div>
+
+    <div class="compBody">
+      <section class="missionBoard">
+        <div class="compSectionTitle"><b>🗺️ Fases e missões do reino</b><small>melhor resultado conta</small></div>
+        <div class="missionCards" id="competitionMissions"></div>
+      </section>
+      <aside class="leaderboardBox">
+        <div class="compSectionTitle"><b>🏆 Classificação</b><small>atualiza automaticamente</small></div>
+        <div class="leaderTabs">
+          <button type="button" class="active" data-rank-scope="global">Reino</button>
+          <button type="button" data-rank-scope="class">Minha turma</button>
+        </div>
+        <div class="rankList" id="competitionRanks"></div>
+        <div class="compLogin" id="compLogin" hidden>Para registrar tentativas competitivas e ver sua posição na turma, <a href="../../login.html">entre na sua conta</a>.</div>
+      </aside>
+    </div>
+  </section>
+
   <section class="philoLog">
     <div class="logHead"><span>📜</span><div><small>GRIMÓRIO DE CAMPO</small><b>Ideias encontradas durante a jornada</b></div></div>
     <div id="logList" class="logList"><span>Nenhum conceito registrado ainda.</span></div>
@@ -370,7 +405,9 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="../../online.js?v=7.5"></script>
+<script src="../../online.js?v=7.6"></script>
+<script src="missions.js?v=1"></script>
+<script src="competition.js?v=1"></script>
 <script src="game.js?v=7"></script>
 </body>
 </html>
