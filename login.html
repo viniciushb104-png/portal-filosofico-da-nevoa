@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08050d">
+<title>Entrar • Portal Filosófico da Névoa</title>
+<link rel="stylesheet" href="styles.css?v=7.3">
+<link rel="stylesheet" href="auth.css?v=1">
+</head>
+<body class="authPage" data-auth="login">
+<header class="authTop"><div class="wrap">
+  <a class="authBrand" href="index.html"><span class="authSigilSmall">🦉</span><span><b>Portal Filosófico da Névoa</b><small>Adentre o Portal</small></span></a>
+  <a class="authBack" href="index.html">← Voltar ao Portal</a>
+</div></header>
+<main class="authMain">
+  <div class="authLayout">
+    <section class="authLore">
+      <div class="eyebrow">Conta do Explorador</div>
+      <h1>Retorne à <span>Névoa</span></h1>
+      <p>Seu XP, suas fases e suas conquistas esperam por você. Entre com o mesmo apelido e PIN usados no cadastro.</p>
+      <div class="authRunes"><span>🏆 Ranking de XP</span><span>☁️ Progresso online</span><span>🟢 Amigos online</span><span>🎮 Fases salvas</span></div>
+      <div class="authQuote">“A memória guarda caminhos. A filosofia ensina por que vale a pena percorrê-los outra vez.”</div>
+    </section>
+    <section class="authCard">
+      <div class="authIcon">🔐</div>
+      <div class="eyebrow">Login do Explorador</div>
+      <h2>Entre no seu perfil</h2>
+      <p class="authLead">Não precisa de e-mail. Use seu apelido e seu PIN numérico.</p>
+      <div id="authLogged" class="authLogged"></div>
+      <form id="authForm" class="authForm">
+        <label>Apelido
+          <input id="username" type="text" maxlength="24" autocomplete="username" placeholder="Ex.: Luiz7B" required>
+        </label>
+        <label>PIN
+          <div class="pinRow"><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="current-password" placeholder="4 a 6 números" required><button class="pinToggle" type="button" aria-label="Mostrar PIN">👁</button></div>
+        </label>
+        <div id="authStatus" class="authStatus" aria-live="polite"></div>
+        <button id="authSubmit" class="authSubmit" type="submit">🔐 Entrar no Portal</button>
+      </form>
+      <div class="authSwitch">Ainda não tem conta? <a href="cadastro.html">🎃 Criar meu cadastro</a></div>
+      <div class="authPrivacy">Seu apelido, turma, XP e posição dentro do jogo podem aparecer no ranking. O PIN não é exibido publicamente.</div>
+    </section>
+  </div>
+</main>
+<script src="online.js?v=7.3"></script>
+<script src="auth.js?v=1"></script>
+</body>
+</html>
