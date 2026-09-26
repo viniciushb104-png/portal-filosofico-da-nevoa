@@ -76,3 +76,78 @@ section{padding:70px 0}.sectionHead{max-width:820px;text-align:center;margin:0 a
 .registerBtn:hover{border-color:#ff9147;box-shadow:0 0 22px #ff7a2a22}
 @media(max-width:900px){.registerBtn{padding:9px 10px;font-size:12px}}
 @media(max-width:760px){.registerBtn{font-size:0;width:42px;height:42px;padding:0}.registerBtn::after{content:"🎃";font-size:18px}}
+
+/* V7.4 — botões de conta integrados ao design do Portal */
+.authNavBtn{
+  appearance:none;
+  -webkit-appearance:none;
+  text-decoration:none;
+  height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border-radius:13px;
+  padding:0 13px;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.02em;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 8px 22px #0006,inset 0 1px #ffffff12;
+  transition:transform .18s ease,filter .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.authNavBtn::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent 0 38%,#ffffff16 48%,transparent 58% 100%);
+  transform:translateX(-130%);
+  transition:transform .45s ease;
+}
+.authNavBtn:hover::before{transform:translateX(130%)}
+.authNavBtn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.authNavBtn span,.authNavBtn b{position:relative;z-index:1}
+.authNavBtn span{font-size:16px}
+.authLoginBtn{
+  color:#f9ecff;
+  border:1px solid #7c3fa0;
+  background:linear-gradient(180deg,#3a1748,#1a0b24);
+  box-shadow:0 0 22px #b34ee126,0 8px 22px #0007,inset 0 1px #ffffff12;
+}
+.authLoginBtn:hover{border-color:#cf65f5;box-shadow:0 0 30px #bd55e744,0 10px 25px #0008}
+.authLoginBtn.logged{
+  color:#b8ffe2;
+  border-color:#2f9e76;
+  background:linear-gradient(180deg,#16382c,#0b1c16);
+  box-shadow:0 0 26px #42d79b30,0 8px 22px #0007;
+}
+.authRegisterBtn{
+  color:#fff0df;
+  border:1px solid #b75a2c;
+  background:linear-gradient(180deg,#572616,#281109);
+  box-shadow:0 0 22px #ff732b25,0 8px 22px #0007,inset 0 1px #ffffff12;
+}
+.authRegisterBtn:hover{border-color:#ff914c;box-shadow:0 0 30px #ff792e42,0 10px 25px #0008}
+.authHallLink{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  border-color:#75408b!important;
+  background:linear-gradient(180deg,#361546,#190b22)!important;
+  color:#f7eaff!important;
+}
+.authHallLink.create{
+  border-color:#a9582e!important;
+  background:linear-gradient(180deg,#492014,#211008)!important;
+  color:#ffe0c7!important;
+}
+@media(max-width:1080px){
+  .authNavBtn{width:42px;padding:0}
+  .authNavBtn b{display:none}
+}
+@media(max-width:760px){
+  .authNavBtn{width:40px;height:40px;border-radius:12px}
+  .authNavBtn span{font-size:17px}
+}
