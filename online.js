@@ -145,6 +145,53 @@ async function loadRpgState(){
   const row=first(await rpc('load_rpg_state',{p_token:token}));
   return row||null;
 }
+async function activeParadoxiaSeason(){
+  return first(await rpc('get_active_paradoxia_season',{}));
+}
+async function paradoxiaMissions(){
+  const token=getSession();
+  const data=await rpc('get_paradoxia_missions',{p_token:token||null});
+  return Array.isArray(data)?data:[];
+}
+async function startParadoxiaAttempt(missionKey){
+  const token=getSession();if(!token)throw new Error('Entre na conta para competir.');
+  return first(await rpc('start_paradoxia_attempt',{p_token:token,p_mission_key:String(missionKey||'')}));
+}
+async function recordParadoxiaCheckpoint(attemptId,checkpointKey){
+  const token=getSession();if(!token)throw new Error('Sessão necessária.');
+  return first(await rpc('record_paradoxia_checkpoint',{
+    p_token:token,p_attempt_id:attemptId,p_checkpoint_key:String(checkpointKey||'')
+  }));
+}
+async function finishParadoxiaAttempt(attemptId,result={}){
+  const token=getSession();if(!token)throw new Error('Sessão necessária.');
+  return first(await rpc('finish_paradoxia_attempt',{
+    p_token:token,p_attempt_id:attemptId,p_result:result||{}
+  }));
+}
+async function paradoxiaLeaderboard(scope='global',limit=50){
+  const token=getSession();
+  const data=await rpc('get_paradoxia_leaderboard',{
+    p_token:token||null,p_scope:String(scope||'global'),p_limit:Math.max(1,Math.min(Number(limit)||50,100))
+  });
+  return Array.isArray(data)?data:[];
+}
+async function paradoxiaCompetitionStatus(){
+  const token=getSession();if(!token)return null;
+  return first(await rpc('get_paradoxia_competition_status',{p_token:token}));
+}
+function watchParadoxiaLeaderboard(callback,scope='global',interval=15000){
+  let stopped=false,timer=null;
+  const run=async()=>{
+    if(stopped)return;
+    try{callback(await paradoxiaLeaderboard(scope,50),null)}
+    catch(e){callback([],e)}
+  };
+  run();
+  timer=setInterval(run,Math.max(10000,Number(interval)||15000));
+  return ()=>{stopped=true;if(timer)clearInterval(timer)};
+}
+
 async function syncLocal(state){
   if((!getSession()&&!getCode())||!state)return null;
   const tasks=[];
@@ -169,7 +216,10 @@ window.NevoaOnline={
   rpc,getCode,setCode,getSession,setSession,
   createExplorer,restoreExplorer,getProgress,loadExplorer,
   registerStudent,loginStudent,sessionProfile,accountSnapshot,logout,
-  leaderboard,claimProgress,claimDaily,heartbeat,startPresence,saveRpgState,loadRpgState,syncLocal
+  leaderboard,claimProgress,claimDaily,heartbeat,startPresence,saveRpgState,loadRpgState,
+  activeParadoxiaSeason,paradoxiaMissions,startParadoxiaAttempt,recordParadoxiaCheckpoint,
+  finishParadoxiaAttempt,paradoxiaLeaderboard,paradoxiaCompetitionStatus,watchParadoxiaLeaderboard,
+  syncLocal
 };
 window.dispatchEvent(new Event('nevoa-online-ready'));
 })();
