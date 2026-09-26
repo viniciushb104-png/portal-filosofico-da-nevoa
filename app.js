@@ -103,42 +103,210 @@ const geminiPrompts={
 $$('.promptBtn').forEach(btn=>btn.onclick=()=>{const key=btn.dataset.prompt; const titles={guia:'Guia da Névoa',mansao:'Mansão da Névoa',filosofos:'Guardião dos Filósofos',espelho:'Sombra do Espelho'}; $('#promptTitle').textContent=titles[key]; $('#promptText').value=geminiPrompts[key]; $('#promptDialog').showModal();});
 $('#copyPrompt').onclick=async()=>{try{await navigator.clipboard.writeText($('#promptText').value); toast('Prompt copiado para o Gemini.')}catch(e){toast('Não foi possível copiar automaticamente.')}};
 
-let onlineRanking=[],onlineProfileData=null;
+let onlineRanking=[],onlineProfileData=null,portalPresenceStop=null;
 function escapeHTML(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function medal(pos){return pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':'🕯️'}
+function isMe(item){
+  if(!onlineProfileData)return false;
+  return item.nickname===onlineProfileData.nickname &&
+    String(item.class_name||'')===String(onlineProfileData.class_name||'');
+}
 function renderHall(){
  const box=$('#hallList');if(!box)return;
- if(!onlineRanking.length){box.innerHTML='<div class="hallItem"><div><b>Ranking aguardando exploradores</b><small>Crie seu perfil para inaugurar a competição.</small></div><span class="hallBadge">0 XP</span></div>';return}
- const myCode=window.NevoaOnline?.getCode?.()||'';
- box.innerHTML=onlineRanking.map(item=>`<div class="hallItem ${onlineProfileData&&item.nickname===onlineProfileData.nickname&&Number(item.xp)===Number(onlineProfileData.xp)?'me':''}"><div><b><span class="rankMedal">${medal(Number(item.rank_position))}</span>${Number(item.rank_position)}. ${escapeHTML(item.nickname)}</b><small>${escapeHTML(item.class_name||'Sem turma')} • ${escapeHTML(item.title)}</small></div><span class="hallBadge">${Number(item.xp)||0} XP</span></div>`).join('');
+ const count=onlineRanking.filter(x=>x.is_online).length;
+ if($('#onlineCount'))$('#onlineCount').textContent=count;
+ if(!onlineRanking.length){
+   box.innerHTML='<div class="hallItem"><div><b>Ranking aguardando exploradores</b><small>Faça login e seja o primeiro a pontuar.</small></div><span class="hallBadge">0 XP</span></div>';
+   return;
+ }
+ box.innerHTML=onlineRanking.map(item=>{
+   const online=!!item.is_online;
+   const where=online&&item.location_label?escapeHTML(item.location_label):'Offline';
+   const status=online
+     ? `<small class="onlineStatus hallLocation"><span class="statusDot on"></span>Online • ${where}</small>`
+     : '<small class="onlineStatus"><span class="statusDot off"></span>Offline</small>';
+   return `<div class="hallItem ${isMe(item)?'me':''}">
+     <div>
+       <b><span class="rankMedal">${medal(Number(item.rank_position))}</span>${Number(item.rank_position)}. ${escapeHTML(item.nickname)}</b>
+       <small>${escapeHTML(item.class_name||'Sem turma')} • ${escapeHTML(item.title)}</small>
+       ${status}
+     </div>
+     <span class="hallBadge">${Number(item.xp)||0} XP</span>
+   </div>`;
+ }).join('');
 }
-function setOnlineProfile(profile){
- onlineProfileData=profile||null;const box=$('#onlineProfile'),codeBox=$('#explorerCodeBox'),codeText=$('#explorerCodeText');
+function setOnlineProfile(profile,logged=!!window.NevoaOnline?.getSession?.()){
+ onlineProfileData=profile||null;
+ const box=$('#onlineProfile'),codeBox=$('#explorerCodeBox'),codeText=$('#explorerCodeText');
+ const logoutBtn=$('#logoutOnline'),loginBtn=$('#loginBtn');
  if(!box)return;
- if(profile){box.classList.add('connected');box.innerHTML=`<span class="onlineDot"></span><div><b>${escapeHTML(profile.nickname)} • ${Number(profile.xp)||0} XP</b><small>${escapeHTML(profile.title)}${profile.class_name?' • '+escapeHTML(profile.class_name):''}</small></div>`;if(codeBox)codeBox.hidden=false;if(codeText)codeText.textContent=profile.explorer_code||window.NevoaOnline.getCode();}
- else{box.classList.remove('connected');box.innerHTML='<span class="onlineDot"></span><div><b>Perfil online ainda não criado</b><small>Crie seu explorador para entrar no Ranking Global.</small></div>';if(codeBox)codeBox.hidden=true}
+ if(profile){
+   box.classList.add('connected');
+   box.innerHTML=`<span class="onlineDot"></span><div><b>${escapeHTML(profile.nickname)} • ${Number(profile.xp)||0} XP</b><small>${escapeHTML(profile.title)}${profile.class_name?' • '+escapeHTML(profile.class_name):''}${logged?' • sessão ativa':' • recuperado por código'}</small></div>`;
+   if(codeBox)codeBox.hidden=false;
+   if(codeText)codeText.textContent=profile.explorer_code||window.NevoaOnline.getCode();
+   if(logoutBtn)logoutBtn.hidden=!logged;
+   if(loginBtn){loginBtn.classList.toggle('logged',logged);loginBtn.textContent=logged?'🟢 '+profile.nickname:'🔐 Entrar';}
+ }else{
+   box.classList.remove('connected');
+   box.innerHTML='<span class="onlineDot"></span><div><b>Você ainda não entrou</b><small>Entre para salvar automaticamente e aparecer na competição.</small></div>';
+   if(codeBox)codeBox.hidden=true;
+   if(logoutBtn)logoutBtn.hidden=true;
+   if(loginBtn){loginBtn.classList.remove('logged');loginBtn.textContent='🔐 Entrar';}
+ }
 }
 function applyServerProgress(snapshot){
  if(!snapshot?.profile)return;
  const p=snapshot.profile,claims=snapshot.progress||[];onlineProfileData=p;
  state.xp=Number(p.xp)||0;
  const roomKeys=['filosofos','logica','etica','descartes','platao','fontes','escape','dilemas'];
- claims.forEach(c=>{const k=c.event_key,score=Number(c.best_score)||0;if(roomKeys.includes(k))state.completed[k]=Math.max(Number(state.completed[k]||0),score);if(k==='socrates_mansion')state.socrates=Math.max(Number(state.socrates||0),score>=130?7:Math.min(7,Math.floor(score/15)));if(k==='platform_socrates')state.completed.plataforma=Math.max(Number(state.completed.plataforma||0),score);if(k==='platform_plato')state.completed.plataoPlataforma=Math.max(Number(state.completed.plataoPlataforma||0),score)});
+ claims.forEach(c=>{
+   const k=c.event_key,score=Number(c.best_score)||0;
+   if(roomKeys.includes(k))state.completed[k]=Math.max(Number(state.completed[k]||0),score);
+   if(k==='socrates_mansion')state.socrates=Math.max(Number(state.socrates||0),score>=130?7:Math.min(7,Math.floor(score/15)));
+   if(k==='platform_socrates')state.completed.plataforma=Math.max(Number(state.completed.plataforma||0),score);
+   if(k==='platform_plato')state.completed.plataoPlataforma=Math.max(Number(state.completed.plataoPlataforma||0),score);
+ });
  saveState();checkAchievements();setOnlineProfile(p);updateUI();
 }
-function applyOnlineClaim(result){if(!result)return;if(Number.isFinite(Number(result.xp))){state.xp=Number(result.xp);saveState();if(onlineProfileData){onlineProfileData.xp=state.xp;onlineProfileData.title=result.title||onlineProfileData.title;setOnlineProfile(onlineProfileData)}updateUI();refreshOnlineRanking();}}
-async function refreshOnlineRanking(){if(!window.NevoaOnline)return;const box=$('#hallList');if(box)box.classList.add('loading');try{onlineRanking=await window.NevoaOnline.leaderboard(50);renderHall()}catch(e){if(box)box.innerHTML='<div class="hallItem"><div><b>Não foi possível carregar o ranking</b><small>Verifique a internet e tente atualizar.</small></div><span class="hallBadge">offline</span></div>'}finally{if(box)box.classList.remove('loading')}}
-async function syncOnlineProfile(showToast=true){if(!window.NevoaOnline?.getCode())return null;try{const snap=await window.NevoaOnline.syncLocal(state);if(snap){applyServerProgress(snap);if(showToast)toast('☁️ Progresso sincronizado com o Ranking Global.');await refreshOnlineRanking()}return snap}catch(e){if(showToast)toast('Não foi possível sincronizar agora.');return null}}
-async function initOnlineHall(){if(!window.NevoaOnline)return;await refreshOnlineRanking();const code=window.NevoaOnline.getCode();if(code){try{const snap=await window.NevoaOnline.loadExplorer(code);if(snap)applyServerProgress(snap);else window.NevoaOnline.setCode('')}catch(e){}}}
-$('#saveHall').onclick=async()=>{if(!window.NevoaOnline){toast('Ranking online indisponível.');return}if(window.NevoaOnline.getCode()){await syncOnlineProfile();return}const name=($('#hallName').value||'').trim(),className=($('#hallClass').value||'').trim();if(!name){toast('Digite um apelido para entrar no ranking.');return}try{const p=await window.NevoaOnline.createExplorer(name,className);setOnlineProfile(p);$('#hallCode').value=p.explorer_code;toast('🎃 Explorador criado! Guarde seu Código da Névoa.');await syncOnlineProfile(false);await refreshOnlineRanking()}catch(e){toast(e.message||'Não foi possível criar o explorador.')}};
-$('#restoreHall').onclick=async()=>{const code=($('#hallCode').value||'').trim().toUpperCase();if(!code){toast('Digite seu Código da Névoa.');return}try{window.NevoaOnline.setCode(code);const snap=await window.NevoaOnline.loadExplorer(code);if(!snap){window.NevoaOnline.setCode('');toast('Código não encontrado.');return}applyServerProgress(snap);await refreshOnlineRanking();toast('☁️ Progresso recuperado deste Código da Névoa.')}catch(e){window.NevoaOnline.setCode('');toast('Código não encontrado ou conexão indisponível.')}};
-$('#copyExplorerCode').onclick=async()=>{const code=window.NevoaOnline?.getCode()||'';if(!code)return;try{await navigator.clipboard.writeText(code);toast('Código da Névoa copiado.')}catch(e){toast(code)}};
+function applyOnlineClaim(result){
+ if(!result)return;
+ if(Number.isFinite(Number(result.xp))){
+   state.xp=Number(result.xp);saveState();
+   if(onlineProfileData){
+     onlineProfileData.xp=state.xp;
+     onlineProfileData.title=result.title||onlineProfileData.title;
+     setOnlineProfile(onlineProfileData);
+   }
+   updateUI();refreshOnlineRanking();
+ }
+}
+async function refreshOnlineRanking(){
+ if(!window.NevoaOnline)return;
+ const box=$('#hallList');if(box)box.classList.add('loading');
+ try{onlineRanking=await window.NevoaOnline.leaderboard(50);renderHall()}
+ catch(e){if(box)box.innerHTML='<div class="hallItem"><div><b>Não foi possível carregar o ranking</b><small>Verifique a internet e tente atualizar.</small></div><span class="hallBadge">offline</span></div>'}
+ finally{if(box)box.classList.remove('loading')}
+}
+function beginPortalPresence(){
+ if(portalPresenceStop){portalPresenceStop();portalPresenceStop=null}
+ if(window.NevoaOnline?.getSession()){
+   portalPresenceStop=window.NevoaOnline.startPresence(()=>({
+     locationKey:'portal',
+     locationLabel:'Portal principal',
+     phase:0,
+     stage:0
+   }),22000);
+ }
+}
+async function syncOnlineProfile(showToast=true){
+ if(!window.NevoaOnline?.getSession()&&!window.NevoaOnline?.getCode())return null;
+ try{
+   const snap=await window.NevoaOnline.syncLocal(state);
+   if(snap){
+     applyServerProgress(snap);
+     if(showToast)toast('☁️ Progresso sincronizado automaticamente.');
+     beginPortalPresence();
+     await refreshOnlineRanking();
+   }
+   return snap;
+ }catch(e){
+   if(showToast)toast('Não foi possível sincronizar agora.');
+   return null;
+ }
+}
+async function initOnlineHall(){
+ if(!window.NevoaOnline)return;
+ await refreshOnlineRanking();
+ if(window.NevoaOnline.getSession()){
+   await syncOnlineProfile(false);
+   beginPortalPresence();
+ }else{
+   const code=window.NevoaOnline.getCode();
+   if(code){
+     try{
+       const snap=await window.NevoaOnline.loadExplorer(code);
+       if(snap){applyServerProgress(snap);setOnlineProfile(snap.profile,false)}
+       else window.NevoaOnline.setCode('');
+     }catch(e){}
+   }else setOnlineProfile(null);
+ }
+}
+function openLogin(){if($('#loginDialog'))$('#loginDialog').showModal()}
+$('#loginBtn').onclick=()=>window.NevoaOnline?.getSession()?$('#hall').scrollIntoView({behavior:'smooth'}):openLogin();
+$('#openLoginHall').onclick=openLogin;
+
+$('#loginSubmit').onclick=async()=>{
+ const user=($('#loginUsername').value||'').trim();
+ const pin=($('#loginPin').value||'').trim();
+ if(!user||!/^[0-9]{4,6}$/.test(pin)){toast('Digite seu apelido e um PIN de 4 a 6 números.');return}
+ try{
+   const p=await window.NevoaOnline.loginStudent(user,pin);
+   setOnlineProfile(p,true);
+   $('#loginDialog').close();
+   await syncOnlineProfile(false);
+   beginPortalPresence();
+   toast('🦇 Login feito. Bem-vindo de volta, '+p.nickname+'!');
+ }catch(e){toast(e.message||'Apelido ou PIN incorreto.')}
+};
+
+$('#registerSubmit').onclick=async()=>{
+ const user=($('#registerUsername').value||'').trim();
+ const pin=($('#registerPin').value||'').trim();
+ const turma=($('#registerClass').value||'').trim();
+ if(!user){toast('Escolha um apelido.');return}
+ if(!/^[0-9]{4,6}$/.test(pin)){toast('O PIN deve ter de 4 a 6 números.');return}
+ try{
+   const p=await window.NevoaOnline.registerStudent(user,pin,turma);
+   setOnlineProfile(p,true);
+   $('#loginDialog').close();
+   await syncOnlineProfile(false);
+   beginPortalPresence();
+   toast('🎃 Conta criada! Seu progresso já está salvo online.');
+ }catch(e){toast(e.message||'Não foi possível criar a conta.')}
+};
+
+$('#logoutOnline').onclick=async()=>{
+ await window.NevoaOnline.logout();
+ window.NevoaOnline.setCode('');
+ if(portalPresenceStop){portalPresenceStop();portalPresenceStop=null}
+ onlineProfileData=null;
+ setOnlineProfile(null);
+ await refreshOnlineRanking();
+ toast('Sessão encerrada neste aparelho.');
+};
+
+$('#restoreHall').onclick=async()=>{
+ const code=($('#hallCode').value||'').trim().toUpperCase();
+ if(!code){toast('Digite seu Código da Névoa.');return}
+ try{
+   window.NevoaOnline.setCode(code);
+   const snap=await window.NevoaOnline.loadExplorer(code);
+   if(!snap){window.NevoaOnline.setCode('');toast('Código não encontrado.');return}
+   applyServerProgress(snap);setOnlineProfile(snap.profile,false);
+   await refreshOnlineRanking();
+   toast('☁️ Progresso recuperado. Agora crie um login para facilitar os próximos acessos.');
+ }catch(e){window.NevoaOnline.setCode('');toast('Código não encontrado ou conexão indisponível.')}
+};
+$('#copyExplorerCode').onclick=async()=>{
+ const code=window.NevoaOnline?.getCode()||'';if(!code)return;
+ try{await navigator.clipboard.writeText(code);toast('Código de recuperação copiado.')}catch(e){toast(code)}
+};
 $('#syncOnline').onclick=()=>syncOnlineProfile();
 $('#refreshRanking').onclick=()=>refreshOnlineRanking();
-$('#openCertificate').onclick=()=>{const name=onlineProfileData?.nickname||(($('#hallName').value||'').trim()||'Explorador da Névoa');const rank=onlineProfileData?.title||currentRank().current[0];$('#certificateName').textContent=name;$('#certificateRank').textContent=rank;$('#certificateXP').textContent=state.xp+' XP';$('#certificateDate').textContent=new Date().toLocaleDateString('pt-BR');$('#certificateDialog').showModal();};
+$('#openCertificate').onclick=()=>{
+ const name=onlineProfileData?.nickname||'Explorador da Névoa';
+ const rank=onlineProfileData?.title||currentRank().current[0];
+ $('#certificateName').textContent=name;
+ $('#certificateRank').textContent=rank;
+ $('#certificateXP').textContent=state.xp+' XP';
+ $('#certificateDate').textContent=new Date().toLocaleDateString('pt-BR');
+ $('#certificateDialog').showModal();
+};
 
 updateUI();
 initOnlineHall();
+setInterval(()=>{if(document.visibilityState==='visible')refreshOnlineRanking()},20000);
 
 // V5 — detecção e reprodução automática dos vídeos do Gemini.
 // Se um MP4 não existir ou falhar, o poster permanece visível e o site continua funcionando.
