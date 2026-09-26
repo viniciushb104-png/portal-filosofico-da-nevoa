@@ -61,7 +61,21 @@ function startBoard(){
    renderRanks(rows);
  },scope,15000);
 }
+function focusMission(key){
+ const card=document.querySelector('.competitionMission[data-mission="'+CSS.escape(key)+'"]');
+ if(!card)return;
+ document.querySelectorAll('.competitionMission.focused').forEach(x=>x.classList.remove('focused'));
+ card.classList.add('focused');
+ card.scrollIntoView({behavior:'smooth',block:'center'});
+ setTimeout(()=>card.classList.remove('focused'),2200);
+}
 function bind(){
+ document.querySelectorAll('[data-region-mission],[data-npc-mission]').forEach(el=>{
+   const key=el.dataset.regionMission||el.dataset.npcMission;
+   const go=()=>focusMission(key);
+   el.addEventListener('click',go);
+   el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+ });
  document.querySelectorAll('[data-rank-scope]').forEach(b=>b.addEventListener('click',()=>{
    scope=b.dataset.rankScope||'global';
    document.querySelectorAll('[data-rank-scope]').forEach(x=>x.classList.toggle('active',x===b));
