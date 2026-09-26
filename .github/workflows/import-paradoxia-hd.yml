@@ -1,0 +1,73 @@
+name: Import Paradoxia HD sprites
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - ".github/workflows/import-paradoxia-hd.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  import-hd-sprites:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download original transparent PNG sheets
+        env:
+          DIALETICO_URL: "https://d2jqrm6oza8nb6.cloudfront.net/datasets/566b632e-a55a-4083-aecc-1328f7a6a18a.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYzQ2MzEyNTcyZDlkMGMzNSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDUxNjY5NX0.thbWHX9a7bmxrFKlCjAw3shzEm7bkAjDBubh-jA7a7U"
+          CETICO_URL: "https://d2jqrm6oza8nb6.cloudfront.net/datasets/f30dcb50-f51b-4fab-b2d9-8c36e836dcce.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMjkwMThhNDlkMzc3MjZiZCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDUxNzE5M30.j_rZazMkZ6l_zIDTuGoWAKTYRzZCgi0yWlU1-LUsZPc"
+          ETICO_URL: "https://d2jqrm6oza8nb6.cloudfront.net/datasets/1ae244be-d970-466f-8624-de627eedf7b5.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNzY4NDNmOGIzYzk4YTQyNiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDUyMjUwN30.Qt2A2hUDHJ7MxgfY5eWQOI3S5Q1OnY0CMUAZXxxXztY"
+          EXISTENCIAL_URL: "https://d2jqrm6oza8nb6.cloudfront.net/datasets/b6f4332e-5a07-47d0-a924-2842f2cbc009.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOWEzZGQ4NGY4ZDA4MjUxYSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDUzMTUzNX0.Mm8hfPaUNO0KoURqMRdUL6GoxHrPAPETNCeg8rRz-PM"
+        run: |
+          set -euo pipefail
+          mkdir -p jogos/paradoxia/assets
+          curl -fL --retry 3 "$DIALETICO_URL" -o jogos/paradoxia/assets/dialetico_sheet_hd.png
+          curl -fL --retry 3 "$CETICO_URL" -o jogos/paradoxia/assets/cetico_sheet_hd.png
+          curl -fL --retry 3 "$ETICO_URL" -o jogos/paradoxia/assets/etico_sheet_hd.png
+          curl -fL --retry 3 "$EXISTENCIAL_URL" -o jogos/paradoxia/assets/existencial_sheet_hd.png
+
+      - name: Verify PNG quality and dimensions
+        run: |
+          python - <<'PY'
+          import struct
+          from pathlib import Path
+          files = [
+              Path("jogos/paradoxia/assets/dialetico_sheet_hd.png"),
+              Path("jogos/paradoxia/assets/cetico_sheet_hd.png"),
+              Path("jogos/paradoxia/assets/etico_sheet_hd.png"),
+              Path("jogos/paradoxia/assets/existencial_sheet_hd.png"),
+          ]
+          for p in files:
+              data = p.read_bytes()
+              assert data[:8] == b"\x89PNG\r\n\x1a\n", f"{p} is not a PNG"
+              w, h = struct.unpack(">II", data[16:24])
+              assert (w, h) == (1254, 1254), f"{p}: unexpected dimensions {(w,h)}"
+              assert len(data) > 500_000, f"{p}: suspiciously small ({len(data)} bytes)"
+              print(p, w, h, len(data))
+          PY
+
+      - name: Remove truncated temporary HD files
+        run: |
+          rm -f jogos/paradoxia/assets/dialetico_sheet_hd.webp
+          rm -f jogos/paradoxia/assets/cetico_sheet_hd.webp
+          rm -f jogos/paradoxia/assets/etico_sheet_hd.webp
+          rm -f jogos/paradoxia/assets/existencial_sheet_hd.webp
+
+      - name: Commit HD sprites
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add jogos/paradoxia/assets/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Importa sprites PNG HD originais de Paradoxia"
+          git push
