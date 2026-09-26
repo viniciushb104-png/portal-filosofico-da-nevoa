@@ -1,0 +1,47 @@
+name: Import Paradoxia illustrated world
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - ".github/workflows/import-paradoxia-world.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  import-world:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download illustrated world
+        env:
+          WORLD_URL_B64: "aHR0cHM6Ly9kMmpxcm02b3phOG5iNi5jbG91ZGZyb250Lm5ldC9kYXRhc2V0cy83ZjI4ZjgxYi1hZWMzLTQ2MzMtOWQ3MC03Njc3ZjBmMDFhYzcud2VicD9fand0PWV5SmhiR2NpT2lKSVV6STFOaUlzSW5SNWNDSTZJa3BYVkNKOS5leUpyWlhsSVlYTm9Jam9pTW1JMU5qVXdZelE1WVdaaFpqazVPQ0lzSW1KMVkydGxkQ0k2SW5KMWJuZGhlUzFrWVhSaGMyVjBjeUlzSW5OMFlXZGxJam9pY0hKdlpDSXNJbVY0Y0NJNk1UYzVNRFUzTkRZMk1IMC52X05vTGtIWEpZUjlNbnZpcDNwOU1CTGtFUmJ4SUF5UjI5M2UxbFhzNjBF"
+        run: |
+          set -euo pipefail
+          mkdir -p jogos/paradoxia/assets/world
+          URL="$(printf '%s' "$WORLD_URL_B64" | base64 -d)"
+          curl -fL --retry 3 "$URL" -o jogos/paradoxia/assets/world/paradoxia_world_playable.webp
+
+      - name: Validate world image
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("jogos/paradoxia/assets/world/paradoxia_world_playable.webp")
+          data=p.read_bytes()
+          assert data[:4] == b"RIFF" and data[8:12] == b"WEBP"
+          assert len(data) > 400_000
+          print(p, len(data))
+          PY
+
+      - name: Commit illustrated world
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add jogos/paradoxia/assets/world/
+          git commit -m "Adiciona mapa ilustrado jogável de Paradoxia"
+          git push
