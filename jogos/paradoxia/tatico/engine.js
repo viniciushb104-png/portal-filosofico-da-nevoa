@@ -152,7 +152,7 @@ function tileClick(x,y){
   return;
  }
  if(state.mode==='move'&&!sel.moved){
-  if(hit?.team==='enemy'){state.inspectTarget=hit.id;render();return}
+  if(hit?.team==='enemy'){state.inspectTarget=hit.id;state.selected=null;state.mode='select';$('#commandBox').hidden=true;render();return}
   if(hit?.id===sel.id){openCommand(sel);return}
   const r=reachable(sel);
   if(r.has(key(x,y))){sel.x=x;sel.y=y;sel.moved=true;state.mode='command';state.inspectTarget=null;applyIdea(sel);render();openCommand(sel)}
@@ -345,7 +345,7 @@ function render(){
  const prog=objectiveProgress();if($('#objectiveProgress'))$('#objectiveProgress').textContent=prog.current+'/'+prog.target;if($('#chainValue'))$('#chainValue').textContent='×'+state.chain;
  const winText=stage.battleRules?.winText||stage.objective.text,loseText=stage.battleRules?.loseText||('Todo o grupo KO ou ultrapassar '+stage.turnLimit+' turnos.');
  if($('#winCondition'))$('#winCondition').textContent=winText;if($('#loseCondition'))$('#loseCondition').textContent=loseText;
- const credBox=$('#credibilityBox');if(credBox){credBox.hidden=state.credibility===null;if(state.credibility!==null){const max=state.maxCredibility||1,pct=Math.max(0,Math.min(100,(state.credibility/max)*100));$('#credibilityValue').textContent=state.credibility+'/'+max;$('#credibilityFill').style.width=pct+'%'}}
+ const credBox=$('#credibilityBox'),credMiniBox=$('#credibilityMiniBox');if(credBox){credBox.hidden=state.credibility===null;if(state.credibility!==null){const max=state.maxCredibility||1,pct=Math.max(0,Math.min(100,(state.credibility/max)*100));$('#credibilityValue').textContent=state.credibility+'/'+max;$('#credibilityFill').style.width=pct+'%'}}if(credMiniBox){credMiniBox.hidden=state.credibility===null;if(state.credibility!==null)$('#credibilityMini').textContent=state.credibility+'/'+state.maxCredibility;}
  renderEnemyRoster();renderInspector();
 
  const board=$('#tacticalBoard');board.style.setProperty('--cols',stage.size.w);board.style.setProperty('--rows',stage.size.h);board.innerHTML='';
