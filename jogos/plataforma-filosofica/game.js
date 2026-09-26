@@ -463,4 +463,12 @@ async function enterGameMode(){
   toast('📱 Modo jogo ativado. Se a tela não girar sozinha, deite o celular.');
 }
 if($('#gameModeBtn'))$('#gameModeBtn').onclick=enterGameMode;
+if(window.NevoaOnline){
+  window.NevoaOnline.startPresence(()=>({
+    locationKey:'platform_socrates',
+    locationLabel:'Fase 1 • Sócrates • Etapa '+currentStage,
+    phase:1,
+    stage:currentStage
+  }),20000);
+}
 })();
