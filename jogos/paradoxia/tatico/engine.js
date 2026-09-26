@@ -95,7 +95,7 @@ function renderEnemyRoster(){
    const status=en.solved?'DESMASCARADO':!en.alive?'SUPERADO':en.failedAttempts?'AINDA ATIVO • '+en.failedAttempts+' erro(s)':'AMEAÇA ATIVA';
    return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+'</span></button>';
  }).join('');
- $('.enemyCard').forEach(card=>card.onclick=()=>{state.inspectTarget=card.dataset.enemyId;state.selected=null;state.mode='select';$('#commandBox').hidden=true;render()});
+ $$('.enemyCard').forEach(card=>card.onclick=()=>{state.inspectTarget=card.dataset.enemyId;state.selected=null;state.mode='select';$('#commandBox').hidden=true;render()});
 }
 function checkDefeat(){
  if(state.ended)return true;
@@ -106,8 +106,8 @@ function checkDefeat(){
 function renderDeployment(){
  const host=$('#deployGrid');if(!host)return;
  host.innerHTML=state.units.map((u,i)=>'<article class="deployUnit"><div class="dAvatar">'+u.icon+'</div><b>'+(i+1)+'. '+u.name+'</b><small>posição inicial '+(i+1)+' • MOV '+u.move+' • ALC '+u.range+'</small><div class="deployArrows"><button data-deploy-left="'+i+'" type="button">←</button><button data-deploy-right="'+i+'" type="button">→</button></div></article>').join('');
- $('[data-deploy-left]').forEach(b=>b.onclick=()=>shiftDeploy(Number(b.dataset.deployLeft),-1));
- $('[data-deploy-right]').forEach(b=>b.onclick=()=>shiftDeploy(Number(b.dataset.deployRight),1));
+ $$('[data-deploy-left]').forEach(b=>b.onclick=()=>shiftDeploy(Number(b.dataset.deployLeft),-1));
+ $$('[data-deploy-right]').forEach(b=>b.onclick=()=>shiftDeploy(Number(b.dataset.deployRight),1));
 }
 function shiftDeploy(i,dir){
  const j=i+dir;if(j<0||j>=state.units.length)return;
@@ -184,7 +184,7 @@ function renderCommands(u){
    '<button data-cmd="interact">🔎 Interagir</button>'+
    '<button data-cmd="wait">✓ Encerrar ação</button>'+
    '<button data-cmd="cancel">↶ Voltar</button>';
- $$('#commandButtons button').forEach(b=>b.onclick=()=>command(b.dataset.cmd));
+ $$$('#commandButtons button').forEach(b=>b.onclick=()=>command(b.dataset.cmd));
 }
 function command(cmd){
  const u=selection();if(!u)return;
@@ -197,7 +197,7 @@ function command(cmd){
 function renderSkills(u){
  const list=D().common.classes[u.classKey]?.skills||[];
  $('#commandButtons').innerHTML=list.map(s=>'<button class="skillBtn" data-skill="'+s.key+'"><span>✦ '+s.name+'</span><small>'+s.desc+' • '+s.cost+' SP</small></button>').join('')+'<button data-skill="back">↶ Voltar</button>';
- $$('#commandButtons button').forEach(b=>b.onclick=()=>{const k=b.dataset.skill;if(k==='back')return renderCommands(u);useSkill(u,k)});
+ $$$('#commandButtons button').forEach(b=>b.onclick=()=>{const k=b.dataset.skill;if(k==='back')return renderCommands(u);useSkill(u,k)});
 }
 function useSkill(u,k){
  const skill=D().common.classes[u.classKey]?.skills.find(s=>s.key===k);if(!skill)return;
@@ -212,7 +212,7 @@ function openLogicChoice(u,e){
  state.mode='logic';const box=$('#logicOverlay');box.classList.add('show');
  $('#logicTarget').textContent=e.icon+' '+e.name;$('#logicText').textContent='Qual conceito descreve o truque argumentativo deste alvo?';
  $('#logicChoices').innerHTML=FALLACIES.map(f=>'<button data-concept="'+f.key+'"><b>'+f.label+'</b><small>'+f.desc+'</small></button>').join('');
- $$('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
+ $$$('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
 }
 function resolveLogicChoice(u,e,choice){
  $('#logicOverlay').classList.remove('show');state.analysisCount++;state.answers[e.id]=choice;
