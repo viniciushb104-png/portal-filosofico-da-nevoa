@@ -184,7 +184,7 @@ function renderCommands(u){
    '<button data-cmd="interact">🔎 Interagir</button>'+
    '<button data-cmd="wait">✓ Encerrar ação</button>'+
    '<button data-cmd="cancel">↶ Voltar</button>';
- $$$('#commandButtons button').forEach(b=>b.onclick=()=>command(b.dataset.cmd));
+ $('#commandButtons button').forEach(b=>b.onclick=()=>command(b.dataset.cmd));
 }
 function command(cmd){
  const u=selection();if(!u)return;
@@ -197,7 +197,7 @@ function command(cmd){
 function renderSkills(u){
  const list=D().common.classes[u.classKey]?.skills||[];
  $('#commandButtons').innerHTML=list.map(s=>'<button class="skillBtn" data-skill="'+s.key+'"><span>✦ '+s.name+'</span><small>'+s.desc+' • '+s.cost+' SP</small></button>').join('')+'<button data-skill="back">↶ Voltar</button>';
- $$$('#commandButtons button').forEach(b=>b.onclick=()=>{const k=b.dataset.skill;if(k==='back')return renderCommands(u);useSkill(u,k)});
+ $('#commandButtons button').forEach(b=>b.onclick=()=>{const k=b.dataset.skill;if(k==='back')return renderCommands(u);useSkill(u,k)});
 }
 function useSkill(u,k){
  const skill=D().common.classes[u.classKey]?.skills.find(s=>s.key===k);if(!skill)return;
@@ -212,7 +212,7 @@ function openLogicChoice(u,e){
  state.mode='logic';const box=$('#logicOverlay');box.classList.add('show');
  $('#logicTarget').textContent=e.icon+' '+e.name;$('#logicText').textContent='Qual conceito descreve o truque argumentativo deste alvo?';
  $('#logicChoices').innerHTML=FALLACIES.map(f=>'<button data-concept="'+f.key+'"><b>'+f.label+'</b><small>'+f.desc+'</small></button>').join('');
- $$$('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
+ $('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
 }
 function resolveLogicChoice(u,e,choice){
  $('#logicOverlay').classList.remove('show');state.analysisCount++;state.answers[e.id]=choice;
