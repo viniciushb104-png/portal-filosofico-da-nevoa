@@ -7,6 +7,7 @@
 <title>Paradoxia — O Reino das Escolhas</title>
 <link rel="stylesheet" href="game.css?v=2">
 <link rel="stylesheet" href="sprites-hd.css?v=2">
+<link rel="stylesheet" href="world-v2.css?v=1">
 <link rel="preload" as="image" href="assets/dialetico_sheet_hd.png">
 <link rel="preload" as="image" href="assets/cetico_sheet_hd.png">
 <link rel="preload" as="image" href="assets/etico_sheet_hd.png">
@@ -60,38 +61,198 @@
   <section class="worldShell" id="worldShell">
     <div class="worldTopline">
       <div class="questNow"><small>MISSÃO ATUAL</small><b id="questNow">Encontre os Portões de Paradoxia</b></div>
-      <div class="worldHint">⌨️ WASD / setas para andar • E ou Enter para interagir</div>
+      <div class="worldLoot"><span>🪙 <b id="mistCoins">0</b></span><span>🔮 <b id="worldSecrets">0</b>/2</span></div><div class="worldHint">⌨️ WASD / setas • E/Enter interage</div>
     </div>
 
     <div class="worldViewport" id="worldViewport" tabindex="0" aria-label="Mapa explorável de Paradoxia">
       <div class="worldLayer" id="worldLayer">
+        <svg class="worldArt" viewBox="0 0 2400 1600" aria-hidden="true">
+          <defs>
+            <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#20302d"/>
+              <stop offset=".52" stop-color="#182723"/>
+              <stop offset="1" stop-color="#101b18"/>
+            </linearGradient>
+            <radialGradient id="plazaGlow">
+              <stop offset="0" stop-color="#b958e2" stop-opacity=".24"/>
+              <stop offset="1" stop-color="#b958e2" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="waterGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#18304a"/>
+              <stop offset=".55" stop-color="#32194e"/>
+              <stop offset="1" stop-color="#0d1e2e"/>
+            </linearGradient>
+            <linearGradient id="roadGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#8b5b3c"/>
+              <stop offset=".5" stop-color="#c08a55"/>
+              <stop offset="1" stop-color="#73452e"/>
+            </linearGradient>
+            <filter id="softGlow"><feGaussianBlur stdDeviation="9"/></filter>
+          </defs>
+
+          <rect width="2400" height="1600" fill="url(#groundGrad)"/>
+          <ellipse cx="1200" cy="790" rx="600" ry="420" fill="url(#plazaGlow)"/>
+
+          <!-- colinas / regiões -->
+          <path class="terrainPatch tPurple" d="M80 180 C330 40 720 70 930 280 C760 500 400 520 110 420 Z"/>
+          <path class="terrainPatch tOrange" d="M90 930 C320 760 670 820 820 1110 C650 1430 250 1480 80 1270 Z"/>
+          <path class="terrainPatch tForest" d="M720 1090 C930 870 1320 980 1480 1230 C1410 1510 980 1590 700 1450 Z"/>
+          <path class="terrainPatch tBlue" d="M1450 900 C1700 690 2150 760 2320 1040 C2260 1360 1760 1510 1460 1320 Z"/>
+          <path class="terrainPatch tCastle" d="M1660 80 C1970 0 2330 110 2380 430 C2220 680 1850 640 1650 500 Z"/>
+
+          <!-- lago -->
+          <path class="lakeShape" d="M1245 1180 C1430 1055 1730 1080 1850 1285 C1775 1495 1450 1540 1255 1430 C1175 1350 1175 1250 1245 1180 Z" fill="url(#waterGrad)"/>
+          <path class="lakeShine" d="M1320 1260 C1450 1200 1630 1210 1760 1305" fill="none" stroke="#b561df" stroke-opacity=".28" stroke-width="10"/>
+          <path class="lakeShine s2" d="M1350 1360 C1495 1310 1610 1320 1725 1385" fill="none" stroke="#62cde1" stroke-opacity=".18" stroke-width="7"/>
+
+          <!-- estradas principais -->
+          <g class="roads" fill="none" stroke="url(#roadGrad)" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M430 1180 C560 1030 650 930 820 845 C970 770 1080 765 1200 790" stroke-width="56"/>
+            <path d="M1200 790 C1010 700 920 640 790 560 C690 500 650 420 640 340" stroke-width="52"/>
+            <path d="M1200 790 C1400 760 1520 780 1650 900 C1780 1010 1860 1030 1980 990" stroke-width="56"/>
+            <path d="M1200 790 C1400 670 1550 560 1680 480 C1840 390 1970 330 2070 285" stroke-width="52"/>
+            <path d="M1200 790 C1140 980 1080 1110 1015 1280" stroke-width="48"/>
+            <path d="M820 845 C760 1000 720 1130 650 1260" stroke-width="42"/>
+          </g>
+          <g class="roadEdge" fill="none" stroke="#32241e" stroke-opacity=".5" stroke-linecap="round">
+            <path d="M430 1180 C560 1030 650 930 820 845 C970 770 1080 765 1200 790" stroke-width="68"/>
+            <path d="M1200 790 C1010 700 920 640 790 560 C690 500 650 420 640 340" stroke-width="64"/>
+            <path d="M1200 790 C1400 760 1520 780 1650 900 C1780 1010 1860 1030 1980 990" stroke-width="68"/>
+            <path d="M1200 790 C1400 670 1550 560 1680 480 C1840 390 1970 330 2070 285" stroke-width="64"/>
+          </g>
+
+          <!-- praça -->
+          <circle cx="1200" cy="790" r="170" fill="#252130" stroke="#84509b" stroke-width="14"/>
+          <circle cx="1200" cy="790" r="132" fill="#17131f" stroke="#d77b45" stroke-width="6" stroke-dasharray="10 18"/>
+          <circle cx="1200" cy="790" r="66" fill="#2f1637" stroke="#b85add" stroke-width="5"/>
+          <g class="plazaRunes" fill="#efb974">
+            <circle cx="1200" cy="675" r="9"/><circle cx="1315" cy="790" r="9"/><circle cx="1200" cy="905" r="9"/><circle cx="1085" cy="790" r="9"/>
+          </g>
+
+          <!-- ponte -->
+          <g class="bridgeArt">
+            <path d="M1570 1015 Q1680 930 1795 1015" fill="none" stroke="#332833" stroke-width="92"/>
+            <path d="M1570 1015 Q1680 930 1795 1015" fill="none" stroke="#9b7650" stroke-width="60" stroke-dasharray="28 8"/>
+            <path d="M1570 990 Q1680 905 1795 990" fill="none" stroke="#e4b36d" stroke-width="6"/>
+          </g>
+
+          <!-- caminhos secretos -->
+          <g class="secretPaths" fill="none" stroke="#7e5a86" stroke-opacity=".35" stroke-width="18" stroke-dasharray="14 22" stroke-linecap="round">
+            <path d="M650 1260 C470 1180 330 1060 260 875"/>
+            <path d="M640 340 C760 255 880 210 1030 225"/>
+            <path d="M1015 1280 C1140 1390 1225 1430 1330 1390"/>
+          </g>
+
+          <!-- ruínas -->
+          <g class="ruinsArt" transform="translate(980 135)">
+            <rect x="0" y="100" width="280" height="25" rx="8" fill="#4e4b58"/>
+            <rect x="24" y="28" width="34" height="90" fill="#6a6871"/>
+            <rect x="84" y="0" width="34" height="118" fill="#77737e"/>
+            <rect x="145" y="42" width="34" height="76" fill="#625f69"/>
+            <rect x="206" y="12" width="34" height="106" fill="#77737e"/>
+            <path d="M0 26 L65 2 L125 25 L188 0 L260 27" fill="none" stroke="#8a8291" stroke-width="16"/>
+          </g>
+
+          <!-- academia -->
+          <g class="academyArt" transform="translate(420 250)">
+            <rect x="70" y="95" width="330" height="170" rx="20" fill="#2c2139" stroke="#79528d" stroke-width="8"/>
+            <rect x="120" y="48" width="230" height="100" rx="18" fill="#352646" stroke="#8f5aa8" stroke-width="8"/>
+            <polygon points="235,0 340,65 130,65" fill="#4b2d5f" stroke="#b466d0" stroke-width="8"/>
+            <rect x="210" y="160" width="54" height="105" rx="22" fill="#130d1b"/>
+            <circle cx="235" cy="83" r="27" fill="#e7a85f" opacity=".8"/>
+            <g fill="#e4b66c"><rect x="105" y="135" width="34" height="52" rx="7"/><rect x="320" y="135" width="34" height="52" rx="7"/></g>
+          </g>
+
+          <!-- vila -->
+          <g class="villageArt">
+            <g transform="translate(250 1040)"><rect x="0" y="45" width="150" height="105" rx="15" fill="#493126"/><polygon points="-12,50 75,0 162,50" fill="#6c3321"/><rect x="58" y="88" width="36" height="62" fill="#21130f"/><circle cx="28" cy="92" r="13" fill="#f4ad4e"/></g>
+            <g transform="translate(420 990)"><rect x="0" y="45" width="160" height="115" rx="15" fill="#3c2a2f"/><polygon points="-10,50 80,0 170,50" fill="#5b2d47"/><rect x="65" y="95" width="34" height="65" fill="#1e1218"/><circle cx="30" cy="96" r="14" fill="#f3b04f"/></g>
+            <g transform="translate(560 1105)"><rect x="0" y="40" width="135" height="90" rx="14" fill="#40302b"/><polygon points="-10,45 68,4 145,45" fill="#783824"/><circle cx="105" cy="80" r="12" fill="#f4ab4b"/></g>
+          </g>
+
+          <!-- mercado -->
+          <g class="marketArt" transform="translate(730 690)">
+            <g transform="translate(0 0)"><polygon points="0,55 65,0 130,55" fill="#8d3c56"/><rect y="55" width="130" height="78" fill="#4b2435"/><path d="M0 55 H130" stroke="#ffd071" stroke-width="9" stroke-dasharray="16 10"/></g>
+            <g transform="translate(150 35)"><polygon points="0,55 65,0 130,55" fill="#5d3f8a"/><rect y="55" width="130" height="78" fill="#33234b"/><path d="M0 55 H130" stroke="#f0a65e" stroke-width="9" stroke-dasharray="16 10"/></g>
+          </g>
+
+          <!-- biblioteca -->
+          <g class="libraryArt" transform="translate(1840 820)">
+            <rect x="0" y="70" width="270" height="210" rx="18" fill="#1c3440" stroke="#557f8d" stroke-width="8"/>
+            <rect x="55" y="22" width="160" height="75" rx="16" fill="#274653" stroke="#6d98a4" stroke-width="7"/>
+            <polygon points="135,0 220,55 50,55" fill="#50374f" stroke="#a56992" stroke-width="7"/>
+            <g fill="#f0c66f"><rect x="40" y="115" width="36" height="54" rx="6"/><rect x="194" y="115" width="36" height="54" rx="6"/></g>
+            <rect x="106" y="175" width="55" height="105" rx="20" fill="#0d171d"/>
+          </g>
+
+          <!-- castelo -->
+          <g class="castleArt" transform="translate(1940 150)">
+            <rect x="65" y="150" width="290" height="250" rx="18" fill="#21172c" stroke="#5e3b70" stroke-width="9"/>
+            <rect x="0" y="70" width="105" height="330" rx="14" fill="#281a35" stroke="#70468a" stroke-width="9"/>
+            <rect x="315" y="55" width="110" height="345" rx="14" fill="#281a35" stroke="#70468a" stroke-width="9"/>
+            <polygon points="52,0 110,90 -6,90" fill="#4b244f"/><polygon points="370,-10 430,75 310,75" fill="#4b244f"/>
+            <polygon points="210,40 285,160 135,160" fill="#6b2f42"/>
+            <g fill="#ef8c45"><rect x="30" y="155" width="38" height="62" rx="15"/><rect x="350" y="145" width="38" height="62" rx="15"/><rect x="185" y="210" width="54" height="78" rx="18"/></g>
+          </g>
+
+          <!-- cemitério -->
+          <g class="cemeteryArt" transform="translate(105 560)" opacity=".92">
+            <path d="M30 220 C50 70 280 20 390 185 C345 340 80 360 30 220Z" fill="#11191a" stroke="#455455" stroke-width="8"/>
+            <g fill="#6d6c78"><path d="M90 210 v-70 q0-38 35-38 q35 0 35 38 v70Z"/><path d="M200 245 v-92 q0-42 38-42 q38 0 38 42 v92Z"/><path d="M305 205 v-62 q0-33 30-33 q30 0 30 33 v62Z"/></g>
+          </g>
+
+          <!-- bosque -->
+          <g class="forestArt" fill="#183222" stroke="#2f5b3b" stroke-width="5">
+            <circle cx="820" cy="1290" r="80"/><circle cx="925" cy="1365" r="90"/><circle cx="1060" cy="1280" r="86"/><circle cx="1160" cy="1395" r="92"/><circle cx="730" cy="1400" r="72"/>
+          </g>
+
+          <!-- brilhos ambientais -->
+          <g class="fireflies" fill="#ffd47a">
+            <circle cx="520" cy="1180" r="5"/><circle cx="590" cy="1115" r="4"/><circle cx="990" cy="1240" r="5"/>
+            <circle cx="1370" cy="1320" r="5"/><circle cx="1880" cy="930" r="4"/><circle cx="710" cy="390" r="5"/>
+          </g>
+        </svg>
+
         <div class="worldSky"></div>
         <div class="worldMoon"></div>
-        <div class="floatingIsland i1"></div><div class="floatingIsland i2"></div><div class="floatingIsland i3"></div>
-        <div class="road r1"></div><div class="road r2"></div><div class="road r3"></div><div class="road r4"></div><div class="road r5"></div><div class="road r6"></div>
+        <div class="mistBand m1"></div><div class="mistBand m2"></div>
 
-        <div class="district academy"><span>🏛️</span><b>Academia Filosófica</b><small>Estudar • Debater • Evoluir</small></div>
-        <div class="district village"><span>🏘️</span><b>Vila das Abóboras</b><small>Tradições • Encontros</small></div>
-        <div class="district forest"><span>🌲</span><b>Floresta das Sombras Doces</b><small>Mistérios • Autoconhecimento</small></div>
-        <div class="district castle"><span>🏰</span><b>Castelo do Paradoxo</b><small>Confrontar • Compreender</small></div>
+        <div class="regionLabel academyLabel"><span>🏛️</span><b>Academia dos Porquês</b><small>Conhecimento • debate</small></div>
+        <div class="regionLabel villageLabel"><span>🎃</span><b>Vila das Abóboras</b><small>Humor • tradição</small></div>
+        <div class="regionLabel ruinsLabel"><span>🗿</span><b>Ruínas da Caverna</b><small>Sombras • aparência</small></div>
+        <div class="regionLabel plazaLabel"><span>🕰️</span><b>Praça do Livre-Arbítrio</b><small>Coração de Paradoxia</small></div>
+        <div class="regionLabel forestLabel"><span>🌲</span><b>Bosque de Teseu</b><small>Identidade • memória</small></div>
+        <div class="regionLabel lakeLabel"><span>🌙</span><b>Lago do Espelho Interior</b><small>Autonomia • reflexão</small></div>
+        <div class="regionLabel libraryLabel"><span>📚</span><b>Biblioteca dos Boatos</b><small>Fontes • evidências</small></div>
+        <div class="regionLabel castleLabel"><span>👑</span><b>Castelo da Certeza Absoluta</b><small>O objetivo distante</small></div>
+        <div class="regionLabel cemeteryLabel"><span>☠️</span><b>Cemitério dos Conceitos</b><small>Área secreta</small></div>
 
-        <button class="worldPoi" data-scene="gate" style="left:13%;top:70%"><span>🚪</span><b>Portões</b></button>
-        <button class="worldPoi" data-scene="market" style="left:36%;top:45%"><span>🎪</span><b>Feira</b></button>
-        <button class="worldPoi" data-scene="bridge" style="left:53%;top:53%"><span>🌉</span><b>Ponte</b></button>
-        <button class="worldPoi" data-scene="theseus" style="left:42%;top:78%"><span>🎃</span><b>Bosque</b></button>
-        <button class="worldPoi" data-scene="library" style="left:73%;top:71%"><span>📚</span><b>Biblioteca</b></button>
-        <button class="worldPoi" data-scene="square" style="left:72%;top:39%"><span>🕰️</span><b>Praça</b></button>
-        <button class="worldPoi bossPoi" data-scene="boss" style="left:87%;top:18%"><span>👑</span><b>Castelo</b></button>
+        <button class="worldPoi" data-scene="gate" style="left:17.9%;top:73.8%"><span>🚪</span><b>Portões</b></button>
+        <button class="worldPoi" data-scene="market" style="left:35.4%;top:52.8%"><span>🎪</span><b>Feira</b></button>
+        <button class="worldPoi" data-scene="bridge" style="left:69.2%;top:63.8%"><span>🌉</span><b>Ponte</b></button>
+        <button class="worldPoi" data-scene="theseus" style="left:42.3%;top:80%"><span>🎃</span><b>Sir Cucurbita</b></button>
+        <button class="worldPoi" data-scene="library" style="left:82.5%;top:61.8%"><span>📚</span><b>Biblioteca</b></button>
+        <button class="worldPoi" data-scene="square" style="left:50%;top:49.4%"><span>🕰️</span><b>Praça</b></button>
+        <button class="worldPoi bossPoi" data-scene="boss" style="left:86.3%;top:17.8%"><span>👑</span><b>Castelo</b></button>
 
-        <div class="worldNpc npcDialetico" style="left:22%;top:35%"><div class="spriteArt"></div><small>Estudiosa Dialética</small></div>
-        <div class="worldNpc npcCetico" style="left:29%;top:31%"><div class="spriteArt"></div><small>Investigadora Cética</small></div>
-        <div class="worldNpc npcEtico" style="left:79%;top:58%"><div class="spriteArt"></div><small>Guardiã Ética</small></div>
-        <div class="worldNpc npcExistencial" style="left:58%;top:22%"><div class="spriteArt"></div><small>Andarilho</small></div>
+        <button class="worldInteract signInteract" data-interaction="sign" style="left:53.5%;top:52.4%"><span>🪧</span></button>
+        <button class="worldInteract pumpkinInteract" data-interaction="pumpkin" style="left:20.8%;top:70.7%"><span>🎃</span></button>
+        <button class="worldInteract mirrorInteract" data-interaction="mirror" style="left:62%;top:84%"><span>🪞</span></button>
+        <button class="worldInteract owlInteract" data-interaction="owl" style="left:78.4%;top:55.5%"><span>🦉</span></button>
+        <button class="worldInteract ruinsInteract" data-interaction="shadows" style="left:44.5%;top:16.4%"><span>🔥</span></button>
+        <button class="worldInteract graveInteract secretProp" data-interaction="grave" style="left:11.7%;top:43%"><span>🪦</span></button>
 
-        <div class="ambientNpc ghost" style="left:34%;top:67%">👻</div>
-        <div class="ambientNpc cat" style="left:61%;top:73%">🐈‍⬛</div>
-        <div class="ambientNpc pumpkin" style="left:18%;top:82%">🎃</div>
-        <div class="ambientNpc owl" style="left:68%;top:18%">🦉</div>
+        <div class="worldNpc npcDialetico" style="left:29%;top:29%"><div class="spriteArt"></div><small>Estudiosa Dialética</small></div>
+        <div class="worldNpc npcCetico" style="left:38%;top:47%"><div class="spriteArt"></div><small>Investigadora Cética</small></div>
+        <div class="worldNpc npcEtico" style="left:75%;top:68%"><div class="spriteArt"></div><small>Guardiã Ética</small></div>
+        <div class="worldNpc npcExistencial" style="left:57%;top:42%"><div class="spriteArt"></div><small>Andarilho</small></div>
+
+        <div class="ambientNpc ghost aGhost1" style="left:31%;top:76%">👻</div>
+        <div class="ambientNpc ghost aGhost2" style="left:72%;top:28%">👻</div>
+        <div class="ambientNpc cat" style="left:48%;top:55%">🐈‍⬛</div>
+        <div class="ambientNpc pumpkin" style="left:24%;top:77%">🎃</div>
+        <div class="ambientNpc book" style="left:80%;top:58%">📖</div>
+        <div class="ambientNpc owl" style="left:66%;top:14%">🦉</div>
 
         <div class="worldPlayer" id="worldPlayer">
           <div class="spriteArt" id="playerSprite"></div>
@@ -99,8 +260,13 @@
         </div>
       </div>
 
+      <div class="worldDialogue" id="worldDialogue" hidden>
+        <button id="worldDialogueClose" aria-label="Fechar">×</button>
+        <div class="worldDialogueIcon" id="worldDialogueIcon">🎃</div>
+        <div><small id="worldDialogueSpeaker">Paradoxia</small><p id="worldDialogueText"></p><em id="worldDialogueReward"></em></div>
+      </div>
       <div class="interactionPrompt" id="interactionPrompt" hidden>
-        <b>✦ Interagir</b><span>E / Enter</span>
+        <b id="interactionLabel">✦ Interagir</b><span>E / Enter</span>
       </div>
       <div class="worldCompass"><span>N</span><i></i><small id="worldPlace">Academia Filosófica</small></div>
     </div>
@@ -196,6 +362,6 @@
 <div class="toast" id="toast"></div>
 
 <script src="../../online.js?v=7.5"></script>
-<script src="game.js?v=2"></script>
+<script src="game.js?v=3"></script>
 </body>
 </html>
