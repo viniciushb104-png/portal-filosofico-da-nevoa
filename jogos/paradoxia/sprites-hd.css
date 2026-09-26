@@ -1,91 +1,78 @@
-/* Paradoxia — sprites HD
-   Sheets em alta qualidade, 4 poses horizontais: frente | lado | costas | ação.
-   Este arquivo sobrescreve apenas a renderização dos personagens. */
+/* Paradoxia — sprites PNG HD originais
+   Cada arquivo tem 1254×1254 com 4 poses em grade 2×2:
+   frente | lateral
+   costas | ação
+   O jogo exibe os frames em escala menor para preservar a nitidez. */
 
 .spriteArt{
   background-repeat:no-repeat !important;
-  background-size:400% 100% !important;
-  background-position:0 0;
+  background-size:1254px 1254px !important;
   image-rendering:auto !important;
 }
 
-/* Metadados dos quatro sheets. */
-.worldPlayer.dialetico,.npcDialetico,.classCard[data-class="dialetico"]{
-  --cw:331px;--ch:460px;--player-scale:.32;--npc-scale:.215;--card-scale:.34;
-}
-.worldPlayer.cetico,.npcCetico,.classCard[data-class="cetico"]{
-  --cw:313px;--ch:460px;--player-scale:.32;--npc-scale:.215;--card-scale:.34;
-}
-.worldPlayer.etico,.npcEtico,.classCard[data-class="etico"]{
-  --cw:326px;--ch:460px;--player-scale:.32;--npc-scale:.215;--card-scale:.34;
-}
-.worldPlayer.existencial,.npcExistencial,.classCard[data-class="existencial"]{
-  --cw:506px;--ch:386px;--player-scale:.285;--npc-scale:.19;--card-scale:.29;
-}
-
-/* Cada classe usa seu próprio arquivo, evitando ampliar um atlas pequeno. */
+/* Fontes HD por classe */
 .worldPlayer.dialetico .spriteArt,.npcDialetico .spriteArt,.classCard[data-class="dialetico"] .spriteArt{
-  background-image:url("assets/dialetico_sheet_hd.webp") !important;
+  background-image:url("assets/dialetico_sheet_hd.png") !important;
 }
 .worldPlayer.cetico .spriteArt,.npcCetico .spriteArt,.classCard[data-class="cetico"] .spriteArt{
-  background-image:url("assets/cetico_sheet_hd.webp") !important;
+  background-image:url("assets/cetico_sheet_hd.png") !important;
 }
 .worldPlayer.etico .spriteArt,.npcEtico .spriteArt,.classCard[data-class="etico"] .spriteArt{
-  background-image:url("assets/etico_sheet_hd.webp") !important;
+  background-image:url("assets/etico_sheet_hd.png") !important;
 }
 .worldPlayer.existencial .spriteArt,.npcExistencial .spriteArt,.classCard[data-class="existencial"] .spriteArt{
-  background-image:url("assets/existencial_sheet_hd.webp") !important;
+  background-image:url("assets/existencial_sheet_hd.png") !important;
 }
 
-/* Player principal: renderiza a fonte grande e reduz na tela.
-   Isso preserva contornos, olhos, roupa e detalhes dourados. */
+/* Cada pose ocupa exatamente 627×627 dentro do sheet 2×2. */
+.worldPlayer .spriteArt,
+.worldNpc .spriteArt,
+.classCard .classSprite .spriteArt{
+  width:627px !important;
+  height:627px !important;
+  background-size:1254px 1254px !important;
+}
+
+/* Player */
 .worldPlayer{
-  width:180px !important;
-  height:176px !important;
+  width:188px !important;
+  height:188px !important;
   overflow:visible;
 }
 .worldPlayer .spriteArt{
   position:absolute;
   left:50%;
-  bottom:12px;
-  width:var(--cw) !important;
-  height:var(--ch) !important;
-  background-size:400% 100% !important;
-  transform:translateX(-50%) scale(var(--player-scale)) !important;
+  bottom:13px;
+  transform:translateX(-50%) scale(.285) !important;
   transform-origin:50% 100% !important;
+  filter:drop-shadow(0 15px 10px #000a);
   will-change:transform;
 }
-.worldPlayer.pose-front .spriteArt{background-position:0% 0 !important}
-.worldPlayer.pose-side .spriteArt{background-position:33.333333% 0 !important}
-.worldPlayer.pose-back .spriteArt{background-position:66.666667% 0 !important}
-.worldPlayer.pose-action .spriteArt{background-position:100% 0 !important}
+.worldPlayer.pose-front .spriteArt{background-position:0 0 !important}
+.worldPlayer.pose-side .spriteArt{background-position:-627px 0 !important}
+.worldPlayer.pose-back .spriteArt{background-position:0 -627px !important}
+.worldPlayer.pose-action .spriteArt{background-position:-627px -627px !important}
 .worldPlayer.flip .spriteArt{
-  transform:translateX(-50%) scaleX(-1) scale(var(--player-scale)) !important;
+  transform:translateX(-50%) scaleX(-1) scale(.285) !important;
 }
 .worldPlayer.walking .spriteArt,
 .worldPlayer.walking.flip .spriteArt{animation:none !important}
-.worldPlayer span{
-  bottom:0 !important;
-  z-index:4;
-  box-shadow:0 5px 14px #0008;
-}
+.worldPlayer span{bottom:0 !important;z-index:4;box-shadow:0 5px 14px #0008}
 
-/* NPCs: mesma arte HD em escala menor. */
+/* NPCs */
 .worldNpc{
   width:132px !important;
-  height:126px !important;
+  height:132px !important;
   overflow:visible;
 }
 .worldNpc .spriteArt{
   position:absolute;
   left:50%;
   bottom:12px;
-  width:var(--cw) !important;
-  height:var(--ch) !important;
-  background-size:400% 100% !important;
-  background-position:0% 0 !important;
-  transform:translateX(-50%) scale(var(--npc-scale)) !important;
+  background-position:0 0 !important;
+  transform:translateX(-50%) scale(.19) !important;
   transform-origin:50% 100% !important;
+  filter:drop-shadow(0 10px 8px #0009);
 }
 .worldNpc small{
   position:absolute;
@@ -96,15 +83,15 @@
   margin:0 !important;
 }
 
-/* Seleção de classe: retrato verdadeiro do personagem, não miniatura estourada. */
+/* Cards de seleção */
 .classCard{
-  padding-top:186px !important;
-  min-height:340px;
+  padding-top:190px !important;
+  min-height:342px;
 }
 .classCard .classSprite{
-  width:194px !important;
-  height:178px !important;
-  top:3px !important;
+  width:198px !important;
+  height:180px !important;
+  top:2px !important;
   left:50%;
   transform:translateX(-50%);
   overflow:visible !important;
@@ -114,43 +101,30 @@
   position:absolute;
   left:50%;
   bottom:0;
-  width:var(--cw) !important;
-  height:var(--ch) !important;
-  background-size:400% 100% !important;
-  background-position:0% 0 !important;
-  transform:translateX(-50%) scale(var(--card-scale)) !important;
+  background-position:0 0 !important;
+  transform:translateX(-50%) scale(.27) !important;
   transform-origin:50% 100% !important;
   filter:drop-shadow(0 13px 10px #0009);
 }
 
-/* Evita qualquer herança do atlas antigo. */
-.worldPlayer.dialetico{--sprite-y:0px}
-.worldPlayer.cetico{--sprite-y:0px}
-.worldPlayer.etico{--sprite-y:0px}
-.worldPlayer.existencial{--sprite-y:0px}
+/* Neutraliza offsets do atlas antigo. */
+.worldPlayer.dialetico,.worldPlayer.cetico,.worldPlayer.etico,.worldPlayer.existencial{--sprite-x:0px;--sprite-y:0px}
 .npcDialetico,.npcCetico,.npcEtico,.npcExistencial{--npc-y:0px}
-.classCard[data-class="dialetico"],
-.classCard[data-class="cetico"],
-.classCard[data-class="etico"],
-.classCard[data-class="existencial"]{--class-y:0px}
+.classCard[data-class="dialetico"],.classCard[data-class="cetico"],.classCard[data-class="etico"],.classCard[data-class="existencial"]{--class-y:0px}
 
 @media(max-width:900px){
-  .worldPlayer{width:166px !important;height:166px !important}
-  .worldPlayer.dialetico,.worldPlayer.cetico,.worldPlayer.etico{--player-scale:.30}
-  .worldPlayer.existencial{--player-scale:.265}
+  .worldPlayer{width:172px !important;height:174px !important}
+  .worldPlayer .spriteArt{transform:translateX(-50%) scale(.26) !important}
+  .worldPlayer.flip .spriteArt{transform:translateX(-50%) scaleX(-1) scale(.26) !important}
 }
 
 @media(max-width:620px){
-  .worldPlayer{width:150px !important;height:154px !important}
-  .worldPlayer.dialetico,.worldPlayer.cetico,.worldPlayer.etico{--player-scale:.275}
-  .worldPlayer.existencial{--player-scale:.245}
+  .worldPlayer{width:154px !important;height:158px !important}
+  .worldPlayer .spriteArt{transform:translateX(-50%) scale(.235) !important}
+  .worldPlayer.flip .spriteArt{transform:translateX(-50%) scaleX(-1) scale(.235) !important}
   .worldNpc{width:112px !important;height:112px !important}
-  .npcDialetico,.npcCetico,.npcEtico{--npc-scale:.19}
-  .npcExistencial{--npc-scale:.165}
-  .classCard{padding-top:166px !important;min-height:315px}
-  .classCard .classSprite{width:170px !important;height:158px !important}
-  .classCard[data-class="dialetico"],
-  .classCard[data-class="cetico"],
-  .classCard[data-class="etico"]{--card-scale:.30}
-  .classCard[data-class="existencial"]{--card-scale:.255}
+  .worldNpc .spriteArt{transform:translateX(-50%) scale(.16) !important}
+  .classCard{padding-top:170px !important;min-height:318px}
+  .classCard .classSprite{width:174px !important;height:160px !important}
+  .classCard .classSprite .spriteArt{transform:translateX(-50%) scale(.235) !important}
 }
