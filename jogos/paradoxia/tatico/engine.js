@@ -41,8 +41,9 @@ function initState(){
   turn:1,phase:'deploy',selected:null,mode:'select',
   units:loadParty(),
   enemies:clone(stage.enemies||[]).map((e,i)=>({...e,team:'enemy',maxHp:e.hp||3,sp:0,acted:false,moved:false,alive:true,id:e.id||'e'+i,move:e.move||2,range:e.range||1})),
-  props:clone(stage.props||[]),switches:{},answers:{},revealed:0,analysisCount:0,log:[],score:0,startedAt:Date.now(),
-  competitive:false,attempt:null,ended:false,chain:0,maxChain:0
+  props:clone(stage.props||[]),switches:{},answers:{},firstAnswers:{},revealed:0,analysisCount:0,log:[],score:0,startedAt:Date.now(),
+  competitive:false,attempt:null,ended:false,chain:0,maxChain:0,inspectTarget:null,
+  credibility:stage.battleRules?.credibility??null,maxCredibility:stage.battleRules?.credibility??null
  };
 }
 function terrainHeight(x,y){const row=stage.terrain[y];return row?Number(row[x]||0):0}
@@ -66,13 +67,41 @@ function objectiveProgress(){
  return {current:0,target:1};
 }
 function renderInspector(){
- const u=selection(),name=$('#inspectName'),hp=$('#inspectHp'),sp=$('#inspectSp'),text=$('#inspectText');
+ const u=selection(),enemy=state.enemies.find(en=>en.id===state.inspectTarget),box=$('#unitInspector'),name=$('#inspectName'),hp=$('#inspectHp'),sp=$('#inspectSp'),text=$('#inspectText'),hpLabel=$('#inspectHpLabel'),spLabel=$('#inspectSpLabel');
  if(!name||!hp||!sp||!text)return;
- if(!u){name.textContent='Selecione uma unidade';hp.textContent='—';sp.textContent='—';text.textContent='Clique em um integrante do esquadrão para ver seus recursos.';return}
- name.textContent=u.icon+' '+u.name+' • Nv.'+(u.level||1);
- hp.textContent=Math.max(0,u.hp)+'/'+u.maxHp;sp.textContent=(u.sp??0)+'/'+(u.maxSp??0);
- const assists=state.enemies.filter(en=>en.alive&&dist(u,en)<=u.range).reduce((n,en)=>Math.max(n,assistCount(u,en)),0);
- text.textContent='MOV '+u.move+' • ALC '+u.range+(u.guard?' • Protegido':'')+(assists?' • até '+assists+' assistência(s)':'');
+ box?.classList.toggle('enemyInspect',!!enemy&&!u);
+ if(u){
+   if(hpLabel)hpLabel.textContent='HP';if(spLabel)spLabel.textContent='SP';
+   name.textContent=u.icon+' '+u.name+' • Nv.'+(u.level||1);
+   hp.textContent=Math.max(0,u.hp)+'/'+u.maxHp;sp.textContent=(u.sp??0)+'/'+(u.maxSp??0);
+   const assists=state.enemies.filter(en=>en.alive&&dist(u,en)<=u.range).reduce((n,en)=>Math.max(n,assistCount(u,en)),0);
+   text.textContent='MOV '+u.move+' • ALC '+u.range+(u.guard?' • Protegido':'')+(assists?' • até '+assists+' assistência(s)':'');
+   return;
+ }
+ if(enemy){
+   if(hpLabel)hpLabel.textContent='HP';if(spLabel)spLabel.textContent='AMEAÇA';
+   name.textContent=enemy.icon+' '+enemy.name;
+   hp.textContent=enemy.alive?Math.max(0,enemy.hp)+'/'+enemy.maxHp:'0/'+enemy.maxHp;
+   sp.textContent=String(enemy.threat||enemy.range||1);
+   text.textContent=(enemy.role||'INIMIGO')+' • '+(enemy.attackName||'Pressão')+(enemy.quote?' • '+enemy.quote:'')+(enemy.failedAttempts?' • '+enemy.failedAttempts+' análise(s) incorreta(s) registrada(s).':'');
+   return;
+ }
+ if(hpLabel)hpLabel.textContent='HP';if(spLabel)spLabel.textContent='SP';
+ name.textContent='Selecione uma unidade ou inimigo';hp.textContent='—';sp.textContent='—';text.textContent='Aliados têm contorno violeta. Inimigos têm marcador vermelho ☠ e podem ser inspecionados.';
+}
+function renderEnemyRoster(){
+ const host=$('#enemyRoster');if(!host)return;
+ host.innerHTML=state.enemies.map(en=>{
+   const status=en.solved?'DESMASCARADO':!en.alive?'SUPERADO':en.failedAttempts?'AINDA ATIVO • '+en.failedAttempts+' erro(s)':'AMEAÇA ATIVA';
+   return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+'</span></button>';
+ }).join('');
+ $('.enemyCard').forEach(card=>card.onclick=()=>{state.inspectTarget=card.dataset.enemyId;state.selected=null;state.mode='select';$('#commandBox').hidden=true;render()});
+}
+function checkDefeat(){
+ if(state.ended)return true;
+ if(state.credibility!==null&&state.credibility<=0){end(false,'A Credibilidade da Plateia chegou a zero. As falácias dominaram o espetáculo.');return true}
+ if(!state.units.some(u=>u.alive)){end(false,'Todo o esquadrão ficou KO. A missão foi perdida.');return true}
+ return false;
 }
 function renderDeployment(){
  const host=$('#deployGrid');if(!host)return;
@@ -118,19 +147,21 @@ function tileClick(x,y){
  if(state.phase!=='player'||state.ended)return;
  const hit=occupied(x,y),sel=selection();
  if(!sel){
-  if(hit?.team==='player'&&!hit.acted){state.selected=hit.id;state.mode='move';render()}
+  if(hit?.team==='enemy'){state.inspectTarget=hit.id;render();return}
+  if(hit?.team==='player'&&!hit.acted){state.inspectTarget=null;state.selected=hit.id;state.mode='move';render()}
   return;
  }
  if(state.mode==='move'&&!sel.moved){
+  if(hit?.team==='enemy'){state.inspectTarget=hit.id;render();return}
   if(hit?.id===sel.id){openCommand(sel);return}
   const r=reachable(sel);
-  if(r.has(key(x,y))){sel.x=x;sel.y=y;sel.moved=true;state.mode='command';applyIdea(sel);render();openCommand(sel)}
+  if(r.has(key(x,y))){sel.x=x;sel.y=y;sel.moved=true;state.mode='command';state.inspectTarget=null;applyIdea(sel);render();openCommand(sel)}
   return;
  }
  if(state.mode==='attack'){
   const range=sel.skillPending?.range??sel.range;
   if(hit?.team==='enemy'&&dist(sel,hit)<=range){
-   if(hit.answer&&!state.answers[hit.id]&&!sel.skillPending){openLogicChoice(sel,hit);return}
+   if(hit.answer&&!hit.solved&&!sel.skillPending){openLogicChoice(sel,hit);return}
    doAttack(sel,hit);return;
   }
   toast('Alvo fora do alcance.');
@@ -184,20 +215,42 @@ function openLogicChoice(u,e){
  $$('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
 }
 function resolveLogicChoice(u,e,choice){
- $('#logicOverlay').classList.remove('show');state.answers[e.id]=choice;state.analysisCount++;
+ $('#logicOverlay').classList.remove('show');state.analysisCount++;state.answers[e.id]=choice;
+ if(!(e.id in state.firstAnswers))state.firstAnswers[e.id]=choice;
  const correct=choice===e.answer,assists=assistCount(u,e);
- e.hp=0;e.alive=false;state.revealed++;
- state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);
- state.score+=(correct?120:45)+(assists*20);
- state.log.unshift((correct?'✨ ':'🎭 ')+e.name+': '+(correct?'falácia identificada.':'primeira leitura registrada.')+(assists?' • '+assists+' aliado(s) sustentaram a análise.':''));
- toast(correct?'Falácia desmascarada!':'Resposta registrada — a máscara caiu, mas o ranking lembrará a primeira análise.');
+ state.inspectTarget=e.id;
+ if(correct){
+   e.solved=true;e.hp=0;e.alive=false;state.revealed++;
+   state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);
+   state.score+=120+(assists*20);
+   state.log.unshift('✨ '+e.name+' foi DESMASCARADO.'+(assists?' • '+assists+' aliado(s) sustentaram a análise.':''));
+   toast('✅ Falácia desmascarada!');
+ }else{
+   e.failedAttempts=(e.failedAttempts||0)+1;state.chain=0;state.score+=10;
+   if(state.credibility!==null){
+     const loss=Number(stage.battleRules?.wrongAnswerLoss)||1;
+     state.credibility=Math.max(0,state.credibility-loss);
+     state.log.unshift('🎭 Análise incorreta contra '+e.name+'. Credibilidade -'+loss+'. O inimigo continua ativo.');
+     toast('❌ Conceito incorreto. Credibilidade -'+loss+'. Tente novamente em outro turno.');
+   }else{
+     state.log.unshift('🎭 Análise incorreta contra '+e.name+'. O inimigo continua ativo.');
+     toast('❌ O inimigo continua ativo.');
+   }
+ }
  finishUnit(u);
 }
 function doAttack(u,e){
- const assists=assistCount(u,e);let dmg=1+Math.min(2,assists);if(u.skillPending){dmg+=1;state.score+=10;u.skillPending=null}
- state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);state.score+=assists*15
+ const assists=assistCount(u,e),conceptLocked=!!e.answer&&!e.solved;let dmg=1+Math.min(2,assists);if(u.skillPending){dmg+=1;state.score+=10;u.skillPending=null}
+ state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);state.score+=assists*15;
  if(e.guard){e.guard=0;dmg=Math.max(0,dmg-1)}
- e.hp-=dmg;state.analysisCount++;state.log.unshift('⚔️ '+u.name+' analisou '+e.name+' (-'+dmg+')'+(assists?' com '+assists+' assistência(s).':'') );
+ e.hp-=dmg;state.analysisCount++;state.inspectTarget=e.id;
+ if(conceptLocked&&e.hp<=0){
+   e.hp=1;
+   state.log.unshift('🧠 '+e.name+' não pode ser derrotado à força. Identifique a falácia com ANALISAR.');
+   toast('A máscara conceitual resistiu. Use Analisar e identifique a falácia.');
+   finishUnit(u);return;
+ }
+ state.log.unshift('⚔️ '+u.name+' analisou '+e.name+' (-'+dmg+')'+(assists?' com '+assists+' assistência(s).':'') );
  if(e.hp<=0){e.alive=false;state.score+=80;state.revealed++;state.log.unshift('✨ '+e.name+' foi superado.')}
  finishUnit(u);
 }
@@ -210,6 +263,7 @@ function interact(u){
 }
 function finishUnit(u){
  u.acted=true;u.moved=true;state.selected=null;state.mode='select';$('#commandBox').hidden=true;
+ if(checkDefeat())return;
  if(checkObjective())return;
  if(!state.units.some(x=>x.alive&&!x.acted))enemyPhase();else render();
 }
@@ -219,12 +273,21 @@ function enemyPhase(){
   state.enemies.filter(e=>e.alive).forEach(e=>{
    const targets=state.units.filter(u=>u.alive);if(!targets.length)return;
    targets.sort((a,b)=>dist(e,a)-dist(e,b));const t=targets[0];
-   if(dist(e,t)<=1){const dmg=t.guard?0:1;t.guard=0;t.hp-=dmg;state.log.unshift('👁️ '+e.name+' pressionou '+t.name+(dmg?' (-1).':' mas a defesa segurou.'));if(t.hp<=0)t.alive=false}
+   if(dist(e,t)<=1){
+     const dmg=t.guard?0:1;t.guard=0;t.hp-=dmg;
+     let extra='';
+     if(dmg&&state.credibility!==null){
+       const loss=Number(stage.battleRules?.enemyHitLoss)||1;state.credibility=Math.max(0,state.credibility-loss);extra=' • Credibilidade -'+loss;
+     }
+     state.log.unshift('👁️ '+e.name+' usou '+(e.attackName||'Pressão')+' em '+t.name+(dmg?' (-1 HP)':' mas a defesa segurou.')+extra);
+     if(t.hp<=0)t.alive=false;
+   }
    else{
     const dx=Math.sign(t.x-e.x),dy=Math.sign(t.y-e.y),candidates=Math.abs(t.x-e.x)>Math.abs(t.y-e.y)?[[dx,0],[0,dy]]:[[0,dy],[dx,0]];
     for(const [mx,my] of candidates){const nx=e.x+mx,ny=e.y+my;if(terrainHeight(nx,ny)&&!occupied(nx,ny,e.id)){e.x=nx;e.y=ny;break}}
    }
   });
+  if(checkDefeat())return;
   state.turn++;state.phase='player';state.chain=0;showTurnBanner('SEU TURNO',false);
   state.units.filter(u=>u.alive).forEach(u=>{u.acted=false;u.moved=false;u.range=u.baseRange;u.move=u.baseMove;u.sp=Math.min(u.maxSp,u.sp+1)});
   if(state.turn>stage.turnLimit)return end(false,'O limite de turnos acabou.');
@@ -258,14 +321,16 @@ async function awardProgress(win){
  if(window.NevoaOnline?.getSession())try{await NevoaOnline.saveParadoxiaTacticalProfile(p)}catch(e){}
 }
 function competitionPayload(){
- if(stage.key==='feira_falacias')return {answers:stage.enemies.map(e=>state.answers[e.id]||'')};
+ if(stage.key==='feira_falacias')return {answers:stage.enemies.map(e=>state.firstAnswers[e.id]||'')};
  return {completed:true,turns:state.turn,local_score:state.score};
 }
 async function end(win,msg){
  if(state.ended)return;state.ended=true;state.phase='end';$('#commandBox').hidden=true;
  const bonus=win?Math.max(0,(stage.turnLimit-state.turn)*20):0,score=Math.max(0,state.score+bonus);
  await awardProgress(win);
- $('#resultOverlay').classList.add('show');$('#resultTitle').textContent=win?'Missão concluída!':'Missão encerrada';$('#resultText').textContent=msg;$('#resultScore').textContent=score;$('#resultTurns').textContent=state.turn;if($('#resultChain'))$('#resultChain').textContent='×'+state.maxChain;
+ const overlay=$('#resultOverlay'),card=overlay?.querySelector('.resultCard');overlay?.classList.add('show');card?.classList.toggle('victory',win);card?.classList.toggle('defeat',!win);
+ if($('#resultIcon'))$('#resultIcon').textContent=win?'🏆':'💀';if($('#resultEyebrow'))$('#resultEyebrow').textContent=win?'MISSÃO VENCIDA':'MISSÃO PERDIDA';
+ $('#resultTitle').textContent=win?'VITÓRIA!':'DERROTA!';$('#resultText').textContent=msg;$('#resultScore').textContent=score;$('#resultTurns').textContent=state.turn;if($('#resultChain'))$('#resultChain').textContent='×'+state.maxChain;
  const server=$('#serverResult');server.textContent='';
  if(win&&state.competitive&&state.attempt){
   server.textContent='Validando resultado no servidor…';
@@ -277,13 +342,17 @@ async function end(win,msg){
 }
 function render(){
  $('#stageTitle').textContent=stage.title;$('#stageSubtitle').textContent=stage.subtitle;$('#objectiveText').textContent=stage.objective.text;$('#turnValue').textContent=state.turn+'/'+stage.turnLimit;$('#phaseValue').textContent=state.phase==='deploy'?'IMPLANTAÇÃO':state.phase==='player'?'SEU TURNO':state.phase==='enemy'?'TURNO INIMIGO':'MISSÃO ENCERRADA';$('#scoreValue').textContent=state.score;
- const prog=objectiveProgress();if($('#objectiveProgress'))$('#objectiveProgress').textContent=prog.current+'/'+prog.target;if($('#chainValue'))$('#chainValue').textContent='×'+state.chain;renderInspector();
+ const prog=objectiveProgress();if($('#objectiveProgress'))$('#objectiveProgress').textContent=prog.current+'/'+prog.target;if($('#chainValue'))$('#chainValue').textContent='×'+state.chain;
+ const winText=stage.battleRules?.winText||stage.objective.text,loseText=stage.battleRules?.loseText||('Todo o grupo KO ou ultrapassar '+stage.turnLimit+' turnos.');
+ if($('#winCondition'))$('#winCondition').textContent=winText;if($('#loseCondition'))$('#loseCondition').textContent=loseText;
+ const credBox=$('#credibilityBox');if(credBox){credBox.hidden=state.credibility===null;if(state.credibility!==null){const max=state.maxCredibility||1,pct=Math.max(0,Math.min(100,(state.credibility/max)*100));$('#credibilityValue').textContent=state.credibility+'/'+max;$('#credibilityFill').style.width=pct+'%'}}
+ renderEnemyRoster();renderInspector();
 
  const board=$('#tacticalBoard');board.style.setProperty('--cols',stage.size.w);board.style.setProperty('--rows',stage.size.h);board.innerHTML='';
  const reach=selection()&&state.mode==='move'?reachable(selection()):new Map();
  for(let y=0;y<stage.size.h;y++)for(let x=0;x<stage.size.w;x++){
   const h=terrainHeight(x,y);if(!h)continue;
-  const t=document.createElement('button');t.className='tile h'+h;t.dataset.x=x;t.dataset.y=y;t.style.setProperty('--x',x);t.style.setProperty('--y',y);t.style.setProperty('--h',h);
+  const t=document.createElement('button');t.className='tile h'+h;if(state.enemies.some(en=>en.alive&&dist({x,y},en)<=Math.max(1,en.range||1)))t.classList.add('danger');t.dataset.x=x;t.dataset.y=y;t.style.setProperty('--x',x);t.style.setProperty('--y',y);t.style.setProperty('--h',h);
   if(reach.has(key(x,y)))t.classList.add('reachable');
   const sel=selection();if(sel&&state.mode==='attack'&&state.enemies.some(en=>en.alive&&en.x===x&&en.y===y&&dist(sel,en)<=(sel.skillPending?.range??sel.range)))t.classList.add('attackable');
 
@@ -292,7 +361,7 @@ function render(){
   t.onclick=()=>tileClick(x,y);board.appendChild(t);
  }
  [...state.units,...state.enemies].filter(u=>u.alive).forEach(u=>{
-  const el=document.createElement('button');const sel=selection();const assisted=u.team==='player'&&sel&&u.id!==sel.id&&state.enemies.some(en=>en.alive&&dist(u,en)<=1&&dist(sel,en)<=(sel.skillPending?.range??sel.range));el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'')+(assisted?' assisted':'');el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
+  const el=document.createElement('button');const sel=selection();const assisted=u.team==='player'&&sel&&u.id!==sel.id&&state.enemies.some(en=>en.alive&&dist(u,en)<=1&&dist(sel,en)<=(sel.skillPending?.range??sel.range));el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'')+(assisted?' assisted':'')+(u.team==='enemy'&&state.inspectTarget===u.id?' targeted':'');el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
   el.innerHTML='<span class="unitSprite">'+u.icon+'</span><span class="unitName">'+u.name+'</span><span class="hp"><i style="width:'+Math.max(0,u.hp/u.maxHp*100)+'%"></i></span>';
   window.ParadoxiaSpriteRuntime?.decorateUnitElement(el,u);
   board.appendChild(el);
@@ -311,7 +380,10 @@ async function prepareCompetition(){
 }
 function briefing(){
  stage=D().stages[stageKey]||D().stages.feira_falacias;initState();
- $('#briefIcon').textContent=stage.icon;$('#briefTitle').textContent=stage.title;$('#briefSubtitle').textContent=stage.subtitle;$('#briefObjective').textContent=stage.objective.text;$('#briefList').innerHTML=stage.briefing.map(x=>'<li>'+x+'</li>').join('');$('#briefOverlay').classList.add('show');render();
+ const winText=stage.battleRules?.winText||stage.objective.text,loseText=stage.battleRules?.loseText||('Todo o grupo KO ou ultrapassar '+stage.turnLimit+' turnos.');
+ $('#briefIcon').textContent=stage.icon;$('#briefTitle').textContent=stage.title;$('#briefSubtitle').textContent=stage.subtitle;$('#briefObjective').textContent=stage.objective.text;
+ if($('#briefWin'))$('#briefWin').textContent=winText;if($('#briefLose'))$('#briefLose').textContent=loseText;
+ $('#briefList').innerHTML=stage.briefing.map(x=>'<li>'+x+'</li>').join('');$('#briefOverlay').classList.add('show');render();
 }
 async function start(){ $('#briefOverlay').classList.remove('show');$('#deployOverlay').classList.add('show');renderDeployment();render()}
 function init(){
