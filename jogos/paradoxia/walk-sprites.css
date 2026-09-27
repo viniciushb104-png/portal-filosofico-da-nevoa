@@ -26,7 +26,19 @@
 /* Direção */
 .worldPlayer.pose-front .spriteArt{--walk-y:0%}
 .worldPlayer.pose-side .spriteArt{--walk-y:50%}
-.worldPlayer.pose-back .spriteArt{--walk-y:100%}
+/* Costas usam faixas dedicadas e limpas.
+   As sheets originais tinham poses traseiras inconsistentes em algumas classes. */
+.worldPlayer.pose-back .spriteArt{
+  --walk-y:0%;
+  width:314px !important;
+  height:418px !important;
+  background-size:400% 100% !important;
+  background-position:var(--walk-x) 0% !important;
+}
+.worldPlayer.dialetico.pose-back .spriteArt{background-image:url("assets/walk/back/dialetico_back_walk.png") !important}
+.worldPlayer.cetico.pose-back .spriteArt{background-image:url("assets/walk/back/cetico_back_walk.png") !important}
+.worldPlayer.etico.pose-back .spriteArt{background-image:url("assets/walk/back/etico_back_walk.png") !important}
+.worldPlayer.existencial.pose-back .spriteArt{background-image:url("assets/walk/back/existencial_back_walk.png") !important}
 /* A folha de caminhada não possui uma quarta linha de ação.
    Durante interação usamos a frente em um quadro expressivo. */
 .worldPlayer.pose-action .spriteArt{--walk-y:0%}
