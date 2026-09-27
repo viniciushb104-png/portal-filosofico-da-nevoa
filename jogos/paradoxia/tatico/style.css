@@ -740,3 +740,73 @@ body[data-stage="feira_falacias"] .argumentShield{border-color:#ffca69;backgroun
   .resultGrid{grid-template-columns:repeat(2,1fr)}
 }
 @media(prefers-reduced-motion:reduce){.argumentShield{animation:none}}
+
+
+/* ===== Academia dos Porquês ===== */
+body[data-stage="academia_torre"] .boardViewport{
+  background:
+    linear-gradient(180deg,rgba(7,5,16,.16),rgba(6,4,12,.72)),
+    radial-gradient(circle at 42% 24%,rgba(159,126,255,.20),transparent 34%),
+    url("../assets/world/paradoxia_world_playable.webp") 31% 19% / cover no-repeat;
+}
+body[data-stage="academia_torre"] .battleTop{
+  background:linear-gradient(90deg,#0d0a19f4,#241a3bf2 50%,#100c20f4);
+  border-bottom-color:#685a91;
+}
+body[data-stage="academia_torre"] .objectivePanel,
+body[data-stage="academia_torre"] .commandBox{
+  background:linear-gradient(180deg,#100c1af3,#08070ef4);
+  border-color:#4d436a;
+}
+body[data-stage="academia_torre"] .tile{
+  border-color:#655b78;
+  background:linear-gradient(145deg,#2b2734,#15131c);
+}
+body[data-stage="academia_torre"] .tile.h2{background:linear-gradient(145deg,#39334a,#1b1824)}
+body[data-stage="academia_torre"] .tile.h3{background:linear-gradient(145deg,#514765,#251f31)}
+body[data-stage="academia_torre"] .tile.h4{
+  background:linear-gradient(145deg,#6d5c83,#33263d);
+  box-shadow:0 8px 0 #1c1422,0 0 22px #a58ad844;
+}
+body[data-stage="academia_torre"] .tile:has(.prop:not(.used)) .prop{
+  filter:drop-shadow(0 0 8px #d6c2ff);
+  animation:premiseGlow 1s ease-in-out infinite alternate;
+}
+@keyframes premiseGlow{to{transform:rotateZ(-45deg) rotateX(-54deg) translateY(-4px) scale(1.14)}}
+body[data-stage="academia_torre"] .unit.enemy::before{
+  content:"📐 GUARDIÃO";
+  background:#3b3157;
+  border-color:#9b87d1;
+  color:#eee4ff;
+}
+body[data-stage="academia_torre"] .enemyCard{
+  border-color:#473d63;
+  background:linear-gradient(135deg,#15101f,#0c0912);
+}
+body[data-stage="academia_torre"] .enemyCard:hover,
+body[data-stage="academia_torre"] .enemyCard.active{
+  border-color:#9c87d5;
+  box-shadow:0 0 18px #8d74c944;
+}
+body[data-stage="academia_torre"] #briefOverlay .briefCard{
+  background:
+    linear-gradient(145deg,rgba(25,18,42,.95),rgba(8,6,13,.98)),
+    radial-gradient(circle at 82% 12%,rgba(155,126,229,.18),transparent 36%);
+  border-color:#67558b;
+}
+body[data-stage="academia_torre"] .argumentShield{
+  border-color:#c3b0ff;
+  background:radial-gradient(circle,#5d4a83,#211a31);
+}
+body[data-stage="academia_torre"] .tile.idea-razao{
+  box-shadow:0 8px 0 #151226,0 0 22px #a995ff55;
+}
+body[data-stage="academia_torre"] .tacticalBoard{
+  filter:drop-shadow(0 30px 30px #000a);
+}
+@media(max-width:820px){
+  body[data-stage="academia_torre"] .boardViewport{background-position:30% 20%}
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-stage="academia_torre"] .tile:has(.prop:not(.used)) .prop{animation:none}
+}
