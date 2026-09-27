@@ -176,7 +176,7 @@ function tileClick(x,y){
    if(hit?.team==='enemy'){state.inspectTarget=hit.id;render();return}
    if(hit?.team==='player'&&!hit.acted){
      state.inspectTarget=null;state.selected=hit.id;state.mode='command';
-     render();openCommand(hit);return;
+     render();openCommand(hit);toast('Escolha: Mover, Analisar / Atacar, Habilidade ou Interagir.');return;
    }
    return;
  }
@@ -434,7 +434,8 @@ function render(){
   t.onclick=()=>tileClick(x,y);board.appendChild(t);
  }
  [...state.units,...state.enemies].filter(u=>u.alive).forEach(u=>{
-  const el=document.createElement('button');const sel=selection();const assisted=u.team==='player'&&sel&&u.id!==sel.id&&state.enemies.some(en=>en.alive&&dist(u,en)<=1&&dist(sel,en)<=(sel.skillPending?.range??sel.range));el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'')+(assisted?' assisted':'')+(u.team==='enemy'&&state.inspectTarget===u.id?' targeted':'');el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
+  const el=document.createElement('button');const sel=selection();const assisted=u.team==='player'&&sel&&u.id!==sel.id&&state.enemies.some(en=>en.alive&&dist(u,en)<=1&&dist(sel,en)<=(sel.skillPending?.range??sel.range));const inRange=u.team==='enemy'&&sel&&sel.team==='player'&&dist(sel,u)<=(sel.skillPending?.range??sel.range);
+  el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'')+(assisted?' assisted':'')+(u.team==='enemy'&&state.inspectTarget===u.id?' targeted':'')+(inRange?' inRange':'');el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
   el.innerHTML='<span class="unitSprite">'+u.icon+'</span><span class="unitName">'+u.name+'</span><span class="hp"><i style="width:'+Math.max(0,u.hp/u.maxHp*100)+'%"></i></span>';
   window.ParadoxiaSpriteRuntime?.decorateUnitElement(el,u);
   board.appendChild(el);
