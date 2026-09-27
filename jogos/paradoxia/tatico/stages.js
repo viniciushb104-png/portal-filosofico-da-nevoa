@@ -269,34 +269,159 @@ const stages={
    ]
   },
   biblioteca_fontes:{
-   key:'biblioteca_fontes',title:'Arquivo das Fontes',subtitle:'Biblioteca dos Boatos',icon:'📚',type:'tactical-puzzle',size:{w:11,h:8},turnLimit:14,
-   objective:{type:'collect',text:'Recupere 5 documentos e leve-os à mesa de comparação.',target:5},
+   key:'biblioteca_fontes',title:'Arquivo das Fontes',subtitle:'Biblioteca dos Boatos',icon:'📚',type:'tactical-boss',size:{w:11,h:8},turnLimit:16,
+   objective:{type:'boss',text:'Recupere 5 fontes e derrote o Arquivista dos Ecos.',target:5},
+   battleRules:{winText:'Colete as 5 fontes e derrote o Arquivista.',loseText:'Todo o grupo KO ou fim do turno 16.'},
+   analysisPrompt:'Que princípio de avaliação de fontes é mais relevante neste caso?',
+   concepts:[
+     {key:'fonte_primaria',label:'Fonte primária',desc:'Registro produzido próximo ao evento ou por participante direto.'},
+     {key:'corroboracao_independente',label:'Corroboração independente',desc:'Fontes independentes convergem sem depender umas das outras.'},
+     {key:'autoridade_contextual',label:'Autoridade contextual',desc:'Especialização importa apenas quando é relevante para o assunto.'},
+     {key:'cadeia_citacao',label:'Cadeia de citação',desc:'Muitas páginas podem repetir uma única origem sem criar evidência independente.'}
+   ],
+   attackQuestions:{
+     boato1:[
+       {q:'Dez páginas repetem a mesma notícia, todas citando um único post. Isso representa...',options:[{key:'a',label:'dez fontes independentes.'},{key:'b',label:'uma cadeia de citação com uma origem comum.'},{key:'c',label:'uma prova experimental.'}],ok:'b',feedback:'Repetição não cria independência entre fontes.'},
+       {q:'Qual verificação fortalece uma notícia?',options:[{key:'a',label:'Encontrar confirmação independente com método e origem identificáveis.'},{key:'b',label:'Contar quantas vezes foi compartilhada.'},{key:'c',label:'Preferir o título mais dramático.'}],ok:'a',feedback:'Corroboração independente aumenta a robustez da evidência.'}
+     ],
+     boato2:[
+       {q:'Uma celebridade opina sobre uma área fora de sua especialidade. O ponto crítico é...',options:[{key:'a',label:'se sua autoridade é relevante para esse tema.'},{key:'b',label:'se ela tem muitos seguidores.'},{key:'c',label:'se a frase é curta.'}],ok:'a',feedback:'Autoridade é contextual, não universal.'},
+       {q:'Qual fonte é mais próxima de um acontecimento?',options:[{key:'a',label:'Um documento contemporâneo produzido por participante direto.'},{key:'b',label:'Um comentário sem referência feito décadas depois.'},{key:'c',label:'Uma repostagem sem origem.'}],ok:'a',feedback:'Proximidade não garante verdade, mas é um dado importante de avaliação.'}
+     ],
+     archivist:[
+       {q:'O Arquivista diz: “Há cem cópias, então há cem confirmações”. O erro é...',options:[{key:'a',label:'confundir número de cópias com independência das fontes.'},{key:'b',label:'usar documentos demais.'},{key:'c',label:'fazer uma pergunta histórica.'}],ok:'a',feedback:'Fontes derivadas da mesma origem não contam como confirmações independentes.'},
+       {q:'Uma boa comparação de fontes considera...',options:[{key:'a',label:'origem, proximidade, independência, método e possíveis limitações.'},{key:'b',label:'apenas o tamanho do texto.'},{key:'c',label:'apenas o número de curtidas.'}],ok:'a',feedback:'Avaliar fontes exige múltiplos critérios, não um único indicador.'}
+     ]
+   },
    terrain:['11111111111','12222222221','12111111121','12123332121','12123332121','12111111121','12222222221','11111111111'],
-   ideaFields:[{x:5,y:3,type:'razao',label:'Mesa de Evidências',effect:'+1 alcance'}],
-   playerSpawns:[{x:5,y:7},{x:4,y:7},{x:6,y:7}],
-   enemies:[{id:'boato1',name:'Boato Copiado',icon:'📄',x:2,y:3,hp:2},{id:'boato2',name:'Boato Copiado',icon:'📄',x:8,y:4,hp:2}],
-   props:[{id:'doc1',icon:'📜',x:1,y:1,type:'collect'},{id:'doc2',icon:'📕',x:9,y:1,type:'collect'},{id:'doc3',icon:'📰',x:1,y:6,type:'collect'},{id:'doc4',icon:'🪨',x:9,y:6,type:'collect'},{id:'doc5',icon:'✉️',x:5,y:1,type:'collect'}],
-   briefing:['Fontes não têm o mesmo peso só porque contam a mesma história.','Recolha evidências e compare origem, proximidade e independência.','O servidor validará respostas quando o puzzle conceitual estiver ligado.']
+   ideaFields:[
+     {x:5,y:3,type:'razao',label:'Mesa de Evidências',effect:'+1 alcance'},
+     {x:2,y:5,type:'dialogo',label:'Leitura Cruzada',effect:'+1 Cadeia'},
+     {x:8,y:2,type:'autonomia',label:'Consulta Independente',effect:'+1 movimento'}
+   ],
+   playerSpawns:[{x:5,y:7},{x:4,y:7},{x:6,y:7},{x:5,y:6}],
+   enemies:[
+     {id:'boato1',name:'Boato Copiado',icon:'📄',x:2,y:3,hp:4,tag:'argument',answer:'cadeia_citacao',role:'BOATO • Cópias da mesma origem',attackName:'Eco de Mil Páginas',quote:'“Se aparece em cem lugares, são cem confirmações.”',threat:1},
+     {id:'boato2',name:'Autoridade Fora de Lugar',icon:'🎙️',x:8,y:4,hp:4,tag:'argument',answer:'autoridade_contextual',role:'BOATO • Prestígio emprestado',attackName:'Voz de Autoridade',quote:'“Sou famoso, portanto sou especialista nisso também.”',threat:2},
+     {id:'archivist',name:'Arquivista dos Ecos',icon:'📚',x:5,y:1,hp:8,tag:'boss',answer:'corroboracao_independente',requiresSeals:5,role:'CHEFE • Arquivo sem origem',attackName:'Biblioteca do Eco',quote:'“Toda cópia é uma nova prova.”',threat:3}
+   ],
+   props:[
+     {id:'seal_doc1',icon:'📜',x:1,y:1,type:'collect',label:'Diário de Campo'},
+     {id:'seal_doc2',icon:'📕',x:9,y:1,type:'collect',label:'Registro Oficial'},
+     {id:'seal_doc3',icon:'📰',x:1,y:6,type:'collect',label:'Jornal da Época'},
+     {id:'seal_doc4',icon:'🪨',x:9,y:6,type:'collect',label:'Inscrição Material'},
+     {id:'seal_doc5',icon:'✉️',x:5,y:2,type:'collect',label:'Carta de Testemunha'}
+   ],
+   briefing:[
+     'A Biblioteca está cheia de textos que parecem confirmar uns aos outros.',
+     'Colete cinco fontes diferentes e compare origem, independência e proximidade.',
+     'Os inimigos transformam repetição e prestígio em falsa evidência.',
+     'O Arquivista só pode ser enfrentado depois das cinco fontes.',
+     'VITÓRIA: cinco fontes + chefe. DERROTA: grupo KO ou fim do turno 16.'
+   ]
   },
   cemiterio_epitafios:{
-   key:'cemiterio_epitafios',title:'Epitáfios da Lógica',subtitle:'Cemitério dos Conceitos',icon:'🪦',type:'tactical-puzzle',size:{w:9,h:8},turnLimit:12,
-   objective:{type:'switches',text:'Decifre 4 lápides contraditórias.',target:4},
+   key:'cemiterio_epitafios',title:'Epitáfios da Lógica',subtitle:'Cemitério dos Conceitos',icon:'🪦',type:'tactical-boss',size:{w:9,h:8},turnLimit:14,
+   objective:{type:'boss',text:'Decifre 4 lápides e derrote o Paradoxo Errante.',target:4},
+   battleRules:{winText:'Ative as 4 lápides e vença o Paradoxo Errante.',loseText:'Todo o grupo KO ou fim do turno 14.'},
+   analysisPrompt:'Qual estrutura lógica aparece nesta inscrição?',
+   concepts:[
+     {key:'contradicao',label:'Contradição',desc:'Duas afirmações incompatíveis são sustentadas no mesmo sentido e contexto.'},
+     {key:'autorreferencia',label:'Autorreferência',desc:'Uma frase ou regra se aplica a si mesma.'},
+     {key:'paradoxo',label:'Paradoxo',desc:'Um conjunto de premissas plausíveis conduz a tensão ou conclusão aparentemente impossível.'},
+     {key:'consistencia',label:'Consistência',desc:'Um conjunto de afirmações evita sustentar simultaneamente proposições incompatíveis.'}
+   ],
+   attackQuestions:{
+     epitaph1:[
+       {q:'“Esta lápide está acesa e não está acesa no mesmo instante e sentido.” Isso é...',options:[{key:'a',label:'contradição.'},{key:'b',label:'mera repetição.'},{key:'c',label:'corroboração.'}],ok:'a',feedback:'A afirmação sustenta proposições incompatíveis sob as mesmas condições.'},
+       {q:'Duas frases diferentes são automaticamente contraditórias?',options:[{key:'a',label:'Não; elas precisam ser incompatíveis no mesmo contexto.'},{key:'b',label:'Sim; diferença já basta.'},{key:'c',label:'Sim; se forem longas.'}],ok:'a',feedback:'Contradição exige incompatibilidade, não simples diferença.'}
+     ],
+     epitaph2:[
+       {q:'Uma regra que diz “todas as regras desta lápide são falsas” envolve...',options:[{key:'a',label:'autorreferência.'},{key:'b',label:'uma medição física.'},{key:'c',label:'apelo à maioria.'}],ok:'a',feedback:'A regra inclui a si própria em seu campo de aplicação.'},
+       {q:'Por que autorreferência pode gerar dificuldade?',options:[{key:'a',label:'Porque a afirmação pode alterar o próprio estatuto ao aplicar-se a si.'},{key:'b',label:'Porque toda autorreferência é automaticamente falsa.'},{key:'c',label:'Porque elimina qualquer linguagem.'}],ok:'a',feedback:'Nem toda autorreferência é problemática, mas algumas criam ciclos sem solução simples.'}
+     ],
+     paradox:[
+       {q:'Um paradoxo filosófico serve frequentemente para...',options:[{key:'a',label:'revelar tensões entre princípios ou pressupostos que pareciam compatíveis.'},{key:'b',label:'provar que pensar é inútil.'},{key:'c',label:'substituir toda evidência por mistério.'}],ok:'a',feedback:'Paradoxos podem funcionar como testes de conceitos e pressupostos.'},
+       {q:'Diante de um paradoxo, um bom passo é...',options:[{key:'a',label:'examinar premissas, definições e inferências que produzem a tensão.'},{key:'b',label:'escolher a frase mais assustadora.'},{key:'c',label:'ignorar qualquer distinção de contexto.'}],ok:'a',feedback:'Desmontar o caminho argumentativo ajuda a localizar a fonte da tensão.'}
+     ]
+   },
    terrain:['111111111','112222211','121111121','121333121','121333121','121111121','112222211','111111111'],
-   ideaFields:[{x:4,y:3,type:'razao',label:'Consistência',effect:'+1 alcance'}],
-   playerSpawns:[{x:4,y:7},{x:3,y:7},{x:5,y:7}],
-   enemies:[{id:'paradox',name:'Paradoxo Errante',icon:'♾️',x:4,y:1,hp:4}],
-   props:[{id:'grave1',icon:'🪦',x:1,y:2,type:'switch'},{id:'grave2',icon:'🪦',x:7,y:2,type:'switch'},{id:'grave3',icon:'🪦',x:1,y:5,type:'switch'},{id:'grave4',icon:'🪦',x:7,y:5,type:'switch'}],
-   briefing:['Esta é uma missão secreta.','As lápides contêm contradições e paradoxos.','Resolver todas libera um bônus de temporada quando a missão for ativada.']
+   ideaFields:[
+     {x:4,y:3,type:'razao',label:'Consistência',effect:'+1 alcance'},
+     {x:4,y:4,type:'dialogo',label:'Leitura Dupla',effect:'+1 Cadeia'}
+   ],
+   playerSpawns:[{x:4,y:7},{x:3,y:7},{x:5,y:7},{x:4,y:6}],
+   enemies:[
+     {id:'epitaph1',name:'Epitáfio Contraditório',icon:'🪦',x:2,y:3,hp:4,tag:'argument',answer:'contradicao',role:'EPITÁFIO • Incompatibilidade',attackName:'Dupla Inscrição',quote:'“Sou e não sou, no mesmo sentido.”',threat:1},
+     {id:'epitaph2',name:'Epitáfio Autorreferente',icon:'📜',x:6,y:4,hp:4,tag:'argument',answer:'autorreferencia',role:'EPITÁFIO • Regra sobre si',attackName:'Laço da Inscrição',quote:'“Tudo aqui, inclusive isto, está proibido.”',threat:2},
+     {id:'paradox',name:'Paradoxo Errante',icon:'♾️',x:4,y:1,hp:8,tag:'boss',answer:'paradoxo',requiresSeals:4,role:'CHEFE • Tensão lógica',attackName:'Nó do Infinito',quote:'“Quanto mais me resolves, mais perguntas aparecem.”',threat:3}
+   ],
+   props:[
+     {id:'seal_grave1',icon:'🪦',x:1,y:2,type:'switch',label:'Lápide da Contradição'},
+     {id:'seal_grave2',icon:'🪦',x:7,y:2,type:'switch',label:'Lápide da Autorreferência'},
+     {id:'seal_grave3',icon:'🪦',x:1,y:5,type:'switch',label:'Lápide da Consistência'},
+     {id:'seal_grave4',icon:'🪦',x:7,y:5,type:'switch',label:'Lápide do Paradoxo'}
+   ],
+   briefing:[
+     'Esta continua sendo uma área secreta do mapa.',
+     'Ative as quatro lápides e leia as tensões lógicas gravadas nelas.',
+     'Contradição, autorreferência e paradoxo não são a mesma coisa.',
+     'O Paradoxo Errante só pode ser confrontado depois das quatro lápides.',
+     'VITÓRIA: quatro lápides + chefe. DERROTA: grupo KO ou fim do turno 14.'
+   ]
   },
   castelo_certeza:{
-   key:'castelo_certeza',title:'Castelo da Certeza Absoluta',subtitle:'Fortaleza Final',icon:'👑',type:'tactical-boss',size:{w:12,h:10},turnLimit:18,
-   objective:{type:'boss',text:'Quebre os 4 Selos Dogmáticos e confronte o Lorde Certeza.',target:4},
+   key:'castelo_certeza',title:'Castelo da Certeza Absoluta',subtitle:'Fortaleza Final',icon:'👑',type:'tactical-boss',size:{w:12,h:10},turnLimit:20,
+   objective:{type:'boss',text:'Quebre os 4 Selos Dogmáticos e derrote o Lorde Certeza Absoluta.',target:4},
+   battleRules:{winText:'Quebre os 4 Selos e derrote o Lorde Certeza.',loseText:'Todo o grupo KO ou fim do turno 20.'},
+   analysisPrompt:'Qual fragilidade argumentativa sustenta esta certeza?',
+   concepts:[
+     {key:'falso_dilema',label:'Falso dilema',desc:'Reduz possibilidades a duas opções sem justificativa suficiente.'},
+     {key:'circularidade',label:'Raciocínio circular',desc:'A conclusão é usada para justificar as próprias premissas.'},
+     {key:'ad_hominem',label:'Ad hominem',desc:'Ataca a pessoa em vez da estrutura ou evidência do argumento.'},
+     {key:'dogmatismo_metodologico',label:'Certeza sem revisão',desc:'Recusa qualquer condição sob a qual uma crença poderia ser reavaliada.'}
+   ],
+   attackQuestions:{
+     guard1:[
+       {q:'“Ou aceita toda a doutrina ou rejeita toda razão.” O defeito é...',options:[{key:'a',label:'falso dilema.'},{key:'b',label:'fonte primária.'},{key:'c',label:'corroboração independente.'}],ok:'a',feedback:'Existem posições intermediárias e alternativas que foram apagadas.'},
+       {q:'Qual resposta abre o dilema?',options:[{key:'a',label:'Listar outras posições possíveis e pedir justificativa para excluí-las.'},{key:'b',label:'Escolher um extremo sem exame.'},{key:'c',label:'Atacar a pessoa que falou.'}],ok:'a',feedback:'Questionar a exaustividade das opções enfraquece o falso dilema.'}
+     ],
+     guard2:[
+       {q:'“Você errou antes, então seu argumento atual é falso.” Isso é...',options:[{key:'a',label:'ad hominem.'},{key:'b',label:'dedução válida.'},{key:'c',label:'análise de fonte primária.'}],ok:'a',feedback:'O histórico pessoal não substitui a análise das razões atuais.'},
+       {q:'Qual crítica permanece focada no argumento?',options:[{key:'a',label:'“Essa conclusão não é sustentada pelas evidências apresentadas.”'},{key:'b',label:'“Você é incapaz de pensar.”'},{key:'c',label:'“Seu jeito de falar prova que está errado.”'}],ok:'a',feedback:'A primeira crítica trata da relação entre evidência e conclusão.'}
+     ],
+     lord:[
+       {q:'O Lorde afirma: “Só aceito evidências que já confirmem minha certeza”. O problema é...',options:[{key:'a',label:'tornar a crença imune à revisão por definição.'},{key:'b',label:'ser cuidadoso demais com fontes.'},{key:'c',label:'ter muitas hipóteses concorrentes.'}],ok:'a',feedback:'Uma crença que rejeita antecipadamente qualquer possível revisão perde capacidade crítica.'},
+       {q:'Qual postura é mais compatível com pensamento crítico?',options:[{key:'a',label:'Explicitar razões e condições que poderiam levar à revisão da conclusão.'},{key:'b',label:'Declarar que nenhuma evidência futura poderia importar.'},{key:'c',label:'Tratar discordância como defeito pessoal.'}],ok:'a',feedback:'Pensamento crítico inclui justificar crenças e reconhecer condições de revisão.'},
+       {q:'Uma conclusão forte é aquela que...',options:[{key:'a',label:'é sustentada por razões relevantes e permanece aberta a avaliação.'},{key:'b',label:'é impossível de questionar por decreto.'},{key:'c',label:'vence porque elimina quem discorda.'}],ok:'a',feedback:'Força argumentativa vem de justificativa, não de imunidade à crítica.'}
+     ]
+   },
    terrain:['001111111100','011222222110','112222222211','122333333221','123344443321','123344443321','122333333221','112222222211','011222222110','001111111100'],
-   ideaFields:[{x:4,y:5,type:'dialogo',label:'Contraponto',effect:'+1 Cadeia'},{x:7,y:5,type:'razao',label:'Justificação',effect:'+1 alcance'},{x:5,y:7,type:'etica',label:'Consequências',effect:'proteção'},{x:6,y:7,type:'autonomia',label:'Autonomia',effect:'+1 movimento'}],
+   ideaFields:[
+     {x:4,y:5,type:'dialogo',label:'Contraponto',effect:'+1 Cadeia'},
+     {x:7,y:5,type:'razao',label:'Justificação',effect:'+1 alcance'},
+     {x:5,y:7,type:'etica',label:'Consequências',effect:'proteção'},
+     {x:6,y:7,type:'autonomia',label:'Autonomia',effect:'+1 movimento'}
+   ],
    playerSpawns:[{x:5,y:9},{x:6,y:9},{x:4,y:9},{x:7,y:9}],
-   enemies:[{id:'lord',name:'Lorde Certeza Absoluta',icon:'👑',x:5,y:1,hp:8,tag:'boss'},{id:'guard1',name:'Sentinela Dogmática',icon:'♜',x:3,y:3,hp:3},{id:'guard2',name:'Sentinela Dogmática',icon:'♜',x:8,y:3,hp:3}],
-   props:[{id:'seal1',icon:'🔒',x:2,y:5,type:'switch'},{id:'seal2',icon:'🔒',x:9,y:5,type:'switch'},{id:'seal3',icon:'🔒',x:4,y:2,type:'switch'},{id:'seal4',icon:'🔒',x:7,y:2,type:'switch'}],
-   briefing:['A fortaleza combina tudo que o reino ensinou.','Os quatro Campos de Ideias aparecem juntos.','O chefe só deve ficar vulnerável após os Selos Dogmáticos.']
+   enemies:[
+     {id:'guard1',name:'Sentinela do Dilema',icon:'♜',x:3,y:3,hp:5,tag:'argument',answer:'falso_dilema',role:'SENTINELA • Duas opções',attackName:'Portão Binário',quote:'“Só existem dois caminhos.”',threat:2},
+     {id:'guard2',name:'Sentinela do Desprezo',icon:'♜',x:8,y:3,hp:5,tag:'argument',answer:'ad_hominem',role:'SENTINELA • Ataque pessoal',attackName:'Julgamento do Oponente',quote:'“Quem discorda não merece ser ouvido.”',threat:2},
+     {id:'lord',name:'Lorde Certeza Absoluta',icon:'👑',x:5,y:1,hp:10,tag:'boss',answer:'dogmatismo_metodologico',requiresSeals:4,role:'CHEFE FINAL • Certeza sem revisão',attackName:'Decreto Inquestionável',quote:'“Nada poderá contar contra aquilo que já decidi ser verdade.”',threat:4}
+   ],
+   props:[
+     {id:'seal1',icon:'🧠',x:2,y:5,type:'switch',label:'Selo da Razão'},
+     {id:'seal2',icon:'⚖️',x:9,y:5,type:'switch',label:'Selo da Ética'},
+     {id:'seal3',icon:'💬',x:4,y:2,type:'switch',label:'Selo do Diálogo'},
+     {id:'seal4',icon:'🗝️',x:7,y:2,type:'switch',label:'Selo da Autonomia'}
+   ],
+   briefing:[
+     'A fortaleza final combina as mecânicas centrais de Paradoxia.',
+     'Ative Razão, Ética, Diálogo e Autonomia nos quatro Selos Dogmáticos.',
+     'As Sentinelas revisitam erros argumentativos encontrados em outras regiões.',
+     'O Lorde Certeza Absoluta só pode ser confrontado depois dos quatro Selos.',
+     'VITÓRIA: quatro Selos + Lorde derrotado. DERROTA: grupo KO ou fim do turno 20.'
+   ]
   },
   npc_dialetico:{
    key:'npc_dialetico',title:'Duelo do Contraponto',subtitle:'Missão da Estudiosa Dialética',icon:'💬',type:'tactical-puzzle',size:{w:8,h:7},turnLimit:9,
@@ -458,16 +583,56 @@ const stages={
    ]
   },
   ruinas_sombras:{
-   key:'ruinas_sombras',title:'Sombras da Caverna',subtitle:'Ruínas da Caverna',icon:'🔥',
-   type:'tactical-platform',size:{w:10,h:8},turnLimit:14,
-   objective:{type:'switches',text:'Acenda 3 fogueiras e alcance a saída.',target:3},
+   key:'ruinas_sombras',title:'Sombras da Caverna',subtitle:'Ruínas da Caverna',icon:'🔥',type:'tactical-boss',size:{w:10,h:8},turnLimit:15,
+   objective:{type:'boss',text:'Acenda 3 fogueiras e derrote a Sombra da Parede.',target:3},
+   battleRules:{winText:'Acenda as 3 fogueiras e vença a Sombra da Parede.',loseText:'Todo o grupo KO ou fim do turno 15.'},
+   analysisPrompt:'Que distinção ajuda a separar aparência, observação e inferência?',
+   concepts:[
+     {key:'observacao_inferencia',label:'Observação x inferência',desc:'Distingue aquilo que foi observado da interpretação construída a partir disso.'},
+     {key:'hipotese_alternativa',label:'Hipótese alternativa',desc:'Uma mesma observação pode admitir mais de uma explicação.'},
+     {key:'aparencia_realidade',label:'Aparência e realidade',desc:'Aquilo que aparece pode não esgotar o que existe ou causa o fenômeno.'},
+     {key:'evidencia_adicional',label:'Evidência adicional',desc:'Novas observações podem discriminar entre explicações concorrentes.'}
+   ],
+   attackQuestions:{
+     shadow1:[
+       {q:'Ver uma sombra alongada permite concluir imediatamente que existe um monstro?',options:[{key:'a',label:'Não; a sombra é observação, “monstro” é uma inferência que precisa de apoio.'},{key:'b',label:'Sim; toda sombra revela exatamente sua causa.'},{key:'c',label:'Sim, se o ambiente for escuro.'}],ok:'a',feedback:'Separar dado observado de interpretação reduz conclusões precipitadas.'},
+       {q:'Qual ação ajuda a testar a interpretação?',options:[{key:'a',label:'Mudar a iluminação e observar se a forma da sombra muda.'},{key:'b',label:'Repetir “é um monstro” várias vezes.'},{key:'c',label:'Evitar qualquer nova observação.'}],ok:'a',feedback:'Uma nova condição de observação pode discriminar hipóteses.'}
+     ],
+     shadow2:[
+       {q:'Duas explicações produzem a mesma aparência. O que fazer?',options:[{key:'a',label:'Buscar evidência adicional que diferencie as hipóteses.'},{key:'b',label:'Escolher a mais assustadora.'},{key:'c',label:'Declarar as duas verdadeiras automaticamente.'}],ok:'a',feedback:'Hipóteses concorrentes exigem testes discriminadores.'},
+       {q:'“Eu vi X” e “X foi causado por Y” são...',options:[{key:'a',label:'uma observação e uma inferência distintas.'},{key:'b',label:'sempre a mesma frase.'},{key:'c',label:'duas provas independentes.'}],ok:'a',feedback:'Confundir observação e explicação produz certeza excessiva.'}
+     ],
+     cave_core:[
+       {q:'A Sombra diz: “Se parece real, então é toda a realidade”. O erro é...',options:[{key:'a',label:'tratar aparência como explicação completa sem investigação adicional.'},{key:'b',label:'usar iluminação.'},{key:'c',label:'formular hipótese.'}],ok:'a',feedback:'Aparência fornece dados, mas não necessariamente toda a estrutura causal.'},
+       {q:'Qual estratégia é mais crítica?',options:[{key:'a',label:'Comparar observações sob condições diferentes e testar hipóteses alternativas.'},{key:'b',label:'Fixar a primeira interpretação para sempre.'},{key:'c',label:'Excluir qualquer evidência que mude a aparência.'}],ok:'a',feedback:'Variação de condições ajuda a separar aparência de causa.'}
+     ]
+   },
    terrain:['1111111111','1122222211','1121111211','1121331211','1121331211','1121111211','1122222211','1111111111'],
-   ideaFields:[{x:4,y:3,type:'autonomia',label:'Luz Própria',effect:'revela uma rota oculta'}],
-   playerSpawns:[{x:1,y:6},{x:2,y:6},{x:1,y:5}],
-   enemies:[{id:'shadow1',name:'Sombra Projetada',icon:'👤',x:6,y:2,hp:2,tag:'illusion'},{id:'shadow2',name:'Sombra Projetada',icon:'👤',x:7,y:5,hp:2,tag:'illusion'}],
-   props:[{id:'fire1',icon:'🕯️',x:3,y:2,type:'switch'},{id:'fire2',icon:'🕯️',x:6,y:4,type:'switch'},{id:'fire3',icon:'🕯️',x:4,y:6,type:'switch'},{id:'exit',icon:'🚪',x:8,y:1,type:'goal'}],
-   briefing:['Nem toda sombra é aquilo que parece.','Acenda as fogueiras para distinguir projeção e objeto.','A saída só se abre depois das três fontes de luz.']
- }
+   ideaFields:[
+     {x:4,y:3,type:'autonomia',label:'Luz Própria',effect:'+1 movimento'},
+     {x:5,y:4,type:'razao',label:'Olhar Crítico',effect:'+1 alcance'},
+     {x:2,y:6,type:'dialogo',label:'Comparar Perspectivas',effect:'+1 Cadeia'}
+   ],
+   playerSpawns:[{x:1,y:6},{x:2,y:6},{x:1,y:5},{x:2,y:5}],
+   enemies:[
+     {id:'shadow1',name:'Sombra Projetada I',icon:'👤',x:6,y:2,hp:4,tag:'illusion',answer:'observacao_inferencia',role:'SOMBRA • Inferência apressada',attackName:'Forma Enganosa',quote:'“Se parece com algo, então é aquilo.”',threat:1},
+     {id:'shadow2',name:'Sombra Projetada II',icon:'👥',x:7,y:5,hp:4,tag:'illusion',answer:'hipotese_alternativa',role:'SOMBRA • Explicação única',attackName:'Parede das Aparências',quote:'“Só existe uma explicação possível.”',threat:2},
+     {id:'cave_core',name:'Sombra da Parede',icon:'🔥',x:8,y:1,hp:8,tag:'boss',answer:'aparencia_realidade',requiresSeals:3,role:'CHEFE • Aparência absoluta',attackName:'Caverna Fechada',quote:'“Aquilo que aparece é tudo que pode existir.”',threat:3}
+   ],
+   props:[
+     {id:'seal_fire1',icon:'🕯️',x:3,y:2,type:'switch',label:'Fogueira da Observação'},
+     {id:'seal_fire2',icon:'🕯️',x:6,y:4,type:'switch',label:'Fogueira da Hipótese'},
+     {id:'seal_fire3',icon:'🕯️',x:4,y:6,type:'switch',label:'Fogueira da Evidência'}
+   ],
+   briefing:[
+     'As sombras parecem entidades completas porque a caverna esconde suas causas.',
+     'Acenda três fogueiras para mudar as condições de observação.',
+     'Separe aquilo que foi visto da interpretação feita a partir disso.',
+     'A Sombra da Parede só pode ser enfrentada depois das três fogueiras.',
+     'VITÓRIA: três fogueiras + chefe. DERROTA: grupo KO ou fim do turno 15.'
+   ]
+  }
+
 };
 
 const common={
