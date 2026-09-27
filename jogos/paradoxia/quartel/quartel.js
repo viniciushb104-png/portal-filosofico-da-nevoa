@@ -35,14 +35,14 @@ async function load(){
 }
 function moveSlot(i,dir){const j=i+dir;if(j<0||j>=profile.party.length)return;[profile.party[i],profile.party[j]]=[profile.party[j],profile.party[i]];selected=j;saveOnline();render()}
 function renderParty(){
- $('#party').innerHTML=profile.party.map((k,i)=>{const c=CLASSES[k],r=profile.roster[k]||{};return '<article class="partyCard '+(i===selected?'active':'')+'" data-slot="'+i+'"><div class="avatar">'+c.icon+'</div><b>'+c.name+'</b><small>Nv. '+(r.level||1)+' • domínio '+(r.mastery||0)+'</small><div class="slotControls"><button data-left="'+i+'">←</button><button data-right="'+i+'">→</button></div></article>'}).join('');
+ $('#party').innerHTML=profile.party.map((k,i)=>{const c=CLASSES[k],r=profile.roster[k]||{};return '<article class="partyCard '+(i===selected?'active':'')+'" data-slot="'+i+'"><div class="avatar quartelPortrait" data-sprite-key="'+k+'">'+c.icon+'</div><b>'+c.name+'</b><small>Nv. '+(r.level||1)+' • domínio '+(r.mastery||0)+'</small><div class="slotControls"><button data-left="'+i+'">←</button><button data-right="'+i+'">→</button></div></article>'}).join('');
  document.querySelectorAll('.partyCard').forEach(x=>x.onclick=e=>{if(e.target.tagName==='BUTTON')return;selected=Number(x.dataset.slot);render()});
  document.querySelectorAll('[data-left]').forEach(b=>b.onclick=()=>moveSlot(Number(b.dataset.left),-1));
  document.querySelectorAll('[data-right]').forEach(b=>b.onclick=()=>moveSlot(Number(b.dataset.right),1));
 }
 function renderDetail(){
  const k=profile.party[selected],c=CLASSES[k],r=profile.roster[k]||{};
- $('#unitDetail').innerHTML='<div class="unitHero"><div class="bigAvatar">'+c.icon+'</div><div><h2>'+c.name+'</h2><p>'+c.desc+'</p><div class="stats"><div><b>'+c.hp+'</b><small>HP</small></div><div><b>'+c.sp+'</b><small>SP</small></div><div><b>'+c.move+'</b><small>MOV</small></div><div><b>'+c.range+'</b><small>ALC</small></div></div></div></div><div class="skillList">'+c.skills.map(s=>'<span>✦ '+s+'</span>').join('')+'<span>🎒 Equipamentos: '+(r.equipment||[null,null,null]).map(x=>x||'vazio').join(' • ')+'</span></div>';
+ $('#unitDetail').innerHTML='<div class="unitHero"><div class="bigAvatar quartelPortrait" data-sprite-key="'+k+'">'+c.icon+'</div><div><h2>'+c.name+'</h2><p>'+c.desc+'</p><div class="stats"><div><b>'+c.hp+'</b><small>HP</small></div><div><b>'+c.sp+'</b><small>SP</small></div><div><b>'+c.move+'</b><small>MOV</small></div><div><b>'+c.range+'</b><small>ALC</small></div></div></div></div><div class="skillList">'+c.skills.map(s=>'<span>✦ '+s+'</span>').join('')+'<span>🎒 Equipamentos: '+(r.equipment||[null,null,null]).map(x=>x||'vazio').join(' • ')+'</span></div>';
 }
 function renderMissions(){
  const metas=window.ParadoxiaMissions?.all||[];
