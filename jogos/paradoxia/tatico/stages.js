@@ -3,14 +3,57 @@
 
 const stages={
   vila_ecos:{
-   key:'vila_ecos',title:'Ecos da Vila',subtitle:'Vila das Abóboras',icon:'🎃',type:'tactical-puzzle',size:{w:9,h:8},turnLimit:11,
-   objective:{type:'investigate',text:'Investigue 4 rumores antes que se espalhem pela vila.',target:4},
-   terrain:['111111111','111222111','112222211','112111211','111111111','111222111','111111111','111111111'],
-   ideaFields:[{x:4,y:2,type:'razao',label:'Praça da Razão',effect:'+1 alcance de análise'},{x:2,y:5,type:'dialogo',label:'Roda de Conversa',effect:'+1 Cadeia'}],
-   playerSpawns:[{x:4,y:7},{x:3,y:7},{x:5,y:7},{x:4,y:6}],
-   enemies:[{id:'rumor1',name:'Rumor do Poço',icon:'🗯️',x:1,y:1,hp:1,tag:'rumor'},{id:'rumor2',name:'Rumor da Padaria',icon:'🗯️',x:7,y:1,hp:1,tag:'rumor'},{id:'rumor3',name:'Rumor do Bosque',icon:'🗯️',x:1,y:5,hp:1,tag:'rumor'},{id:'rumor4',name:'Rumor do Relógio',icon:'🗯️',x:7,y:5,hp:1,tag:'rumor'}],
-   props:[{id:'well',icon:'🪣',x:4,y:4,type:'bonus'}],
-   briefing:['Rumores surgiram em quatro pontos da vila.','Aproxime-se e analise antes de aceitar a primeira versão.','Nem toda fala errada é mentira deliberada: procure evidência.']
+   key:'vila_ecos',title:'Ecos da Vila',subtitle:'Vila das Abóboras',icon:'🎃',type:'tactical-investigation',size:{w:11,h:9},turnLimit:12,
+   objective:{type:'investigate',text:'Investigue as 4 evidências e desmonte os 4 rumores antes que o Pânico tome a vila.',target:4},
+   battleRules:{
+     panic:0,maxPanic:10,wrongAnswerPanic:2,enemySpreadPanic:1,
+     winText:'Desmonte os 4 rumores usando evidências.',
+     loseText:'Pânico 10/10, grupo derrotado ou fim do turno 12.'
+   },
+   analysisPrompt:'Qual leitura crítica explica melhor por que esse rumor não está bem sustentado?',
+   concepts:[
+     {key:'testemunho_isolado',label:'Testemunho isolado',desc:'Um único relato não basta para representar toda a situação.'},
+     {key:'boato_sem_fonte',label:'Boato sem fonte verificável',desc:'A afirmação circula, mas ninguém consegue indicar de onde veio a informação.'},
+     {key:'generalizacao_precipitada',label:'Generalização precipitada',desc:'Poucos casos são usados para concluir algo sobre um grupo ou situação inteira.'},
+     {key:'causa_sem_prova',label:'Causa atribuída sem evidência',desc:'Dois acontecimentos próximos são ligados como causa e efeito sem demonstração.'}
+   ],
+   terrain:[
+     '11111111111',
+     '11220002211',
+     '11221112211',
+     '11111111111',
+     '11001110011',
+     '11111111111',
+     '11221112211',
+     '11220002211',
+     '11111111111'
+   ],
+   ideaFields:[
+     {x:5,y:3,type:'razao',label:'Coreto da Razão',effect:'+1 alcance de análise'},
+     {x:5,y:5,type:'dialogo',label:'Roda de Conversa',effect:'+1 Cadeia de Argumentos'},
+     {x:1,y:8,type:'autonomia',label:'Atalho da Curiosidade',effect:'+1 movimento'}
+   ],
+   playerSpawns:[{x:5,y:8},{x:4,y:8},{x:6,y:8},{x:5,y:7}],
+   enemies:[
+     {id:'rumor_well',name:'Rumor do Poço',icon:'🗯️',x:1,y:1,hp:2,tag:'rumor',answer:'testemunho_isolado',requiresEvidence:'evidence_well',role:'RUMOR • Água Amaldiçoada',attackName:'Sussurro Contagioso',quote:'“Três pessoas passaram mal. A água inteira está amaldiçoada!”',threat:1},
+     {id:'rumor_bakery',name:'Rumor da Padaria',icon:'🗯️',x:9,y:1,hp:2,tag:'rumor',answer:'boato_sem_fonte',requiresEvidence:'evidence_bakery',role:'RUMOR • Preço Escondido',attackName:'Fila do Boato',quote:'“Todo mundo diz que o padeiro muda os preços escondido.”',threat:1},
+     {id:'rumor_forest',name:'Rumor do Bosque',icon:'🗯️',x:1,y:7,hp:2,tag:'rumor',answer:'generalizacao_precipitada',requiresEvidence:'evidence_forest',role:'RUMOR • Monstros no Bosque',attackName:'Medo da Sombra',quote:'“Vi uma sombra entre as árvores. O bosque inteiro está cheio de monstros!”',threat:2},
+     {id:'rumor_clock',name:'Rumor do Relógio',icon:'🗯️',x:9,y:7,hp:2,tag:'rumor',answer:'causa_sem_prova',requiresEvidence:'evidence_clock',role:'RUMOR • Azar da Torre',attackName:'Badalada do Azar',quote:'“O relógio parou quando a viajante chegou. Foi ela que trouxe o azar.”',threat:2}
+   ],
+   props:[
+     {id:'evidence_well',icon:'📘',x:2,y:2,type:'evidence',label:'Registro do Poço',clue:'O registro mostra manutenção irregular e apenas três relatos, sem análise da água.',rumorId:'rumor_well'},
+     {id:'evidence_bakery',icon:'📒',x:8,y:2,type:'evidence',label:'Livro de Preços',clue:'Os preços estão anotados publicamente e as mudanças correspondem ao custo dos ingredientes.',rumorId:'rumor_bakery'},
+     {id:'evidence_forest',icon:'🐾',x:2,y:6,type:'evidence',label:'Rastros do Bosque',clue:'As pegadas são de animais comuns e só há um relato de “sombra”.',rumorId:'rumor_forest'},
+     {id:'evidence_clock',icon:'📝',x:8,y:6,type:'evidence',label:'Bilhete do Relojoeiro',clue:'O mecanismo já apresentava defeito dois dias antes da chegada da viajante.',rumorId:'rumor_clock'},
+     {id:'pumpkin_cache',icon:'🎃',x:5,y:4,type:'bonus',label:'Cesta de Abóboras'}
+   ],
+   briefing:[
+     'Quatro rumores estão se espalhando pela Vila das Abóboras.',
+     'Vá até os pontos de evidência e use INTERAGIR antes de confrontar cada rumor.',
+     'Rumores vivos aumentam o Pânico da Vila durante o turno inimigo.',
+     'Uma análise errada também aumenta o Pânico. A primeira resposta continua valendo na competição.',
+     'VITÓRIA: desmonte os 4 rumores. DERROTA: Pânico 10/10, grupo KO ou fim do turno 12.'
+   ]
   },
   praca_agora:{
    key:'praca_agora',title:'Ágora do Livre-Arbítrio',subtitle:'Praça do Livre-Arbítrio',icon:'🕰️',type:'tactical-hybrid',size:{w:10,h:9},turnLimit:13,
