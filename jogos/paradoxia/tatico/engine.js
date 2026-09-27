@@ -179,7 +179,7 @@ async function confirmDeployment(){
  $('#deployOverlay').classList.remove('show');showTurnBanner('SEU TURNO',false);render();
 }
 function manualEndTurn(){
- if(state.phase!=='player'||state.ended)return;
+ if(state.phase!=='player'||state.ended||state.mode==='animating')return;
  state.units.filter(u=>u.alive&&!u.acted).forEach(u=>{u.acted=true;u.moved=true});
  state.selected=null;state.mode='select';$('#commandBox').hidden=true;enemyPhase();
 }
@@ -202,7 +202,7 @@ function reachable(unit){
  seen.delete(key(unit.x,unit.y));return seen;
 }
 function tileClick(x,y){
- if(state.phase!=='player'||state.ended)return;
+ if(state.phase!=='player'||state.ended||state.mode==='animating')return;
  const hit=occupied(x,y),sel=selection();
 
  // Nenhuma unidade selecionada: aliado abre comandos; inimigo abre ficha.
@@ -386,8 +386,11 @@ async function enemyPhase(){
        const loss=Number(stage.battleRules?.enemyHitLoss)||1;state.credibility=Math.max(0,state.credibility-loss);extra=' • Credibilidade -'+loss;
      }
      state.log.unshift('👁️ '+enemy.name+' usou '+(enemy.attackName||'Pressão')+' em '+target.name+(dmg?' (-1 HP)':' mas a defesa segurou.')+extra);
+     target.animState='action';
      if(target.hp<=0)target.alive=false;
-     render();await wait(480);
+     render();await wait(260);
+     target.animState='idle';
+     render();await wait(220);
    }else{
      const dx=Math.sign(target.x-enemy.x),dy=Math.sign(target.y-enemy.y),candidates=Math.abs(target.x-enemy.x)>Math.abs(target.y-enemy.y)?[[dx,0],[0,dy]]:[[0,dy],[dx,0]];
      for(const [mx,my] of candidates){
@@ -401,7 +404,7 @@ async function enemyPhase(){
  }
  state.lastEnemyActor=null;state.inspectTarget=null;
  state.turn++;state.phase='player';state.chain=0;showTurnBanner('SEU TURNO',false);
- state.units.filter(u=>u.alive).forEach(u=>{u.acted=false;u.moved=false;u.moveSnapshot=null;u.range=u.baseRange;u.move=u.baseMove;u.sp=Math.min(u.maxSp,u.sp+1)});
+ state.units.filter(u=>u.alive).forEach(u=>{u.animState='idle';u.acted=false;u.moved=false;u.moveSnapshot=null;u.range=u.baseRange;u.move=u.baseMove;u.sp=Math.min(u.maxSp,u.sp+1)});
  if(state.turn>stage.turnLimit)return end(false,'O limite de turnos acabou.');
  if(!state.units.some(u=>u.alive))return end(false,'Seu grupo ficou sem argumentos para continuar.');
  if(!checkObjective())render();
