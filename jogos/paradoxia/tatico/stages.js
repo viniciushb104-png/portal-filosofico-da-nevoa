@@ -231,19 +231,78 @@ const stages={
  },
  academia_torre:{
    key:'academia_torre',title:'Torre dos Argumentos',subtitle:'Academia dos Porquês',icon:'🏛️',
-   type:'tactical-platform',size:{w:9,h:10},turnLimit:15,
-   objective:{type:'reach',text:'Leve ao menos uma unidade ao topo da torre.',target:{x:4,y:0}},
-   terrain:['001121100','011222110','111232111','112333211','112343211','111333111','011222110','011222110','001111100','000111000'],
-   ideaFields:[{x:4,y:4,type:'razao',label:'Premissa Forte',effect:'+1 movimento neste turno'}],
-   playerSpawns:[{x:4,y:9},{x:3,y:8},{x:5,y:8}],
-   enemies:[
-     {id:'circular1',name:'Guardião Circular',icon:'🔁',x:3,y:5,hp:3,tag:'obstacle'},
-     {id:'circular2',name:'Guardião Circular',icon:'🔁',x:5,y:3,hp:3,tag:'obstacle'}
+   type:'tactical-hybrid',size:{w:9,h:10},turnLimit:16,
+   objective:{type:'boss',text:'Reúna as 3 Premissas-Mestras e derrote o Mestre da Circularidade no topo.',target:3},
+   battleRules:{
+     winText:'Ative as 3 Premissas-Mestras e derrote o Mestre da Circularidade.',
+     loseText:'Todo o grupo KO ou fim do turno 16.'
+   },
+   analysisPrompt:'Qual diagnóstico descreve melhor o problema deste argumento?',
+   concepts:[
+     {key:'circularidade',label:'Raciocínio circular',desc:'A conclusão já está pressuposta nas próprias razões usadas para defendê-la.'},
+     {key:'premissa_fraca',label:'Premissa insuficiente',desc:'A razão apresentada não oferece suporte suficiente para a conclusão.'},
+     {key:'conclusao_nao_segue',label:'Conclusão não decorre',desc:'Mesmo aceitando as premissas, a conclusão não é garantida por elas.'},
+     {key:'premissa_relevante',label:'Premissa relevante',desc:'A razão tem relação direta com a conclusão que pretende sustentar.'}
    ],
-   props:[{id:'goal',icon:'🔔',x:4,y:0,type:'goal'}],
-   briefing:['A torre foi construída com premissas empilhadas.','Terrenos mais altos custam movimento extra.','Chegue ao sino superior antes do limite de turnos.']
- },
- ruinas_sombras:{
+   attackQuestions:{
+     circular1:[
+       {q:'“A regra é justa porque é uma regra justa.” Qual é o principal problema?',options:[{key:'a',label:'A conclusão é repetida como se fosse uma razão.'},{key:'b',label:'Há evidência demais.'},{key:'c',label:'A frase apresenta alternativas demais.'}],ok:'a',feedback:'Repetir a própria conclusão não oferece apoio independente.'},
+       {q:'Para quebrar um raciocínio circular, precisamos...',options:[{key:'a',label:'de uma razão independente da conclusão.'},{key:'b',label:'repetir a conclusão com mais força.'},{key:'c',label:'eliminar qualquer premissa.'}],ok:'a',feedback:'Uma boa justificativa precisa acrescentar suporte independente.'}
+     ],
+     circular2:[
+       {q:'Qual argumento oferece apoio real em vez de circularidade?',options:[{key:'a',label:'“É confiável porque sempre diz a verdade.”'},{key:'b',label:'“É confiável porque previsões anteriores foram verificadas por fontes independentes.”'},{key:'c',label:'“É confiável porque é confiável.”'}],ok:'b',feedback:'A verificação independente fornece uma razão nova para a conclusão.'},
+       {q:'Se a premissa depende da própria conclusão ser verdadeira, temos...',options:[{key:'a',label:'um apoio independente.'},{key:'b',label:'um raciocínio circular.'},{key:'c',label:'uma definição neutra.'}],ok:'b',feedback:'Premissa e conclusão estão apenas sustentando uma à outra.'}
+     ],
+     tower_guard:[
+       {q:'Premissas verdadeiras garantem uma conclusão verdadeira em qualquer argumento?',options:[{key:'a',label:'Sim, automaticamente.'},{key:'b',label:'Não; a forma de inferência também precisa sustentar a conclusão.'},{key:'c',label:'Só quando a conclusão é popular.'}],ok:'b',feedback:'Além das premissas, importa se a conclusão realmente decorre delas.'},
+       {q:'Qual pergunta testa melhor uma inferência?',options:[{key:'a',label:'“Se eu aceitar as premissas, ainda posso rejeitar a conclusão sem contradição?”'},{key:'b',label:'“A conclusão soa elegante?”'},{key:'c',label:'“Quem falou é famoso?”'}],ok:'a',feedback:'Esse teste investiga a relação lógica entre premissas e conclusão.'}
+     ],
+     master_circle:[
+       {q:'O Mestre diz: “Minha conclusão é correta porque minhas premissas são corretas; minhas premissas são corretas porque minha conclusão é correta.” O defeito central é...',options:[{key:'a',label:'raciocínio circular.'},{key:'b',label:'apelo à maioria.'},{key:'c',label:'generalização estatística.'}],ok:'a',feedback:'Nenhuma parte recebe sustentação independente.'},
+       {q:'Qual reforma torna um argumento mais forte?',options:[{key:'a',label:'Adicionar premissas relevantes e independentes que realmente apoiem a conclusão.'},{key:'b',label:'Repetir a conclusão em letras maiores.'},{key:'c',label:'Remover toda possibilidade de crítica.'}],ok:'a',feedback:'Argumentos fortes dependem de razões relevantes, independentes e conectadas à conclusão.'}
+     ]
+   },
+   terrain:[
+     '000141000',
+     '001242100',
+     '011242110',
+     '012333210',
+     '012343210',
+     '011333110',
+     '011232110',
+     '011222110',
+     '001111100',
+     '000111000'
+   ],
+   ideaFields:[
+     {x:4,y:7,type:'razao',label:'Degrau da Premissa',effect:'+1 alcance de análise'},
+     {x:3,y:5,type:'dialogo',label:'Patamar do Contraponto',effect:'+1 Cadeia de Argumentos'},
+     {x:5,y:3,type:'autonomia',label:'Escada da Hipótese',effect:'+1 movimento'},
+     {x:4,y:1,type:'etica',label:'Balança da Conclusão',effect:'proteção'}
+   ],
+   playerSpawns:[{x:4,y:9},{x:3,y:8},{x:5,y:8},{x:4,y:8}],
+   enemies:[
+     {id:'circular1',name:'Guardião Circular I',icon:'🔁',x:3,y:6,hp:4,tag:'argument',answer:'circularidade',role:'GUARDIÃO • Razão que gira em si',attackName:'Laço da Repetição',quote:'“Está certo porque eu disse que está certo.”',threat:1},
+     {id:'circular2',name:'Guardião Circular II',icon:'🔁',x:5,y:4,hp:4,tag:'argument',answer:'circularidade',role:'GUARDIÃO • Premissa reciclada',attackName:'Retorno da Premissa',quote:'“A prova é verdadeira porque a conclusão confirma a prova.”',threat:2},
+     {id:'tower_guard',name:'Sentinela da Inferência',icon:'📐',x:3,y:2,hp:5,tag:'argument',answer:'conclusao_nao_segue',role:'SENTINELA • Salto lógico',attackName:'Salto da Conclusão',quote:'“Se as premissas parecem boas, qualquer conclusão serve.”',threat:2},
+     {id:'master_circle',name:'Mestre da Circularidade',icon:'🌀',x:4,y:0,hp:7,tag:'boss',answer:'circularidade',requiresPremises:3,role:'CHEFE • Conclusão sem fundamento',attackName:'Eterno Retorno',quote:'“Minha conclusão prova minhas premissas, e minhas premissas provam minha conclusão.”',threat:3}
+   ],
+   props:[
+     {id:'seal_premise1',icon:'📜',x:2,y:7,type:'premise',label:'Premissa-Mestra I',clue:'Uma boa premissa precisa ser relevante para a conclusão.'},
+     {id:'seal_premise2',icon:'📜',x:6,y:5,type:'premise',label:'Premissa-Mestra II',clue:'Uma razão forte deve oferecer apoio independente, não apenas repetir a conclusão.'},
+     {id:'seal_premise3',icon:'📜',x:2,y:3,type:'premise',label:'Premissa-Mestra III',clue:'Mesmo premissas aceitáveis exigem uma inferência que realmente sustente a conclusão.'},
+     {id:'bell',icon:'🔔',x:4,y:0,type:'goal',label:'Sino da Conclusão'}
+   ],
+   briefing:[
+     'A Torre dos Argumentos foi construída como um argumento: cada andar precisa sustentar o seguinte.',
+     'Subidas de altura custam movimento extra. Use os Campos de Ideias para alcançar os patamares.',
+     'Encontre e ative as três Premissas-Mestras com INTERAGIR.',
+     'Guardiões possuem Escudo de Argumento: identifique o problema conceitual antes de vencê-los em Duelo de Argumentos.',
+     'O Mestre da Circularidade só pode ser confrontado depois das três Premissas-Mestras.',
+     'VITÓRIA: três Premissas ativas + chefe derrotado. DERROTA: grupo KO ou fim do turno 16.'
+   ]
+  },
+  ruinas_sombras:{
    key:'ruinas_sombras',title:'Sombras da Caverna',subtitle:'Ruínas da Caverna',icon:'🔥',
    type:'tactical-platform',size:{w:10,h:8},turnLimit:14,
    objective:{type:'switches',text:'Acenda 3 fogueiras e alcance a saída.',target:3},
