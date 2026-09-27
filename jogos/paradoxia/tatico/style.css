@@ -55,3 +55,45 @@
 @media(max-width:820px){.turnRoster{top:56px;left:8px;max-width:70%}.turnUnit{min-width:60px}.turnUnit>b{max-width:38px}}
 @media(max-width:560px){.turnRoster{top:50px;max-width:80%}.turnUnit{min-width:46px;padding:4px}.turnUnit>span{font-size:15px}.turnUnit>b{display:none}.turnUnit>small{font-size:4px}}
 @media(prefers-reduced-motion:reduce){.enemyCard.acting{animation:none}}
+
+/* Cena cinematográfica de vitória / derrota */
+.outcomeOverlay{background:#050208f2;overflow:auto;align-items:start;padding:0}
+.outcomeFx{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.outcomeBurst{position:absolute;left:50%;top:36%;width:740px;height:740px;transform:translate(-50%,-50%) scale(.2);border-radius:50%;opacity:0;background:radial-gradient(circle,#fff3c8 0,#f5b65c55 18%,#b75bd12f 43%,transparent 70%)}
+.outcomeCurtain{position:absolute;top:0;bottom:0;width:32%;background:linear-gradient(90deg,#200818,#7b1e45 55%,#260819);box-shadow:0 0 60px #000c;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.outcomeCurtainLeft{left:0;transform:translateX(0)}.outcomeCurtainRight{right:0;transform:translateX(0) scaleX(-1)}
+.resultScene{position:relative;z-index:2;width:min(980px,calc(100% - 22px));margin:34px auto 60px;opacity:0;transform:translateY(22px) scale(.96);transition:.45s}
+.outcomeOverlay.show .resultScene{opacity:1;transform:none}
+.outcomeOverlay.victory .outcomeCurtainLeft{transform:translateX(-102%)}.outcomeOverlay.victory .outcomeCurtainRight{transform:translateX(102%) scaleX(-1)}
+.outcomeOverlay.victory .outcomeBurst{animation:victoryBurst 1s .15s ease-out forwards}
+.outcomeOverlay.defeat .outcomeCurtainLeft{transform:translateX(-38%)}.outcomeOverlay.defeat .outcomeCurtainRight{transform:translateX(38%) scaleX(-1)}
+@keyframes victoryBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(.1)}45%{opacity:.9}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
+.resultStampWrap{text-align:center;margin-bottom:16px;perspective:900px}
+.resultStampWrap>small{display:block;color:#cda278;font-size:8px;font-weight:950;letter-spacing:.18em}
+.resultStamp{display:inline-block;margin-top:5px;padding:10px 18px;border:3px solid #f0b35d;border-radius:14px;background:linear-gradient(180deg,#43152e,#190b18);color:#fff1cb;font:950 clamp(28px,6vw,70px)/.95 Georgia,serif;letter-spacing:.03em;text-shadow:0 4px 0 #7b273a,0 0 24px #ffcf7b55;box-shadow:0 10px 0 #3a1025,0 18px 45px #000b;transform:rotate(-2deg) scale(0);opacity:0}
+.outcomeOverlay.show .resultStamp{animation:stampSlam .55s .15s cubic-bezier(.18,.89,.32,1.28) forwards}
+@keyframes stampSlam{0%{opacity:0;transform:rotate(-8deg) scale(2.2)}70%{opacity:1;transform:rotate(-2deg) scale(.92)}100%{opacity:1;transform:rotate(-2deg) scale(1)}}
+.outcomeOverlay.defeat .resultStamp{border-color:#c64b59;background:linear-gradient(180deg,#4a1018,#17080c);color:#ffd7da;text-shadow:0 4px 0 #6e1721,0 0 24px #e84f5f55;box-shadow:0 10px 0 #26090e,0 18px 45px #000c}
+.resultStage{margin:10px 0 0;color:#9e8da4;font:700 13px Georgia,serif}
+.resultParty{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px 0 16px}
+.resultHero{width:120px;min-height:120px;padding:9px;border:1px solid #4d3457;border-radius:16px;background:linear-gradient(#17101d,#0b0710);text-align:center;opacity:0;transform:translateY(24px)}
+.outcomeOverlay.show .resultHero{animation:heroRise .42s forwards}
+.resultHero:nth-child(2){animation-delay:.10s!important}.resultHero:nth-child(3){animation-delay:.20s!important}.resultHero:nth-child(4){animation-delay:.30s!important}
+@keyframes heroRise{to{opacity:1;transform:none}}
+.resultHero.ko{filter:grayscale(1);opacity:.42!important}
+.resultHero .heroIcon{font-size:42px;filter:drop-shadow(0 8px 6px #000a)}.resultHero b{display:block;color:#f0e1f0;font-size:9px}.resultHero small{display:block;color:#7f7084;font-size:6px;margin-top:2px}.resultHero .heroState{margin-top:6px;padding:3px 6px;border-radius:999px;background:#0d1712;color:#8fdfb2;font-size:6px;font-weight:950}.resultHero.ko .heroState{background:#200d12;color:#dd838d}
+.resultNarrative{display:grid;grid-template-columns:auto 1fr auto;gap:13px;align-items:center;padding:14px 16px;border:1px solid #53385e;border-radius:17px;background:linear-gradient(135deg,#130b18,#0b0710);box-shadow:0 16px 45px #0008}
+.resultIcon{font-size:42px}.resultNarrative h1{margin:0;font:850 28px Georgia,serif;color:#ffe6bc}.resultNarrative p{margin:4px 0 0;color:#a99aad;font-size:9px;line-height:1.5}
+.rankMedal{width:82px;height:82px;border-radius:50%;display:grid;place-items:center;align-content:center;border:3px solid #e5a54e;background:radial-gradient(circle,#3b2037,#140c17 72%);box-shadow:0 0 24px #e5a54e44}.rankMedal small{font-size:6px;color:#b89972}.rankMedal b{font:950 35px Georgia,serif;color:#ffd98c}
+.outcomeOverlay.defeat .rankMedal{border-color:#833945;box-shadow:0 0 24px #b23c4b33}.outcomeOverlay.defeat .rankMedal b{color:#df8b94}
+.resultGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}.resultGrid>div{padding:10px;border:1px solid #3a293f;border-radius:12px;background:#0d0811;text-align:center}.resultGrid span,.resultGrid b,.resultGrid small{display:block}.resultGrid span{font-size:18px}.resultGrid b{color:#ffd08b;font-size:16px}.resultGrid small{font-size:6px;color:#776a7b}
+.rewardPanel{margin-top:10px;padding:12px;border:1px solid #4a354f;border-radius:15px;background:linear-gradient(135deg,#130d18,#0b0810)}.rewardTitle{display:flex;align-items:center;gap:8px;margin-bottom:8px}.rewardTitle>span{font-size:24px}.rewardTitle small,.rewardTitle b{display:block}.rewardTitle small{font-size:6px;color:#9f7e9e}.rewardTitle b{font-size:10px;color:#eedfed}.rewardParty{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.rewardUnit{padding:8px;border:1px solid #34263a;border-radius:10px;background:#0e0912}.rewardUnit b,.rewardUnit small{display:block}.rewardUnit b{font-size:8px;color:#e8dce9}.rewardUnit small{font-size:6px;color:#7f7283}.xpTrack{height:6px;margin-top:6px;border-radius:99px;background:#23172a;overflow:hidden}.xpTrack i{display:block;height:100%;background:linear-gradient(90deg,#a85ec1,#f0a451)}
+.failureLesson{margin-top:10px;padding:12px;border:1px solid #763844;border-radius:14px;background:#1a0d12}.failureLesson small{display:block;color:#d76d79;font-size:6px;font-weight:950;letter-spacing:.11em}.failureLesson b{display:block;margin-top:3px;color:#ffd0d4;font-size:10px}.failureLesson p{margin:5px 0 0;color:#a7898d;font-size:8px;line-height:1.45}
+.cinematicServer{margin:10px 0 0;text-align:center}.outcomeButtons{margin-top:13px}.outcomeButtons button,.outcomeButtons a{min-width:140px}
+.outcomeParticles{position:absolute;inset:0}.outcomeParticle{position:absolute;top:-30px;font-size:18px;animation:particleFall 2.5s linear forwards}
+@keyframes particleFall{to{transform:translateY(110vh) rotate(420deg);opacity:.2}}
+.boardViewport.battleVictory{animation:boardVictory .7s ease-out}.boardViewport.battleDefeat{animation:boardDefeat .65s ease-in-out;filter:grayscale(.65) brightness(.65)}
+@keyframes boardVictory{35%{filter:brightness(1.7) saturate(1.35)}100%{filter:none}}@keyframes boardDefeat{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@media(max-width:760px){.resultGrid{grid-template-columns:repeat(2,1fr)}.rewardParty{grid-template-columns:repeat(2,1fr)}.resultNarrative{grid-template-columns:auto 1fr}.rankMedal{grid-column:1/3;justify-self:center;width:66px;height:66px}.rankMedal b{font-size:28px}.resultHero{width:92px}.resultStamp{font-size:clamp(24px,9vw,48px)}}
+@media(max-width:480px){.resultScene{width:calc(100% - 12px);margin-top:18px}.resultParty{gap:5px}.resultHero{width:74px;min-height:105px;padding:6px}.resultHero .heroIcon{font-size:34px}.rewardParty{grid-template-columns:1fr 1fr}.outcomeButtons button,.outcomeButtons a{min-width:0;flex:1}}
+@media(prefers-reduced-motion:reduce){.resultStamp,.resultHero,.outcomeBurst,.outcomeParticle,.boardViewport.battleVictory,.boardViewport.battleDefeat{animation:none!important;opacity:1!important;transform:none!important}}
