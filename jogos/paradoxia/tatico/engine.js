@@ -556,6 +556,7 @@ function checkObjective(){
   const seals=used.filter(id=>id.startsWith('seal')).length,boss=state.enemies.find(e=>e.tag==='boss');win=seals>=Number(target)&&boss&&!boss.alive;
  }
  if(type==='escort'){const escort=state.props.find(p=>p.type==='escort');win=escort?escort.x===target.x&&escort.y===target.y:state.units.some(u=>u.alive&&u.x===target.x&&u.y===target.y);}
+ if(win&&stage.battleRules?.requireClear)win=!state.enemies.some(en=>en.alive&&en.answer);
  if(win){end(true,'Objetivo cumprido.');return true}return false;
 }
 async function awardProgress(win){
