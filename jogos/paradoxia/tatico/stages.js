@@ -6,7 +6,7 @@ const stages={
    key:'vila_ecos',title:'Ecos da Vila',subtitle:'Vila das Abóboras',icon:'🎃',type:'tactical-investigation',size:{w:11,h:9},turnLimit:12,
    objective:{type:'investigate',text:'Investigue as 4 evidências e desmonte os 4 rumores antes que o Pânico tome a vila.',target:4},
    battleRules:{
-     panic:0,maxPanic:10,wrongAnswerPanic:2,enemySpreadPanic:1,
+     panic:0,maxPanic:10,wrongAnswerPanic:2,wrongAttackPanic:1,enemySpreadPanic:1,
      winText:'Desmonte os 4 rumores usando evidências.',
      loseText:'Pânico 10/10, grupo derrotado ou fim do turno 12.'
    },
@@ -17,6 +17,24 @@ const stages={
      {key:'generalizacao_precipitada',label:'Generalização precipitada',desc:'Poucos casos são usados para concluir algo sobre um grupo ou situação inteira.'},
      {key:'causa_sem_prova',label:'Causa atribuída sem evidência',desc:'Dois acontecimentos próximos são ligados como causa e efeito sem demonstração.'}
    ],
+   attackQuestions:{
+     rumor_well:[
+       {q:'O que o registro do poço permite concluir com segurança?',options:[{key:'a',label:'Há relatos e manutenção irregular, mas ainda não há prova de maldição.'},{key:'b',label:'Três relatos provam que toda a água está contaminada.'},{key:'c',label:'Se alguém passou mal, a causa necessariamente foi o poço.'}],ok:'a',feedback:'A evidência disponível é limitada: ela justifica investigar, não afirmar uma causa total.'},
+       {q:'Qual seria o próximo passo mais forte para testar o rumor?',options:[{key:'a',label:'Repetir o rumor para alertar mais pessoas.'},{key:'b',label:'Analisar a água e comparar com outras possíveis causas.'},{key:'c',label:'Perguntar apenas às três pessoas que já concordam.'}],ok:'b',feedback:'Uma investigação mais forte busca teste independente e hipóteses alternativas.'}
+     ],
+     rumor_bakery:[
+       {q:'O livro de preços enfraquece o rumor porque...',options:[{key:'a',label:'mostra registros verificáveis das mudanças de preço.'},{key:'b',label:'prova que o padeiro nunca pode errar.'},{key:'c',label:'a maioria dos moradores gosta de pão.'}],ok:'a',feedback:'O ponto relevante é a existência de um registro verificável, não a popularidade do padeiro.'},
+       {q:'Qual pergunta é mais útil diante de “todo mundo diz”?',options:[{key:'a',label:'Quem exatamente afirma isso e qual é a fonte?'},{key:'b',label:'Quantas vezes a frase foi repetida?'},{key:'c',label:'A frase é assustadora o bastante para ser verdade?'}],ok:'a',feedback:'Boatos ficam mais fortes quando ninguém exige uma fonte identificável.'}
+     ],
+     rumor_forest:[
+       {q:'Uma única sombra observada permite concluir que o bosque inteiro está cheio de monstros?',options:[{key:'a',label:'Sim, porque qualquer sombra é evidência suficiente.'},{key:'b',label:'Não; é uma amostra pequena e há explicações alternativas.'},{key:'c',label:'Sim, desde que a pessoa esteja com medo.'}],ok:'b',feedback:'Generalizar exige uma base representativa e eliminação de explicações alternativas.'},
+       {q:'Os rastros encontrados fortalecem qual interpretação?',options:[{key:'a',label:'Animais comuns podem explicar parte do que foi visto.'},{key:'b',label:'Todo animal comum é secretamente um monstro.'},{key:'c',label:'Rastros nunca contam como evidência.'}],ok:'a',feedback:'A evidência oferece uma explicação menos extraordinária para o relato.'}
+     ],
+     rumor_clock:[
+       {q:'O relógio já apresentava defeito antes da chegada da viajante. Isso mostra que...',options:[{key:'a',label:'a chegada dela não pode ser tratada como causa apenas pela coincidência temporal.'},{key:'b',label:'ela certamente consertou o relógio.'},{key:'c',label:'qualquer evento anterior é irrelevante.'}],ok:'a',feedback:'A cronologia anterior enfraquece a atribuição causal feita pelo rumor.'},
+       {q:'Para sustentar que a viajante causou a pane seria necessário...',options:[{key:'a',label:'um mecanismo ou evidência que ligasse a chegada ao defeito.'},{key:'b',label:'apenas repetir que os dois fatos aconteceram perto no tempo.'},{key:'c',label:'uma votação entre os moradores.'}],ok:'a',feedback:'Causalidade exige mais do que sequência temporal.'}
+     ]
+   },
    terrain:[
      '11111111111',
      '11220002211',
@@ -35,10 +53,10 @@ const stages={
    ],
    playerSpawns:[{x:5,y:8},{x:4,y:8},{x:6,y:8},{x:5,y:7}],
    enemies:[
-     {id:'rumor_well',name:'Rumor do Poço',icon:'🗯️',x:1,y:1,hp:2,tag:'rumor',answer:'testemunho_isolado',requiresEvidence:'evidence_well',role:'RUMOR • Água Amaldiçoada',attackName:'Sussurro Contagioso',quote:'“Três pessoas passaram mal. A água inteira está amaldiçoada!”',threat:1},
-     {id:'rumor_bakery',name:'Rumor da Padaria',icon:'🗯️',x:9,y:1,hp:2,tag:'rumor',answer:'boato_sem_fonte',requiresEvidence:'evidence_bakery',role:'RUMOR • Preço Escondido',attackName:'Fila do Boato',quote:'“Todo mundo diz que o padeiro muda os preços escondido.”',threat:1},
-     {id:'rumor_forest',name:'Rumor do Bosque',icon:'🗯️',x:1,y:7,hp:2,tag:'rumor',answer:'generalizacao_precipitada',requiresEvidence:'evidence_forest',role:'RUMOR • Monstros no Bosque',attackName:'Medo da Sombra',quote:'“Vi uma sombra entre as árvores. O bosque inteiro está cheio de monstros!”',threat:2},
-     {id:'rumor_clock',name:'Rumor do Relógio',icon:'🗯️',x:9,y:7,hp:2,tag:'rumor',answer:'causa_sem_prova',requiresEvidence:'evidence_clock',role:'RUMOR • Azar da Torre',attackName:'Badalada do Azar',quote:'“O relógio parou quando a viajante chegou. Foi ela que trouxe o azar.”',threat:2}
+     {id:'rumor_well',name:'Rumor do Poço',icon:'🗯️',x:1,y:1,hp:3,tag:'rumor',answer:'testemunho_isolado',requiresEvidence:'evidence_well',role:'RUMOR • Água Amaldiçoada',attackName:'Sussurro Contagioso',quote:'“Três pessoas passaram mal. A água inteira está amaldiçoada!”',threat:1},
+     {id:'rumor_bakery',name:'Rumor da Padaria',icon:'🗯️',x:9,y:1,hp:3,tag:'rumor',answer:'boato_sem_fonte',requiresEvidence:'evidence_bakery',role:'RUMOR • Preço Escondido',attackName:'Fila do Boato',quote:'“Todo mundo diz que o padeiro muda os preços escondido.”',threat:1},
+     {id:'rumor_forest',name:'Rumor do Bosque',icon:'🗯️',x:1,y:7,hp:4,tag:'rumor',answer:'generalizacao_precipitada',requiresEvidence:'evidence_forest',role:'RUMOR • Monstros no Bosque',attackName:'Medo da Sombra',quote:'“Vi uma sombra entre as árvores. O bosque inteiro está cheio de monstros!”',threat:2},
+     {id:'rumor_clock',name:'Rumor do Relógio',icon:'🗯️',x:9,y:7,hp:4,tag:'rumor',answer:'causa_sem_prova',requiresEvidence:'evidence_clock',role:'RUMOR • Azar da Torre',attackName:'Badalada do Azar',quote:'“O relógio parou quando a viajante chegou. Foi ela que trouxe o azar.”',threat:2}
    ],
    props:[
      {id:'evidence_well',icon:'📘',x:2,y:2,type:'evidence',label:'Registro do Poço',clue:'O registro mostra manutenção irregular e apenas três relatos, sem análise da água.',rumorId:'rumor_well'},
@@ -151,7 +169,29 @@ const stages={
    key:'feira_falacias',title:'Circo das Falácias',subtitle:'Feira das Verdades Duvidosas',icon:'🎪',
    type:'tactical-puzzle',size:{w:10,h:8},turnLimit:12,
    objective:{type:'logic_targets',text:'Desmascare os 5 artistas-falácia antes que a plateia perca a confiança.',target:5},
-   battleRules:{credibility:10,wrongAnswerLoss:2,enemyHitLoss:1,winText:'Desmascare as 5 falácias.',loseText:'Credibilidade 0, grupo derrotado ou turno 12 encerrado.'},
+   battleRules:{credibility:10,wrongAnswerLoss:2,wrongAttackCredibility:1,enemyHitLoss:1,winText:'Desmascare as 5 falácias.',loseText:'Credibilidade 0, grupo derrotado ou turno 12 encerrado.'},
+   attackQuestions:{
+     populum:[
+       {q:'Depois de reconhecer o apelo à maioria, qual resposta enfraquece melhor o truque?',options:[{key:'a',label:'Perguntar quais evidências sustentam a afirmação, além do número de pessoas que acreditam.'},{key:'b',label:'Procurar uma multidão ainda maior.'},{key:'c',label:'Dizer que a maioria é sempre ignorante.'}],ok:'a',feedback:'Popularidade e evidência são critérios diferentes.'},
+       {q:'Qual frase NÃO depende de apelo à maioria?',options:[{key:'a',label:'“Mil pessoas acreditam, então é verdade.”'},{key:'b',label:'“Os testes repetidos produziram o mesmo resultado.”'},{key:'c',label:'“É famoso, portanto está correto.”'}],ok:'b',feedback:'Repetição de teste é evidência; popularidade não é.'}
+     ],
+     binary:[
+       {q:'Como escapar de um falso dilema?',options:[{key:'a',label:'Procurando outras alternativas além das duas apresentadas.'},{key:'b',label:'Escolhendo a opção mais dramática.'},{key:'c',label:'Recusando qualquer escolha para sempre.'}],ok:'a',feedback:'O falso dilema esconde possibilidades relevantes.'},
+       {q:'Qual estrutura é suspeita de falso dilema?',options:[{key:'a',label:'“Ou aceita toda a proposta ou odeia a cidade.”'},{key:'b',label:'“Há três caminhos possíveis e cada um tem custos.”'},{key:'c',label:'“Precisamos comparar as alternativas.”'}],ok:'a',feedback:'A frase força duas opções extremas e apaga alternativas.'}
+     ],
+     hominem:[
+       {q:'Qual resposta enfrenta um ataque ad hominem?',options:[{key:'a',label:'Voltar às razões e evidências do argumento.'},{key:'b',label:'Atacar a aparência do oponente também.'},{key:'c',label:'Mudar de assunto para evitar a discussão.'}],ok:'a',feedback:'A crítica deve responder ao argumento, não à pessoa.'},
+       {q:'Qual crítica é relevante para um argumento?',options:[{key:'a',label:'“A conclusão não decorre dessas premissas.”'},{key:'b',label:'“Seu chapéu é ridículo.”'},{key:'c',label:'“Você fala estranho.”'}],ok:'a',feedback:'A primeira crítica trata da estrutura do argumento.'}
+     ],
+     posthoc:[
+       {q:'O que falta para passar de “depois disso” para “por causa disso”?',options:[{key:'a',label:'Evidência de um mecanismo ou relação causal.'},{key:'b',label:'Uma história mais assustadora.'},{key:'c',label:'Que os eventos tenham nomes parecidos.'}],ok:'a',feedback:'Sequência temporal sozinha não demonstra causalidade.'},
+       {q:'Qual afirmação é mais cuidadosa?',options:[{key:'a',label:'“B aconteceu depois de A; precisamos investigar se há relação causal.”'},{key:'b',label:'“B veio depois, então A causou B.”'},{key:'c',label:'“Tudo que acontece depois tem a mesma causa.”'}],ok:'a',feedback:'A formulação cuidadosa separa correlação temporal de causalidade.'}
+     ],
+     straw:[
+       {q:'Como responder a um espantalho?',options:[{key:'a',label:'Restaurar a posição original antes de criticá-la.'},{key:'b',label:'Distorcer ainda mais a posição adversária.'},{key:'c',label:'Ignorar o que a pessoa realmente disse.'}],ok:'a',feedback:'Antes de criticar, é preciso representar a posição com fidelidade.'},
+       {q:'Qual atitude evita construir um espantalho?',options:[{key:'a',label:'Parafrasear a posição e pedir confirmação.'},{key:'b',label:'Escolher a versão mais absurda da fala.'},{key:'c',label:'Responder apenas a uma palavra isolada.'}],ok:'a',feedback:'Confirmar a interpretação reduz distorções.'}
+     ]
+   },
    terrain:[
      '0011111100',
      '0111111110',
@@ -169,11 +209,11 @@ const stages={
    ],
    playerSpawns:[{x:4,y:7},{x:5,y:7},{x:3,y:7},{x:6,y:7}],
    enemies:[
-     {id:'populum',name:'Homem do Megafone',icon:'📣',x:2,y:1,hp:2,tag:'fallacy',answer:'ad_populum',role:'INIMIGO • Apelo Popular',attackName:'Voz da Multidão',quote:'“Todo mundo acredita, então é verdade!”',threat:2},
-     {id:'binary',name:'Acrobata Binário',icon:'⚔️',x:7,y:1,hp:2,tag:'fallacy',answer:'falso_dilema',role:'INIMIGO • Escolha Forçada',attackName:'Só Duas Opções',quote:'“Ou concorda comigo ou está contra todos!”',threat:2},
-     {id:'hominem',name:'Palhaço Maldoso',icon:'🤡',x:1,y:4,hp:2,tag:'fallacy',answer:'ad_hominem',role:'INIMIGO • Ataque Pessoal',attackName:'Vaia Pessoal',quote:'“Olhe o chapéu dele! Nem escute a proposta.”',threat:2},
-     {id:'posthoc',name:'Mágico do Depois',icon:'🪄',x:8,y:4,hp:2,tag:'fallacy',answer:'post_hoc',role:'INIMIGO • Causa Inventada',attackName:'Depois, Logo Por Causa',quote:'“Aconteceu depois. Então eu causei!”',threat:2},
-     {id:'straw',name:'Domador de Espantalhos',icon:'🌾',x:5,y:2,hp:3,tag:'fallacy',answer:'espantalho',role:'INIMIGO • Distorção',attackName:'Boneco de Palha',quote:'“Vou mudar sua ideia antes de atacar.”',threat:3}
+     {id:'populum',name:'Homem do Megafone',icon:'📣',x:2,y:1,hp:3,tag:'fallacy',answer:'ad_populum',role:'INIMIGO • Apelo Popular',attackName:'Voz da Multidão',quote:'“Todo mundo acredita, então é verdade!”',threat:2},
+     {id:'binary',name:'Acrobata Binário',icon:'⚔️',x:7,y:1,hp:3,tag:'fallacy',answer:'falso_dilema',role:'INIMIGO • Escolha Forçada',attackName:'Só Duas Opções',quote:'“Ou concorda comigo ou está contra todos!”',threat:2},
+     {id:'hominem',name:'Palhaço Maldoso',icon:'🤡',x:1,y:4,hp:3,tag:'fallacy',answer:'ad_hominem',role:'INIMIGO • Ataque Pessoal',attackName:'Vaia Pessoal',quote:'“Olhe o chapéu dele! Nem escute a proposta.”',threat:2},
+     {id:'posthoc',name:'Mágico do Depois',icon:'🪄',x:8,y:4,hp:3,tag:'fallacy',answer:'post_hoc',role:'INIMIGO • Causa Inventada',attackName:'Depois, Logo Por Causa',quote:'“Aconteceu depois. Então eu causei!”',threat:2},
+     {id:'straw',name:'Domador de Espantalhos',icon:'🌾',x:5,y:2,hp:4,tag:'fallacy',answer:'espantalho',role:'INIMIGO • Distorção',attackName:'Boneco de Palha',quote:'“Vou mudar sua ideia antes de atacar.”',threat:3}
    ],
    props:[
      {id:'spotlight_a',icon:'💡',x:3,y:3,type:'switch'},
