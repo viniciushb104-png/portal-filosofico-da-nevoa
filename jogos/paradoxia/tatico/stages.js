@@ -69,7 +69,8 @@ const stages={
      'Quatro rumores estão se espalhando pela Vila das Abóboras.',
      'Vá até os pontos de evidência e use INTERAGIR antes de confrontar cada rumor.',
      'Rumores vivos aumentam o Pânico da Vila durante o turno inimigo.',
-     'Uma análise errada também aumenta o Pânico. A primeira resposta continua valendo na competição.',
+     'O primeiro acerto quebra o Escudo de Argumento; depois, novos ataques abrem Duelos de Argumentos.',
+     'Errar uma questão permite contra-ataque e também aumenta o Pânico. A primeira resposta conceitual continua valendo na competição.',
      'VITÓRIA: desmonte os 4 rumores. DERROTA: Pânico 10/10, grupo KO ou fim do turno 12.'
    ]
   },
@@ -222,7 +223,8 @@ const stages={
    ],
    briefing:[
      'O Mestre de Cerimônias espalhou cinco truques argumentativos pelo picadeiro.',
-     'Aproxime-se dos artistas e use ANALISAR. Escolher o conceito correto quebra a máscara da falácia.',
+     'Aproxime-se dos artistas e use ANALISAR. Acertar o conceito quebra o Escudo de Argumento.',
+     'Depois do escudo quebrado, novos ataques viram Duelos de Argumentos: acertos causam dano; erros permitem contra-ataque.',
      'Campos de Ideias alteram suas possibilidades durante o turno.',
      'VITÓRIA: desmascare os 5 artistas. DERROTA: Credibilidade 0, todo o grupo KO ou o fim do turno 12.'
    ]
