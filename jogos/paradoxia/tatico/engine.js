@@ -390,28 +390,118 @@ function checkObjective(){
  if(win){end(true,'Objetivo cumprido.');return true}return false;
 }
 async function awardProgress(win){
- if(!win)return;
- const p=normalizeProfile(readProfile());p.party.forEach(k=>{const r=p.roster[k];r.xp=(r.xp||0)+25;r.mastery=(r.mastery||0)+1;while(r.xp>=100){r.xp-=100;r.level=(r.level||1)+1}});p.updatedAt=Date.now();saveProfileLocal(p);
+ if(!win)return [];
+ const p=normalizeProfile(readProfile()),gains=[];
+ p.party.forEach(k=>{
+   const r=p.roster[k],beforeLevel=r.level||1,beforeXp=r.xp||0,beforeMastery=r.mastery||0;
+   r.xp=beforeXp+25;r.mastery=beforeMastery+1;
+   while(r.xp>=100){r.xp-=100;r.level=(r.level||1)+1}
+   gains.push({classKey:k,name:D().common.classes[k]?.name||k,icon:D().common.classes[k]?.icon||'✦',beforeLevel,level:r.level||1,xp:r.xp||0,mastery:r.mastery||0,leveled:(r.level||1)>beforeLevel});
+ });
+ p.updatedAt=Date.now();saveProfileLocal(p);
  if(window.NevoaOnline?.getSession())try{await NevoaOnline.saveParadoxiaTacticalProfile(p)}catch(e){}
+ return gains;
 }
 function competitionPayload(){
  if(stage.key==='feira_falacias')return {answers:stage.enemies.map(e=>state.firstAnswers[e.id]||'')};
  return {completed:true,turns:state.turn,local_score:state.score};
 }
+function outcomeRank(win){
+ if(!win)return '—';
+ const alive=state.units.filter(u=>u.alive).length,total=Math.max(1,state.units.length);
+ const survival=alive/total,pace=state.turn/Math.max(1,stage.turnLimit),chain=state.maxChain;
+ if(survival===1&&pace<=.65&&chain>=3)return 'S';
+ if(survival>=.75&&pace<=.82)return 'A';
+ if(survival>=.5)return 'B';
+ return 'C';
+}
+function failureTipFor(msg){
+ const m=String(msg||'').toLowerCase();
+ if(m.includes('credibilidade'))return 'Use a ficha dos inimigos e o marcador NO ALCANCE. Uma análise errada custa Credibilidade; reposicione antes de arriscar.';
+ if(m.includes('turno'))return 'Aproveite Desfazer Movimento, Campos de Ideias e ataques assistidos para gastar menos turnos.';
+ if(m.includes('ko')||m.includes('esquadrão')||m.includes('grupo'))return 'Ponderação, posicionamento e assistência importam. Evite deixar uma unidade isolada no alcance de vários inimigos.';
+ return 'Leia a condição de derrota no briefing, inspecione os inimigos e ajuste a formação no próximo combate.';
+}
+function buildOutcomeParticles(win){
+ const host=$('#outcomeParticles');if(!host)return;host.innerHTML='';
+ const symbols=win?['✦','★','🎃','◆','✧']:['🕯️','◆','✦'];
+ const count=win?28:12;
+ for(let i=0;i<count;i++){
+   const p=document.createElement('span');p.className='outcomeParticle';p.textContent=symbols[i%symbols.length];
+   p.style.left=((i*37)%97)+'%';p.style.animationDelay=((i%8)*.09)+'s';p.style.animationDuration=(2+(i%5)*.22)+'s';
+   host.appendChild(p);
+ }
+}
+function renderOutcomeParty(){
+ const host=$('#resultParty');if(!host)return;
+ host.innerHTML=state.units.map(u=>'<article class="resultHero '+(u.alive?'':'ko')+'"><div class="heroIcon">'+u.icon+'</div><b>'+u.name+'</b><small>HP '+Math.max(0,u.hp)+'/'+u.maxHp+'</small><div class="heroState">'+(u.alive?'DE PÉ':'KO')+'</div></article>').join('');
+}
+function renderRewards(gains){
+ const panel=$('#rewardPanel'),host=$('#rewardParty');
+ if(!panel||!host)return;
+ panel.hidden=!gains.length;
+ if(!gains.length){host.innerHTML='';return}
+ $('#rewardHeadline').textContent='+25 XP e +1 domínio para cada classe';
+ host.innerHTML=gains.map(g=>'<article class="rewardUnit"><b>'+g.icon+' '+g.name+(g.leveled?' • LEVEL UP!':'')+'</b><small>Nv. '+g.level+' • XP '+g.xp+'/100 • domínio '+g.mastery+'</small><div class="xpTrack"><i style="width:'+Math.max(0,Math.min(100,g.xp))+'%"></i></div></article>').join('');
+}
+async function playOutcomeScene(win,msg,score,gains){
+ const viewport=$('.boardViewport');
+ viewport?.classList.add(win?'battleVictory':'battleDefeat');
+ showTurnBanner(win?'VITÓRIA!':'DERROTA!',!win);
+ await wait(win?620:480);
+
+ const overlay=$('#resultOverlay'),scene=$('#resultScene');
+ overlay?.classList.remove('victory','defeat');overlay?.classList.add('show',win?'victory':'defeat');
+ scene?.classList.remove('victory','defeat');scene?.classList.add(win?'victory':'defeat');
+ buildOutcomeParticles(win);renderOutcomeParty();renderRewards(gains);
+
+ $('#resultEyebrow').textContent=win?'MISSÃO CONCLUÍDA':'MISSÃO FRACASSADA';
+ $('#resultStamp').textContent=win?'PARADOXO RESOLVIDO!':'ARGUMENTO DESMORONOU!';
+ $('#resultStage').textContent=stage.icon+' '+stage.title+' — '+stage.subtitle;
+ $('#resultIcon').textContent=win?'🏆':'🕯️';
+ $('#resultTitle').textContent=win?'VITÓRIA!':'DERROTA!';
+ $('#resultText').textContent=msg;
+ $('#resultRank').textContent=outcomeRank(win);
+ $('#resultScore').textContent=score;
+ $('#resultTurns').textContent=state.turn+'/'+stage.turnLimit;
+ $('#resultChain').textContent='×'+state.maxChain;
+ const alive=state.units.filter(u=>u.alive).length;
+ $('#resultSurvivors').textContent=alive+'/'+state.units.length;
+
+ const credBox=$('#resultCredibilityBox');
+ if(credBox){
+   credBox.hidden=state.credibility===null;
+   if(state.credibility!==null)$('#resultCredibility').textContent=state.credibility+'/'+state.maxCredibility;
+ }
+
+ const failure=$('#failureLesson');
+ failure.hidden=win;
+ if(!win){
+   $('#failureReason').textContent=msg;
+   $('#failureTip').textContent=failureTipFor(msg);
+ }
+}
 async function end(win,msg){
  if(state.ended)return;state.ended=true;state.phase='end';$('#commandBox').hidden=true;
  const bonus=win?Math.max(0,(stage.turnLimit-state.turn)*20):0,score=Math.max(0,state.score+bonus);
- await awardProgress(win);
- const overlay=$('#resultOverlay'),card=overlay?.querySelector('.resultCard');overlay?.classList.add('show');card?.classList.toggle('victory',win);card?.classList.toggle('defeat',!win);
- if($('#resultIcon'))$('#resultIcon').textContent=win?'🏆':'💀';if($('#resultEyebrow'))$('#resultEyebrow').textContent=win?'MISSÃO VENCIDA':'MISSÃO PERDIDA';
- $('#resultTitle').textContent=win?'VITÓRIA!':'DERROTA!';$('#resultText').textContent=msg;$('#resultScore').textContent=score;$('#resultTurns').textContent=state.turn;if($('#resultChain'))$('#resultChain').textContent='×'+state.maxChain;
+ const gains=await awardProgress(win);
+ await playOutcomeScene(win,msg,score,gains);
+
  const server=$('#serverResult');server.textContent='';
  if(win&&state.competitive&&state.attempt){
-  server.textContent='Validando resultado no servidor…';
-  try{
-   const out=await ParadoxiaCompetition.finish(competitionPayload());
-   server.textContent='🏆 '+out.verified_score+' pts • melhor '+out.best_score+' • ranking #'+out.rank_position;
-  }catch(e){server.textContent='Tentativa local concluída, mas o servidor não validou: '+e.message;ParadoxiaCompetition.clear()}
+   server.textContent='Validando resultado da temporada…';
+   try{
+     const out=await ParadoxiaCompetition.finish(competitionPayload());
+     server.textContent='🏆 '+out.verified_score+' pts da temporada • melhor '+out.best_score+' • ranking #'+out.rank_position;
+   }catch(err){
+     server.textContent='A missão foi vencida localmente, mas o servidor não validou esta tentativa: '+err.message;
+     ParadoxiaCompetition.clear();
+   }
+ }else if(!win&&state.competitive&&state.attempt){
+   server.textContent='Esta tentativa terminou em derrota e não gerou Pontos de Paradoxia.';
+   ParadoxiaCompetition.clear();
+ }else{
+   server.textContent=win?'Vitória registrada no perfil tático.':'A derrota não remove XP, nível ou recordes anteriores.';
  }
 }
 function render(){
@@ -462,7 +552,7 @@ function briefing(){
 }
 async function start(){ $('#briefOverlay').classList.remove('show');$('#deployOverlay').classList.add('show');renderDeployment();render()}
 function init(){
- $('#startMission').onclick=start;$('#confirmDeploy').onclick=confirmDeployment;$('#endTurnBtn').onclick=manualEndTurn;$('#retryMission').onclick=()=>location.reload();$('#backToMap').href='../index.html';briefing();
+ $('#startMission').onclick=start;$('#confirmDeploy').onclick=confirmDeployment;$('#endTurnBtn').onclick=manualEndTurn;$('#retryMission').onclick=()=>location.reload();$('#backToMap').href='../index.html';if($('#backToQuartel'))$('#backToQuartel').href='../quartel/';briefing();
 }
 window.addEventListener('DOMContentLoaded',init);
 })();
