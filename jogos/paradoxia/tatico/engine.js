@@ -77,7 +77,8 @@ function initState(){
   enemies:clone(stage.enemies||[]).map((e,i)=>({...e,team:'enemy',maxHp:e.hp||3,sp:0,acted:false,moved:false,alive:true,id:e.id||'e'+i,move:e.move||2,range:e.range||1})),
   props:clone(stage.props||[]),switches:{},answers:{},firstAnswers:{},revealed:0,analysisCount:0,log:[],score:0,startedAt:Date.now(),
   competitive:false,attempt:null,ended:false,chain:0,maxChain:0,inspectTarget:null,lastEnemyActor:null,
-  credibility:stage.battleRules?.credibility??null,maxCredibility:stage.battleRules?.credibility??null
+  credibility:stage.battleRules?.credibility??null,maxCredibility:stage.battleRules?.credibility??null,
+  panic:stage.battleRules?.panic??null,maxPanic:stage.battleRules?.maxPanic??null
  };
 }
 function terrainHeight(x,y){const row=stage.terrain[y];return row?Number(row[x]||0):0}
@@ -158,6 +159,7 @@ function renderEnemyRoster(){
 function checkDefeat(){
  if(state.ended)return true;
  if(state.credibility!==null&&state.credibility<=0){end(false,'A Credibilidade da Plateia chegou a zero. As falácias dominaram o espetáculo.');return true}
+ if(state.panic!==null&&state.panic>=(state.maxPanic||10)){end(false,'O Pânico da Vila chegou ao máximo. Os rumores dominaram as ruas.');return true}
  if(!state.units.some(u=>u.alive)){end(false,'Todo o esquadrão ficou KO. A missão foi perdida.');return true}
  return false;
 }
@@ -312,10 +314,18 @@ function useSkill(u,k){
  u.skillPending=skill;state.mode='attack';$('#commandBox').hidden=true;toast('Escolha o alvo da habilidade.');render();
 }
 function openLogicChoice(u,e){
+ if(e.requiresEvidence&&!state.switches[e.requiresEvidence]){
+   const proof=state.props.find(p=>p.id===e.requiresEvidence);
+   state.mode='command';
+   toast('🔎 Falta evidência. Investigue '+(proof?.label||'o local indicado')+' antes de confrontar este rumor.');
+   render();openCommand(u);return;
+ }
  state.mode='logic';const box=$('#logicOverlay');box.classList.add('show');
- $('#logicTarget').textContent=e.icon+' '+e.name;$('#logicText').textContent='Qual conceito descreve o truque argumentativo deste alvo?';
- $('#logicChoices').innerHTML=FALLACIES.map(f=>'<button data-concept="'+f.key+'"><b>'+f.label+'</b><small>'+f.desc+'</small></button>').join('');
- $$('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
+ const concepts=Array.isArray(stage.concepts)&&stage.concepts.length?stage.concepts:FALLACIES;
+ $('#logicTarget').textContent=e.icon+' '+e.name;
+ $('#logicText').textContent=stage.analysisPrompt||'Qual conceito descreve o truque argumentativo deste alvo?';
+ $('#logicChoices').innerHTML=concepts.map(f=>'<button data-concept="'+f.key+'"><b>'+f.label+'</b><small>'+f.desc+'</small></button>').join('');
+ $('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
 }
 async function resolveLogicChoice(u,e,choice){
  $('#logicOverlay').classList.remove('show');u.animState='action';state.mode='animating';render();await wait(240);state.analysisCount++;state.answers[e.id]=choice;
@@ -335,6 +345,11 @@ async function resolveLogicChoice(u,e,choice){
      state.credibility=Math.max(0,state.credibility-loss);
      state.log.unshift('🎭 Análise incorreta contra '+e.name+'. Credibilidade -'+loss+'. O inimigo continua ativo.');
      toast('❌ Conceito incorreto. Credibilidade -'+loss+'. Tente novamente em outro turno.');
+   }else if(state.panic!==null){
+     const loss=Number(stage.battleRules?.wrongAnswerPanic)||1;
+     state.panic=Math.min(state.maxPanic||10,state.panic+loss);
+     state.log.unshift('🗯️ A análise não sustentou a refutação de '+e.name+'. Pânico +'+loss+'.');
+     toast('❌ O rumor ganhou força. Pânico +'+loss+'.');
    }else{
      state.log.unshift('🎭 Análise incorreta contra '+e.name+'. O inimigo continua ativo.');
      toast('❌ O inimigo continua ativo.');
@@ -360,7 +375,14 @@ async function doAttack(u,e){
 function interact(u){
  const candidates=state.props.filter(p=>!state.switches[p.id]&&(p.x===u.x&&p.y===u.y||dist(p,u)<=1));
  const p=candidates[0];if(!p)return toast('Não há nada interativo aqui.');
- state.switches[p.id]=true;state.score+=40;state.log.unshift(p.icon+' '+u.name+' ativou '+p.id+'.');
+ state.switches[p.id]=true;
+ if(p.type==='evidence'){
+   state.score+=55;
+   state.log.unshift('🔎 '+u.name+' encontrou '+(p.label||'uma evidência')+': '+(p.clue||'pista registrada.'));
+   toast('📚 EVIDÊNCIA: '+(p.clue||p.label||'pista registrada.'));
+ }else{
+   state.score+=40;state.log.unshift(p.icon+' '+u.name+' ativou '+(p.label||p.id)+'.');
+ }
  if(p.type==='bonus')u.sp=Math.min(u.maxSp,u.sp+2);
  finishUnit(u);
 }
@@ -399,6 +421,12 @@ async function enemyPhase(){
      }
      state.log.unshift('↠ '+enemy.name+' avançou em direção a '+target.name+'.');
      render();await wait(360);
+   }
+   if(enemy.alive&&enemy.tag==='rumor'&&state.panic!==null){
+     const rise=Number(stage.battleRules?.enemySpreadPanic)||1;
+     state.panic=Math.min(state.maxPanic||10,state.panic+rise);
+     state.log.unshift('🗯️ '+enemy.name+' se espalhou pela vila. Pânico +'+rise+'.');
+     render();await wait(240);
    }
    if(checkDefeat())return;
  }
@@ -443,7 +471,7 @@ async function awardProgress(win){
  return gains;
 }
 function competitionPayload(){
- if(stage.key==='feira_falacias')return {answers:stage.enemies.map(e=>state.firstAnswers[e.id]||'')};
+ if(stage.enemies?.some(e=>e.answer))return {answers:stage.enemies.filter(e=>e.answer).map(e=>state.firstAnswers[e.id]||'')};
  return {completed:true,turns:state.turn,local_score:state.score};
 }
 function outcomeRank(win){
@@ -458,6 +486,7 @@ function outcomeRank(win){
 function failureTipFor(msg){
  const m=String(msg||'').toLowerCase();
  if(m.includes('credibilidade'))return 'Use a ficha dos inimigos e o marcador NO ALCANCE. Uma análise errada custa Credibilidade; reposicione antes de arriscar.';
+ if(m.includes('pânico'))return 'Colete as evidências primeiro e neutralize os rumores mais próximos. Cada rumor vivo aumenta o Pânico durante o turno inimigo.';
  if(m.includes('turno'))return 'Aproveite Desfazer Movimento, Campos de Ideias e ataques assistidos para gastar menos turnos.';
  if(m.includes('ko')||m.includes('esquadrão')||m.includes('grupo'))return 'Ponderação, posicionamento e assistência importam. Evite deixar uma unidade isolada no alcance de vários inimigos.';
  return 'Leia a condição de derrota no briefing, inspecione os inimigos e ajuste a formação no próximo combate.';
@@ -510,8 +539,9 @@ async function playOutcomeScene(win,msg,score,gains){
 
  const credBox=$('#resultCredibilityBox');
  if(credBox){
-   credBox.hidden=state.credibility===null;
-   if(state.credibility!==null)$('#resultCredibility').textContent=state.credibility+'/'+state.maxCredibility;
+   credBox.hidden=state.credibility===null&&state.panic===null;
+   if(state.credibility!==null){$('#resultMeterLabel').textContent='credibilidade';$('#resultCredibility').textContent=state.credibility+'/'+state.maxCredibility}
+   else if(state.panic!==null){$('#resultMeterLabel').textContent='pânico final';$('#resultCredibility').textContent=state.panic+'/'+state.maxPanic}
  }
 
  const failure=$('#failureLesson');
@@ -549,7 +579,23 @@ function render(){
  const prog=objectiveProgress();if($('#objectiveProgress'))$('#objectiveProgress').textContent=prog.current+'/'+prog.target;if($('#chainValue'))$('#chainValue').textContent='×'+state.chain;
  const winText=stage.battleRules?.winText||stage.objective.text,loseText=stage.battleRules?.loseText||('Todo o grupo KO ou ultrapassar '+stage.turnLimit+' turnos.');
  if($('#winCondition'))$('#winCondition').textContent=winText;if($('#loseCondition'))$('#loseCondition').textContent=loseText;
- const credBox=$('#credibilityBox'),credMiniBox=$('#credibilityMiniBox');if(credBox){credBox.hidden=state.credibility===null;if(state.credibility!==null){const max=state.maxCredibility||1,pct=Math.max(0,Math.min(100,(state.credibility/max)*100));$('#credibilityValue').textContent=state.credibility+'/'+max;$('#credibilityFill').style.width=pct+'%'}}if(credMiniBox){credMiniBox.hidden=state.credibility===null;if(state.credibility!==null)$('#credibilityMini').textContent=state.credibility+'/'+state.maxCredibility;}
+ const credBox=$('#credibilityBox'),credMiniBox=$('#credibilityMiniBox');
+ const hasCred=state.credibility!==null,hasPanic=state.panic!==null;
+ if(credBox){
+   credBox.hidden=!hasCred&&!hasPanic;
+   if(hasCred){
+     const max=state.maxCredibility||1,pct=Math.max(0,Math.min(100,(state.credibility/max)*100));
+     $('#battleMeterLabel').textContent='CREDIBILIDADE DA PLATEIA';$('#credibilityValue').textContent=state.credibility+'/'+max;$('#credibilityFill').style.width=pct+'%';credBox.classList.remove('panicMeter');
+   }else if(hasPanic){
+     const max=state.maxPanic||10,pct=Math.max(0,Math.min(100,(state.panic/max)*100));
+     $('#battleMeterLabel').textContent='PÂNICO DA VILA';$('#credibilityValue').textContent=state.panic+'/'+max;$('#credibilityFill').style.width=pct+'%';credBox.classList.add('panicMeter');
+   }
+ }
+ if(credMiniBox){
+   credMiniBox.hidden=!hasCred&&!hasPanic;
+   if(hasCred){$('#battleMeterMiniLabel').textContent='CREDIBILIDADE';$('#credibilityMini').textContent=state.credibility+'/'+state.maxCredibility}
+   else if(hasPanic){$('#battleMeterMiniLabel').textContent='PÂNICO';$('#credibilityMini').textContent=state.panic+'/'+state.maxPanic}
+ }
  renderEnemyRoster();renderTurnRoster();renderInspector();
 
  const board=$('#tacticalBoard');board.style.setProperty('--cols',stage.size.w);board.style.setProperty('--rows',stage.size.h);board.innerHTML='';
