@@ -98,7 +98,7 @@ function renderTurnRoster(){
  const host=$('#turnRoster');if(!host)return;
  host.innerHTML=state.units.map(u=>{
    const status=!u.alive?'KO':u.acted?'AGIU':u.moved?'MOVIDO':'PRONTO';
-   return '<button class="turnUnit '+(!u.alive?'ko ':u.acted?'done ':u.moved?'moved ':'ready ')+(state.selected===u.id?'active':'')+'" data-turn-unit="'+u.id+'" '+(!u.alive?'disabled':'')+'><span>'+u.icon+'</span><b>'+u.name+'</b><small>'+status+'</small></button>';
+   return '<button class="turnUnit '+(!u.alive?'ko ':u.acted?'done ':u.moved?'moved ':'ready ')+(state.selected===u.id?'active':'')+'" data-turn-unit="'+u.id+'" '+(!u.alive?'disabled':'')+'><span class="miniPortrait" data-sprite-key="'+u.classKey+'">'+u.icon+'</span><b>'+u.name+'</b><small>'+status+'</small></button>';
  }).join('');
  $$('[data-turn-unit]').forEach(b=>b.onclick=()=>{
    const u=state.units.find(x=>x.id===b.dataset.turnUnit);
@@ -163,7 +163,7 @@ function checkDefeat(){
 }
 function renderDeployment(){
  const host=$('#deployGrid');if(!host)return;
- host.innerHTML=state.units.map((u,i)=>'<article class="deployUnit"><div class="dAvatar">'+u.icon+'</div><b>'+(i+1)+'. '+u.name+'</b><small>posição inicial '+(i+1)+' • MOV '+u.move+' • ALC '+u.range+'</small><div class="deployArrows"><button data-deploy-left="'+i+'" type="button">←</button><button data-deploy-right="'+i+'" type="button">→</button></div></article>').join('');
+ host.innerHTML=state.units.map((u,i)=>'<article class="deployUnit"><div class="dAvatar portraitSprite" data-sprite-key="'+u.classKey+'">'+u.icon+'</div><b>'+(i+1)+'. '+u.name+'</b><small>posição inicial '+(i+1)+' • MOV '+u.move+' • ALC '+u.range+'</small><div class="deployArrows"><button data-deploy-left="'+i+'" type="button">←</button><button data-deploy-right="'+i+'" type="button">→</button></div></article>').join('');
  $$('[data-deploy-left]').forEach(b=>b.onclick=()=>shiftDeploy(Number(b.dataset.deployLeft),-1));
  $$('[data-deploy-right]').forEach(b=>b.onclick=()=>shiftDeploy(Number(b.dataset.deployRight),1));
 }
@@ -233,6 +233,9 @@ function tileClick(x,y){
    if(hit?.id===sel.id){state.mode='command';render();openCommand(sel);return}
    const r=reachable(sel);
    if(r.has(key(x,y))){
+     const dx=x-sel.x,dy=y-sel.y;
+     sel.direction=Math.abs(dx)>=Math.abs(dy)?'side':(dy<0?'back':'front');
+     sel.animState='idle';
      sel.x=x;sel.y=y;sel.moved=true;state.mode='command';state.inspectTarget=null;
      applyIdea(sel);render();openCommand(sel);return;
    }
@@ -314,8 +317,8 @@ function openLogicChoice(u,e){
  $('#logicChoices').innerHTML=FALLACIES.map(f=>'<button data-concept="'+f.key+'"><b>'+f.label+'</b><small>'+f.desc+'</small></button>').join('');
  $$('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
 }
-function resolveLogicChoice(u,e,choice){
- $('#logicOverlay').classList.remove('show');state.analysisCount++;state.answers[e.id]=choice;
+async function resolveLogicChoice(u,e,choice){
+ $('#logicOverlay').classList.remove('show');u.animState='action';state.mode='animating';render();await wait(240);state.analysisCount++;state.answers[e.id]=choice;
  if(!(e.id in state.firstAnswers))state.firstAnswers[e.id]=choice;
  const correct=choice===e.answer,assists=assistCount(u,e);
  state.inspectTarget=e.id;
@@ -339,8 +342,8 @@ function resolveLogicChoice(u,e,choice){
  }
  finishUnit(u);
 }
-function doAttack(u,e){
- const assists=assistCount(u,e),conceptLocked=!!e.answer&&!e.solved;let dmg=1+Math.min(2,assists);if(u.skillPending){dmg+=1;state.score+=10;u.skillPending=null}
+async function doAttack(u,e){
+ u.animState='attack';state.mode='animating';render();await wait(240);const assists=assistCount(u,e),conceptLocked=!!e.answer&&!e.solved;let dmg=1+Math.min(2,assists);if(u.skillPending){dmg+=1;state.score+=10;u.skillPending=null}
  state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);state.score+=assists*15;
  if(e.guard){e.guard=0;dmg=Math.max(0,dmg-1)}
  e.hp-=dmg;state.analysisCount++;state.inspectTarget=e.id;
@@ -362,7 +365,7 @@ function interact(u){
  finishUnit(u);
 }
 function finishUnit(u){
- u.moveSnapshot=null;u.acted=true;u.moved=true;state.selected=null;state.mode='select';$('#commandBox').hidden=true;
+ u.animState='idle';u.moveSnapshot=null;u.acted=true;u.moved=true;state.selected=null;state.mode='select';$('#commandBox').hidden=true;
  if(checkDefeat())return;
  if(checkObjective())return;
  if(!state.units.some(x=>x.alive&&!x.acted))enemyPhase();else render();
@@ -468,7 +471,7 @@ function buildOutcomeParticles(win){
 }
 function renderOutcomeParty(){
  const host=$('#resultParty');if(!host)return;
- host.innerHTML=state.units.map(u=>'<article class="resultHero '+(u.alive?'':'ko')+'"><div class="heroIcon">'+u.icon+'</div><b>'+u.name+'</b><small>HP '+Math.max(0,u.hp)+'/'+u.maxHp+'</small><div class="heroState">'+(u.alive?'DE PÉ':'KO')+'</div></article>').join('');
+ host.innerHTML=state.units.map(u=>'<article class="resultHero '+(u.alive?'':'ko')+'"><div class="heroIcon portraitSprite" data-sprite-key="'+u.classKey+'">'+u.icon+'</div><b>'+u.name+'</b><small>HP '+Math.max(0,u.hp)+'/'+u.maxHp+'</small><div class="heroState">'+(u.alive?'DE PÉ':'KO')+'</div></article>').join('');
 }
 function renderRewards(gains){
  const panel=$('#rewardPanel'),host=$('#rewardParty');
@@ -476,7 +479,7 @@ function renderRewards(gains){
  panel.hidden=!gains.length;
  if(!gains.length){host.innerHTML='';return}
  $('#rewardHeadline').textContent='+25 XP e +1 domínio para cada classe';
- host.innerHTML=gains.map(g=>'<article class="rewardUnit"><b>'+g.icon+' '+g.name+(g.leveled?' • LEVEL UP!':'')+'</b><small>Nv. '+g.level+' • XP '+g.xp+'/100 • domínio '+g.mastery+'</small><div class="xpTrack"><i style="width:'+Math.max(0,Math.min(100,g.xp))+'%"></i></div></article>').join('');
+ host.innerHTML=gains.map(g=>'<article class="rewardUnit"><div class="rewardUnitHead"><span class="rewardPortrait portraitSprite" data-sprite-key="'+g.classKey+'">'+g.icon+'</span><div><b>'+g.name+(g.leveled?' • LEVEL UP!':'')+'</b><small>Nv. '+g.level+' • XP '+g.xp+'/100 • domínio '+g.mastery+'</small></div></div><div class="xpTrack"><i style="width:'+Math.max(0,Math.min(100,g.xp))+'%"></i></div></article>').join('');
 }
 async function playOutcomeScene(win,msg,score,gains){
  const viewport=$('.boardViewport');
@@ -578,7 +581,7 @@ async function prepareCompetition(){
  }catch(e){$('#competitionState').textContent='prática';toast(e.message||'Competição indisponível.')}
 }
 function briefing(){
- stage=D().stages[stageKey]||D().stages.feira_falacias;initState();
+ stage=D().stages[stageKey]||D().stages.feira_falacias;document.body.dataset.stage=stage.key;initState();
  const winText=stage.battleRules?.winText||stage.objective.text,loseText=stage.battleRules?.loseText||('Todo o grupo KO ou ultrapassar '+stage.turnLimit+' turnos.');
  $('#briefIcon').textContent=stage.icon;$('#briefTitle').textContent=stage.title;$('#briefSubtitle').textContent=stage.subtitle;$('#briefObjective').textContent=stage.objective.text;
  if($('#briefWin'))$('#briefWin').textContent=winText;if($('#briefLose'))$('#briefLose').textContent=loseText;
