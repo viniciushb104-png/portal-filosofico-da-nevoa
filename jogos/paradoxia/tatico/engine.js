@@ -140,7 +140,9 @@ function renderInspector(){
    hp.textContent=enemy.alive?Math.max(0,enemy.hp)+'/'+enemy.maxHp:'0/'+enemy.maxHp;
    sp.textContent=String(enemy.threat||enemy.range||1);
    const intent=enemyIntent(enemy);
-   text.textContent=(enemy.role||'INIMIGO')+' • '+(enemy.attackName||'Pressão')+(intent?.target?' • 🎯 alvo provável: '+intent.target.name+(intent.willAttack?' (ATACA AGORA)':' (vai se aproximar)'):'')+(enemy.quote?' • '+enemy.quote:'')+(enemy.failedAttempts?' • '+enemy.failedAttempts+' análise(s) incorreta(s) registrada(s).':'');
+   const proof=enemy.requiresEvidence?state.props.find(p=>p.id===enemy.requiresEvidence):null;
+   const proofText=enemy.requiresEvidence?(state.switches[enemy.requiresEvidence]?' • 📚 evidência coletada':' • 🔎 investigue '+(proof?.label||'a evidência')):'';
+   text.textContent=(enemy.role||'INIMIGO')+' • '+(enemy.attackName||'Pressão')+proofText+(intent?.target?' • 🎯 alvo provável: '+intent.target.name+(intent.willAttack?' (ATACA AGORA)':' (vai se aproximar)'):'')+(enemy.quote?' • '+enemy.quote:'')+(enemy.failedAttempts?' • '+enemy.failedAttempts+' análise(s) incorreta(s) registrada(s).':'');
    return;
  }
  if(hpLabel)hpLabel.textContent='HP';if(spLabel)spLabel.textContent='SP';
@@ -149,10 +151,11 @@ function renderInspector(){
 function renderEnemyRoster(){
  const host=$('#enemyRoster');if(!host)return;
  host.innerHTML=state.enemies.map(en=>{
-   const status=en.solved?'DESMASCARADO':!en.alive?'SUPERADO':en.failedAttempts?'AINDA ATIVO • '+en.failedAttempts+' erro(s)':'AMEAÇA ATIVA';
+   const evidenceReady=!en.requiresEvidence||!!state.switches[en.requiresEvidence];
+   const status=en.solved?'DESMASCARADO':!en.alive?'SUPERADO':en.requiresEvidence&&!evidenceReady?'🔎 EVIDÊNCIA PENDENTE':evidenceReady&&en.requiresEvidence?'📚 PRONTO PARA CONFRONTAR':en.failedAttempts?'AINDA ATIVO • '+en.failedAttempts+' erro(s)':'AMEAÇA ATIVA';
    const intent=en.alive?enemyIntent(en):null;
    const intentText=intent?.target?(intent.willAttack?'🎯 ATACA '+intent.target.name:'↠ segue '+intent.target.name):'';
-   return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+(state.lastEnemyActor===en.id?' acting':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+(intentText?' • '+intentText:'')+'</span></button>';
+   return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+(state.lastEnemyActor===en.id?' acting':'')+(en.tag==='rumor'?' rumorCard':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+(intentText?' • '+intentText:'')+'</span></button>';
  }).join('');
  $$('.enemyCard').forEach(card=>card.onclick=()=>{state.inspectTarget=card.dataset.enemyId;state.selected=null;state.mode='select';$('#commandBox').hidden=true;closeMobilePanel();render()});
 }
