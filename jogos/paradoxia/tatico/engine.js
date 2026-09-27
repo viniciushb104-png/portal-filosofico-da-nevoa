@@ -337,14 +337,14 @@ function defeatEnemy(e,verb='SUPERADO'){
  e.hp=0;e.alive=false;e.solved=true;state.revealed++;state.score+=90;
  state.log.unshift('✨ '+e.name+' foi '+verb+'.');
 }
-function applyWrongMeterPenalty(){
+function applyWrongMeterPenalty(kind='attack'){
  if(state.credibility!==null){
-   const loss=Number(stage.battleRules?.wrongAttackCredibility??stage.battleRules?.wrongAnswerLoss)||1;
+   const loss=Number(kind==='concept'?stage.battleRules?.wrongAnswerLoss:(stage.battleRules?.wrongAttackCredibility??stage.battleRules?.wrongAnswerLoss))||1;
    state.credibility=Math.max(0,state.credibility-loss);
    return 'Credibilidade -'+loss;
  }
  if(state.panic!==null){
-   const rise=Number(stage.battleRules?.wrongAttackPanic??stage.battleRules?.wrongAnswerPanic)||1;
+   const rise=Number(kind==='concept'?stage.battleRules?.wrongAnswerPanic:(stage.battleRules?.wrongAttackPanic??stage.battleRules?.wrongAnswerPanic))||1;
    state.panic=Math.min(state.maxPanic||10,state.panic+rise);
    return 'Pânico +'+rise;
  }
@@ -381,7 +381,7 @@ async function resolveLogicChoice(u,e,choice){
    else toast('🧠 Conceito correto! Escudo quebrado • -'+dmg+' HP • agora ele está vulnerável.');
  }else{
    state.quizWrong++;e.failedAttempts=(e.failedAttempts||0)+1;state.chain=0;state.score+=5;
-   const meter=applyWrongMeterPenalty(),counter=counterAttack(u,e);
+   const meter=applyWrongMeterPenalty('concept'),counter=counterAttack(u,e);
    state.log.unshift('❌ Leitura incorreta contra '+e.name+'. '+(meter?meter+' • ':'')+(counter?'Contra-ataque -'+counter+' HP.':'A defesa segurou o contra-ataque.'));
    toast('❌ Resposta incorreta • '+(meter?meter+' • ':'')+(counter?'-'+counter+' HP':'defesa segurou'));
  }
@@ -410,7 +410,7 @@ async function resolveAttackQuestion(u,e,q,choice){
    else toast('✅ '+q.feedback+' • -'+dmg+' HP'+(critical?' • CRÍTICO':''));
  }else{
    state.quizWrong++;state.chain=0;state.score+=5;
-   const meter=applyWrongMeterPenalty(),counter=counterAttack(u,e);
+   const meter=applyWrongMeterPenalty('attack'),counter=counterAttack(u,e);
    state.log.unshift('💢 '+e.name+' rebateu o ataque de '+u.name+'. '+(meter?meter+' • ':'')+(counter?'Contra-ataque -'+counter+' HP.':'Defesa segurou.'));
    toast('💢 Contra-argumento! '+(meter?meter+' • ':'')+(counter?'-'+counter+' HP':'defesa segurou'));
  }
@@ -671,7 +671,7 @@ function render(){
  [...state.units,...state.enemies].filter(u=>u.alive).forEach(u=>{
   const el=document.createElement('button');const sel=selection();const assisted=u.team==='player'&&sel&&u.id!==sel.id&&state.enemies.some(en=>en.alive&&dist(u,en)<=1&&dist(sel,en)<=(sel.skillPending?.range??sel.range));const inRange=u.team==='enemy'&&sel&&sel.team==='player'&&dist(sel,u)<=(sel.skillPending?.range??sel.range);
   el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'')+(assisted?' assisted':'')+(u.team==='enemy'&&state.inspectTarget===u.id?' targeted':'')+(inRange?' inRange':'');el.dataset.unitId=u.id;el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
-  el.innerHTML='<span class="unitSprite">'+u.icon+'</span><span class="unitName">'+u.name+'</span><span class="hp"><i style="width:'+Math.max(0,u.hp/u.maxHp*100)+'%"></i></span>';
+  el.innerHTML='<span class="unitSprite">'+u.icon+'</span><span class="unitName">'+u.name+'</span><span class="hp"><i style="width:'+Math.max(0,u.hp/u.maxHp*100)+'%"></i></span>'+(u.team==='enemy'&&u.answer&&!u.conceptResolved?'<span class="argumentShield" title="Escudo de Argumento">🛡</span>':'');
   window.ParadoxiaSpriteRuntime?.decorateUnitElement(el,u);
   board.appendChild(el);
  });
