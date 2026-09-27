@@ -66,7 +66,7 @@ function renderTurnRoster(){
    const status=!u.alive?'KO':u.acted?'AGIU':u.moved?'MOVIDO':'PRONTO';
    return '<button class="turnUnit '+(!u.alive?'ko ':u.acted?'done ':u.moved?'moved ':'ready ')+(state.selected===u.id?'active':'')+'" data-turn-unit="'+u.id+'" '+(!u.alive?'disabled':'')+'><span>'+u.icon+'</span><b>'+u.name+'</b><small>'+status+'</small></button>';
  }).join('');
- $('[data-turn-unit]').forEach(b=>b.onclick=()=>{
+ $$('[data-turn-unit]').forEach(b=>b.onclick=()=>{
    const u=state.units.find(x=>x.id===b.dataset.turnUnit);
    if(!u||!u.alive||u.acted||state.phase!=='player')return;
    state.inspectTarget=null;state.selected=u.id;state.mode='command';render();openCommand(u);
@@ -236,7 +236,7 @@ function renderCommands(u){
    '<button data-cmd="interact">🔎 Interagir</button>'+
    '<button data-cmd="wait">✓ Encerrar ação</button>'+
    '<button data-cmd="cancel">↶ Trocar unidade</button>';
- $('#commandButtons button').forEach(b=>b.onclick=()=>{if(!b.disabled)command(b.dataset.cmd)});
+ $$('#commandButtons button').forEach(b=>b.onclick=()=>{if(!b.disabled)command(b.dataset.cmd)});
 }
 function command(cmd){
  const u=selection();if(!u)return;
