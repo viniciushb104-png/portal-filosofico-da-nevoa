@@ -77,7 +77,7 @@ const stages={
   praca_agora:{
    key:'praca_agora',title:'Ágora do Livre-Arbítrio',subtitle:'Praça do Livre-Arbítrio',icon:'🕰️',type:'tactical-hybrid',size:{w:10,h:9},turnLimit:14,
    objective:{type:'switches',text:'Ative os 3 Relógios de Possibilidade e alcance o centro da Ágora.',target:3},
-   battleRules:{winText:'Ative os 3 Relógios e alcance o centro.',loseText:'Todo o grupo KO ou fim do turno 14.'},
+   battleRules:{requireClear:true,winText:'Ative os 3 Relógios e alcance o centro.',loseText:'Todo o grupo KO ou fim do turno 14.'},
    analysisPrompt:'Que erro existe ao tratar uma previsão como se fosse um destino necessário?',
    concepts:[
      {key:'previsao_nao_necessidade',label:'Previsão não é necessidade',desc:'Antecipar um resultado provável não prova que ele seja inevitável.'},
@@ -123,7 +123,7 @@ const stages={
   ponte_dilema:{
    key:'ponte_dilema',title:'Ponte do Dilema',subtitle:'Ponte das Escolhas',icon:'🌉',type:'tactical-hybrid',size:{w:12,h:6},turnLimit:14,
    objective:{type:'escort',text:'Escolte o Mensageiro até a margem oposta.',target:{x:11,y:2}},
-   battleRules:{winText:'Leve o Mensageiro ao marco final.',loseText:'Todo o grupo KO ou fim do turno 14.'},
+   battleRules:{requireClear:true,winText:'Leve o Mensageiro ao marco final.',loseText:'Todo o grupo KO ou fim do turno 14.'},
    analysisPrompt:'Qual leitura argumentativa identifica melhor o conflito apresentado?',
    concepts:[
      {key:'tradeoff',label:'Conflito de consequências',desc:'Há custos e benefícios relevantes em mais de uma alternativa.'},
@@ -167,7 +167,7 @@ const stages={
   bosque_teseu:{
    key:'bosque_teseu',title:'O Abóbora de Teseu',subtitle:'Bosque de Teseu',icon:'🌲',type:'tactical-boss',size:{w:9,h:9},turnLimit:15,
    objective:{type:'boss',text:'Recupere as 4 peças de Sir Cucurbita e confronte a Memória do Bosque.',target:4},
-   battleRules:{winText:'Colete as 4 peças e derrote a Memória do Bosque.',loseText:'Todo o grupo KO ou fim do turno 15.'},
+   battleRules:{requireClear:true,winText:'Colete as 4 peças e derrote a Memória do Bosque.',loseText:'Todo o grupo KO ou fim do turno 15.'},
    analysisPrompt:'Que problema filosófico está sendo levantado por esta mudança de partes?',
    concepts:[
      {key:'identidade_mudanca',label:'Identidade através da mudança',desc:'Pergunta o que faz algo continuar sendo o mesmo apesar de alterações.'},
@@ -219,7 +219,7 @@ const stages={
   lago_espelho:{
    key:'lago_espelho',title:'Espelho da Autonomia',subtitle:'Lago do Espelho Interior',icon:'🪞',type:'tactical-boss',size:{w:10,h:8},turnLimit:14,
    objective:{type:'boss',text:'Ative os 4 Espelhos de Coerência e enfrente o Reflexo Sem Rosto.',target:4},
-   battleRules:{winText:'Ative os 4 Espelhos e derrote o Reflexo Sem Rosto.',loseText:'Todo o grupo KO ou fim do turno 14.'},
+   battleRules:{requireClear:true,winText:'Ative os 4 Espelhos e derrote o Reflexo Sem Rosto.',loseText:'Todo o grupo KO ou fim do turno 14.'},
    analysisPrompt:'Que distinção ajuda a avaliar esta afirmação sobre autonomia?',
    concepts:[
      {key:'autonomia_reflexiva',label:'Autonomia reflexiva',desc:'Distingue simplesmente agir de examinar razões e assumir uma escolha.'},
@@ -271,7 +271,7 @@ const stages={
   biblioteca_fontes:{
    key:'biblioteca_fontes',title:'Arquivo das Fontes',subtitle:'Biblioteca dos Boatos',icon:'📚',type:'tactical-boss',size:{w:11,h:8},turnLimit:16,
    objective:{type:'boss',text:'Recupere 5 fontes e derrote o Arquivista dos Ecos.',target:5},
-   battleRules:{winText:'Colete as 5 fontes e derrote o Arquivista.',loseText:'Todo o grupo KO ou fim do turno 16.'},
+   battleRules:{requireClear:true,winText:'Colete as 5 fontes e derrote o Arquivista.',loseText:'Todo o grupo KO ou fim do turno 16.'},
    analysisPrompt:'Que princípio de avaliação de fontes é mais relevante neste caso?',
    concepts:[
      {key:'fonte_primaria',label:'Fonte primária',desc:'Registro produzido próximo ao evento ou por participante direto.'},
@@ -323,7 +323,7 @@ const stages={
   cemiterio_epitafios:{
    key:'cemiterio_epitafios',title:'Epitáfios da Lógica',subtitle:'Cemitério dos Conceitos',icon:'🪦',type:'tactical-boss',size:{w:9,h:8},turnLimit:14,
    objective:{type:'boss',text:'Decifre 4 lápides e derrote o Paradoxo Errante.',target:4},
-   battleRules:{winText:'Ative as 4 lápides e vença o Paradoxo Errante.',loseText:'Todo o grupo KO ou fim do turno 14.'},
+   battleRules:{requireClear:true,winText:'Ative as 4 lápides e vença o Paradoxo Errante.',loseText:'Todo o grupo KO ou fim do turno 14.'},
    analysisPrompt:'Qual estrutura lógica aparece nesta inscrição?',
    concepts:[
      {key:'contradicao',label:'Contradição',desc:'Duas afirmações incompatíveis são sustentadas no mesmo sentido e contexto.'},
@@ -373,7 +373,7 @@ const stages={
   castelo_certeza:{
    key:'castelo_certeza',title:'Castelo da Certeza Absoluta',subtitle:'Fortaleza Final',icon:'👑',type:'tactical-boss',size:{w:12,h:10},turnLimit:20,
    objective:{type:'boss',text:'Quebre os 4 Selos Dogmáticos e derrote o Lorde Certeza Absoluta.',target:4},
-   battleRules:{winText:'Quebre os 4 Selos e derrote o Lorde Certeza.',loseText:'Todo o grupo KO ou fim do turno 20.'},
+   battleRules:{requireClear:true,winText:'Quebre os 4 Selos e derrote o Lorde Certeza.',loseText:'Todo o grupo KO ou fim do turno 20.'},
    analysisPrompt:'Qual fragilidade argumentativa sustenta esta certeza?',
    concepts:[
      {key:'falso_dilema',label:'Falso dilema',desc:'Reduz possibilidades a duas opções sem justificativa suficiente.'},
@@ -513,7 +513,7 @@ const stages={
    key:'academia_torre',title:'Torre dos Argumentos',subtitle:'Academia dos Porquês',icon:'🏛️',
    type:'tactical-hybrid',size:{w:9,h:10},turnLimit:16,
    objective:{type:'boss',text:'Reúna as 3 Premissas-Mestras e derrote o Mestre da Circularidade no topo.',target:3},
-   battleRules:{
+   battleRules:{requireClear:true,
      winText:'Ative as 3 Premissas-Mestras e derrote o Mestre da Circularidade.',
      loseText:'Todo o grupo KO ou fim do turno 16.'
    },
@@ -585,7 +585,7 @@ const stages={
   ruinas_sombras:{
    key:'ruinas_sombras',title:'Sombras da Caverna',subtitle:'Ruínas da Caverna',icon:'🔥',type:'tactical-boss',size:{w:10,h:8},turnLimit:15,
    objective:{type:'boss',text:'Acenda 3 fogueiras e derrote a Sombra da Parede.',target:3},
-   battleRules:{winText:'Acenda as 3 fogueiras e vença a Sombra da Parede.',loseText:'Todo o grupo KO ou fim do turno 15.'},
+   battleRules:{requireClear:true,winText:'Acenda as 3 fogueiras e vença a Sombra da Parede.',loseText:'Todo o grupo KO ou fim do turno 15.'},
    analysisPrompt:'Que distinção ajuda a separar aparência, observação e inferência?',
    concepts:[
      {key:'observacao_inferencia',label:'Observação x inferência',desc:'Distingue aquilo que foi observado da interpretação construída a partir disso.'},
