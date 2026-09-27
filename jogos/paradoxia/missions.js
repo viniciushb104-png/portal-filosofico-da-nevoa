@@ -2,7 +2,7 @@
 'use strict';
 
 const places=[
- {key:'vila_ecos',region:'village',icon:'🎃',place:'Vila das Abóboras',title:'Ecos da Vila',kind:'puzzle',theme:'Senso comum e generalizações',max:1000,description:'Investigue rumores espalhados pela vila e descubra quando uma conclusão foi tirada rápido demais.'},
+ {key:'vila_ecos',region:'village',icon:'🎃',place:'Vila das Abóboras',title:'Ecos da Vila',kind:'puzzle',theme:'Rumores, evidências e generalizações',max:1000,href:'tatico/?mission=vila_ecos',description:'Colete evidências no poço, padaria, bosque e relógio; depois confronte quatro rumores antes que o Pânico da Vila chegue ao máximo.'},
  {key:'academia_torre',region:'academy',icon:'🏛️',place:'Academia dos Porquês',title:'Torre dos Argumentos',kind:'platform',theme:'Argumentação',max:1000,description:'Suba a torre reunindo premissas e evitando plataformas que não sustentam a conclusão.'},
  {key:'feira_falacias',region:'market',icon:'🎪',place:'Feira das Verdades Duvidosas',title:'Circo das Falácias',kind:'puzzle',theme:'Falácias',max:1000,href:'tatico/?mission=feira_falacias',description:'Entre na grande lona da feira e revele cinco truques argumentativos usados para enganar a plateia.'},
  {key:'praca_agora',region:'square',icon:'🕰️',place:'Praça do Livre-Arbítrio',title:'Ágora do Livre-Arbítrio',kind:'hybrid',theme:'Liberdade e responsabilidade',max:1000,description:'Explore rotas diferentes e resolva um mecanismo sobre escolha, previsão e responsabilidade.'},
