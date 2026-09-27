@@ -706,3 +706,37 @@ body[data-stage="vila_ecos"] #briefOverlay .briefIcon{
 @media(prefers-reduced-motion:reduce){
   body[data-stage="vila_ecos"] .tile:has(.prop:not(.used)) .prop{animation:none}
 }
+
+/* ===== Combate filosófico refinado ===== */
+.argumentShield{
+  position:absolute;
+  right:-4px;
+  top:2px;
+  z-index:14;
+  width:25px;height:25px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  border:1px solid #ffd27e;
+  background:radial-gradient(circle,#4a315f,#1b1024);
+  box-shadow:0 0 16px #e3a75d99,0 4px 8px #0008;
+  font-size:13px;
+  animation:shieldPulse 1s ease-in-out infinite alternate;
+}
+@keyframes shieldPulse{to{transform:translateY(-2px) scale(1.08);box-shadow:0 0 24px #f0bb6dcc,0 4px 8px #0008}}
+.unit.enemy:has(.argumentShield) .unitSprite{filter:drop-shadow(0 0 9px #e8ad6c88)}
+.enemyCard .eStatus{line-height:1.45}
+.commandBox button[data-cmd="defend"]{border-color:#486e76;background:#0e1b20;color:#b7e3e5}
+.commandBox button[data-cmd="defend"]:hover{border-color:#73bec7;background:#142b32}
+.logicCard #logicEyebrow{color:#f0a75b}
+.logicChoices button{position:relative;overflow:hidden}
+.logicChoices button:hover::after{content:"ESCOLHER";position:absolute;right:7px;top:6px;font-size:5px;color:#dba56e;font-weight:950;letter-spacing:.08em}
+body[data-stage="vila_ecos"] .argumentShield{border-color:#cf90e7;background:radial-gradient(circle,#5a2a69,#211128)}
+body[data-stage="feira_falacias"] .argumentShield{border-color:#ffca69;background:radial-gradient(circle,#6c3c32,#211018)}
+@media(max-width:820px){
+  .argumentShield{width:23px;height:23px;font-size:12px;right:0;top:4px}
+  .resultGrid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:520px){
+  .resultGrid{grid-template-columns:repeat(2,1fr)}
+}
+@media(prefers-reduced-motion:reduce){.argumentShield{animation:none}}
