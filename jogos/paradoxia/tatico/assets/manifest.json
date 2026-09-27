@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "pose_order": [
+    "front",
+    "action",
+    "side",
+    "back"
+  ],
+  "sprite_cell": [
+    512,
+    512
+  ],
+  "characters": {
+    "dialetico": "characters/dialetico_tactical_sheet.png",
+    "cetico": "characters/cetico_tactical_sheet.png",
+    "etico": "characters/etico_tactical_sheet.png",
+    "existencial": "characters/existencial_tactical_sheet.png"
+  },
+  "backgrounds": {
+    "feira_falacias": "backgrounds/circo_arena.jpg"
+  },
+  "environment": {
+    "tiles": "environment/tiles_atlas.png",
+    "props": "environment/props_atlas.png"
+  }
+}
