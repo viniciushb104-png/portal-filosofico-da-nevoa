@@ -6,6 +6,7 @@ const params=new URLSearchParams(location.search);
 const stageKey=params.get('mission')||'feira_falacias';
 const PROFILE_KEY='paradoxiaTacticalV1';
 let stage=null,state=null;
+let boardZoom=1,zoomUserAdjusted=false;
 
 const FALLACIES=[
  {key:'ad_populum',label:'Apelo à maioria',desc:'Muita gente acreditar não transforma crença em prova.'},
@@ -19,6 +20,39 @@ function clone(v){return JSON.parse(JSON.stringify(v))}
 function key(x,y){return x+','+y}
 function dist(a,b){return Math.abs(a.x-b.x)+Math.abs(a.y-b.y)}
 function toast(msg){const t=$('#tacticalToast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+function isMobileBattle(){return window.matchMedia('(max-width:820px)').matches}
+function defaultMobileZoom(){
+ if(!isMobileBattle())return 1;
+ if(window.matchMedia('(orientation:landscape)').matches)return .86;
+ return window.innerWidth<=430?.68:.76;
+}
+function setBoardZoom(value,manual=false){
+ boardZoom=Math.max(.55,Math.min(1.15,Number(value)||1));
+ if(manual)zoomUserAdjusted=true;
+ document.documentElement.style.setProperty('--board-zoom',String(boardZoom));
+ const label=$('#zoomLabel');if(label)label.textContent=Math.round(boardZoom*100)+'%';
+}
+function syncMobileLayout(){
+ if(!zoomUserAdjusted)setBoardZoom(defaultMobileZoom(),false);
+ if(!isMobileBattle())closeMobilePanel();
+}
+function openMobilePanel(){
+ if(!isMobileBattle())return;
+ const panel=$('#objectivePanel'),backdrop=$('#mobilePanelBackdrop');
+ panel?.classList.add('mobileOpen');if(backdrop)backdrop.hidden=false;
+}
+function closeMobilePanel(){
+ const panel=$('#objectivePanel'),backdrop=$('#mobilePanelBackdrop');
+ panel?.classList.remove('mobileOpen');if(backdrop)backdrop.hidden=true;
+}
+function focusSelectedUnit(){
+ if(!isMobileBattle())return;
+ requestAnimationFrame(()=>{
+   const el=document.querySelector('.unit.selected');
+   if(el)el.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
+ });
+}
+
 function readProfile(){try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'null')}catch(e){return null}}
 function saveProfileLocal(p){localStorage.setItem(PROFILE_KEY,JSON.stringify(p))}
 function normalizeProfile(p){
@@ -69,7 +103,7 @@ function renderTurnRoster(){
  $$('[data-turn-unit]').forEach(b=>b.onclick=()=>{
    const u=state.units.find(x=>x.id===b.dataset.turnUnit);
    if(!u||!u.alive||u.acted||state.phase!=='player')return;
-   state.inspectTarget=null;state.selected=u.id;state.mode='command';render();openCommand(u);
+   state.inspectTarget=null;state.selected=u.id;state.mode='command';render();openCommand(u);focusSelectedUnit();
  });
 }
 
@@ -119,7 +153,7 @@ function renderEnemyRoster(){
    const intentText=intent?.target?(intent.willAttack?'🎯 ATACA '+intent.target.name:'↠ segue '+intent.target.name):'';
    return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+(state.lastEnemyActor===en.id?' acting':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+(intentText?' • '+intentText:'')+'</span></button>';
  }).join('');
- $$('.enemyCard').forEach(card=>card.onclick=()=>{state.inspectTarget=card.dataset.enemyId;state.selected=null;state.mode='select';$('#commandBox').hidden=true;render()});
+ $('.enemyCard').forEach(card=>card.onclick=()=>{state.inspectTarget=card.dataset.enemyId;state.selected=null;state.mode='select';$('#commandBox').hidden=true;closeMobilePanel();render()});
 }
 function checkDefeat(){
  if(state.ended)return true;
@@ -176,7 +210,7 @@ function tileClick(x,y){
    if(hit?.team==='enemy'){state.inspectTarget=hit.id;render();return}
    if(hit?.team==='player'&&!hit.acted){
      state.inspectTarget=null;state.selected=hit.id;state.mode='command';
-     render();openCommand(hit);toast('Escolha: Mover, Analisar / Atacar, Habilidade ou Interagir.');return;
+     render();openCommand(hit);focusSelectedUnit();toast('Escolha: Mover, Analisar / Atacar, Habilidade ou Interagir.');return;
    }
    return;
  }
@@ -552,7 +586,23 @@ function briefing(){
 }
 async function start(){ $('#briefOverlay').classList.remove('show');$('#deployOverlay').classList.add('show');renderDeployment();render()}
 function init(){
- $('#startMission').onclick=start;$('#confirmDeploy').onclick=confirmDeployment;$('#endTurnBtn').onclick=manualEndTurn;$('#retryMission').onclick=()=>location.reload();$('#backToMap').href='../index.html';if($('#backToQuartel'))$('#backToQuartel').href='../quartel/';briefing();
+ $('#startMission').onclick=start;
+ $('#confirmDeploy').onclick=confirmDeployment;
+ $('#endTurnBtn').onclick=manualEndTurn;
+ $('#mobileEndTurnBtn').onclick=manualEndTurn;
+ $('#mobileInfoBtn').onclick=openMobilePanel;
+ $('#mobilePanelClose').onclick=closeMobilePanel;
+ $('#mobilePanelBackdrop').onclick=closeMobilePanel;
+ $('#zoomOutBtn').onclick=()=>setBoardZoom(boardZoom-.1,true);
+ $('#zoomInBtn').onclick=()=>setBoardZoom(boardZoom+.1,true);
+ $('#zoomResetBtn').onclick=()=>{zoomUserAdjusted=false;setBoardZoom(defaultMobileZoom(),false)};
+ $('#retryMission').onclick=()=>location.reload();
+ $('#backToMap').href='../index.html';
+ if($('#backToQuartel'))$('#backToQuartel').href='../quartel/';
+ window.addEventListener('resize',syncMobileLayout,{passive:true});
+ window.addEventListener('orientationchange',()=>{zoomUserAdjusted=false;setTimeout(syncMobileLayout,120)},{passive:true});
+ syncMobileLayout();
+ briefing();
 }
 window.addEventListener('DOMContentLoaded',init);
 })();
