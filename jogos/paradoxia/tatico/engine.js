@@ -153,7 +153,7 @@ function renderEnemyRoster(){
    const intentText=intent?.target?(intent.willAttack?'🎯 ATACA '+intent.target.name:'↠ segue '+intent.target.name):'';
    return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+(state.lastEnemyActor===en.id?' acting':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+(intentText?' • '+intentText:'')+'</span></button>';
  }).join('');
- $('.enemyCard').forEach(card=>card.onclick=()=>{state.inspectTarget=card.dataset.enemyId;state.selected=null;state.mode='select';$('#commandBox').hidden=true;closeMobilePanel();render()});
+ $$('.enemyCard').forEach(card=>card.onclick=()=>{state.inspectTarget=card.dataset.enemyId;state.selected=null;state.mode='select';$('#commandBox').hidden=true;closeMobilePanel();render()});
 }
 function checkDefeat(){
  if(state.ended)return true;
