@@ -141,8 +141,11 @@ function renderInspector(){
    sp.textContent=String(enemy.threat||enemy.range||1);
    const intent=enemyIntent(enemy);
    const proof=enemy.requiresEvidence?state.props.find(p=>p.id===enemy.requiresEvidence):null;
-   const proofText=enemy.requiresEvidence?(state.switches[enemy.requiresEvidence]?' • 📚 evidência coletada':' • 🔎 investigue '+(proof?.label||'a evidência')):'';const shieldText=enemy.answer?(enemy.conceptResolved?' • ⚔ escudo quebrado':' • 🛡 Escudo de Argumento ativo'):'';
-   text.textContent=(enemy.role||'INIMIGO')+' • '+(enemy.attackName||'Pressão')+proofText+shieldText+(intent?.target?' • 🎯 alvo provável: '+intent.target.name+(intent.willAttack?' (ATACA AGORA)':' (vai se aproximar)'):'')+(enemy.quote?' • '+enemy.quote:'')+(enemy.failedAttempts?' • '+enemy.failedAttempts+' análise(s) incorreta(s) registrada(s).':'');
+   const proofText=enemy.requiresEvidence?(state.switches[enemy.requiresEvidence]?' • 📚 evidência coletada':' • 🔎 investigue '+(proof?.label||'a evidência')):'';
+   const premiseCount=Object.keys(state.switches).filter(id=>id.startsWith('seal_premise')&&state.switches[id]).length;
+   const premiseText=enemy.requiresPremises?(premiseCount>=enemy.requiresPremises?' • 📜 premissas completas':' • 🔒 premissas '+premiseCount+'/'+enemy.requiresPremises):'';
+   const shieldText=enemy.answer?(enemy.conceptResolved?' • ⚔ escudo quebrado':' • 🛡 Escudo de Argumento ativo'):'';
+   text.textContent=(enemy.role||'INIMIGO')+' • '+(enemy.attackName||'Pressão')+proofText+premiseText+shieldText+(intent?.target?' • 🎯 alvo provável: '+intent.target.name+(intent.willAttack?' (ATACA AGORA)':' (vai se aproximar)'):'')+(enemy.quote?' • '+enemy.quote:'')+(enemy.failedAttempts?' • '+enemy.failedAttempts+' análise(s) incorreta(s) registrada(s).':'');
    return;
  }
  if(hpLabel)hpLabel.textContent='HP';if(spLabel)spLabel.textContent='SP';
@@ -152,7 +155,9 @@ function renderEnemyRoster(){
  const host=$('#enemyRoster');if(!host)return;
  host.innerHTML=state.enemies.map(en=>{
    const evidenceReady=!en.requiresEvidence||!!state.switches[en.requiresEvidence];
-   const status=!en.alive?(en.tag==='rumor'?'✅ DESMENTIDO':'✅ DERROTADO'):en.requiresEvidence&&!evidenceReady?'🔎 EVIDÊNCIA PENDENTE':en.answer&&!en.conceptResolved?'🛡 ESCUDO DE ARGUMENTO':en.answer&&en.conceptResolved?'⚔ VULNERÁVEL':en.failedAttempts?'AINDA ATIVO • '+en.failedAttempts+' erro(s)':'AMEAÇA ATIVA';
+   const premiseCount=Object.keys(state.switches).filter(id=>id.startsWith('seal_premise')&&state.switches[id]).length;
+   const premiseLocked=en.requiresPremises&&premiseCount<en.requiresPremises;
+   const status=!en.alive?(en.tag==='rumor'?'✅ DESMENTIDO':'✅ DERROTADO'):premiseLocked?'🔒 PREMISSAS '+premiseCount+'/'+en.requiresPremises:en.requiresEvidence&&!evidenceReady?'🔎 EVIDÊNCIA PENDENTE':en.answer&&!en.conceptResolved?'🛡 ESCUDO DE ARGUMENTO':en.answer&&en.conceptResolved?'⚔ VULNERÁVEL':en.failedAttempts?'AINDA ATIVO • '+en.failedAttempts+' erro(s)':'AMEAÇA ATIVA';
    const intent=en.alive?enemyIntent(en):null;
    const intentText=intent?.target?(intent.willAttack?'🎯 ATACA '+intent.target.name:'↠ segue '+intent.target.name):'';
    return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+(state.lastEnemyActor===en.id?' acting':'')+(en.tag==='rumor'?' rumorCard':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+(intentText?' • '+intentText:'')+'</span></button>';
@@ -357,6 +362,14 @@ function counterAttack(u,e){
  return dmg;
 }
 function openLogicChoice(u,e){
+ if(e.requiresPremises){
+   const count=Object.keys(state.switches).filter(id=>id.startsWith('seal_premise')&&state.switches[id]).length;
+   if(count<Number(e.requiresPremises)){
+     state.mode='command';
+     toast('📜 O chefe está protegido. Ative as '+e.requiresPremises+' Premissas-Mestras antes do confronto.');
+     render();openCommand(u);return;
+   }
+ }
  if(e.requiresEvidence&&!state.switches[e.requiresEvidence]){
    const proof=state.props.find(p=>p.id===e.requiresEvidence);
    state.mode='command';
@@ -438,6 +451,11 @@ function interact(u){
    state.score+=55;
    state.log.unshift('🔎 '+u.name+' encontrou '+(p.label||'uma evidência')+': '+(p.clue||'pista registrada.'));
    toast('📚 EVIDÊNCIA: '+(p.clue||p.label||'pista registrada.'));
+ }else if(p.type==='premise'){
+   state.score+=60;
+   const count=Object.keys(state.switches).filter(id=>id.startsWith('seal_premise')&&state.switches[id]).length;
+   state.log.unshift('📜 '+u.name+' ativou '+(p.label||'uma Premissa-Mestra')+': '+(p.clue||'argumento fortalecido.'));
+   toast('📜 PREMISSA '+count+'/3 • '+(p.clue||p.label||'argumento fortalecido.'));
  }else{
    state.score+=40;state.log.unshift(p.icon+' '+u.name+' ativou '+(p.label||p.id)+'.');
  }
