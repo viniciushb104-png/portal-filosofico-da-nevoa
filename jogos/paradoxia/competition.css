@@ -40,3 +40,18 @@
 
 .academyEntrance{border-color:#7763a8!important;background:linear-gradient(180deg,#392c60,#171329)!important;color:#eadfff!important;box-shadow:0 0 0 2px #9d82dd33,0 7px 18px #0008!important}
 .academyEntrance:hover{border-color:#bea4ff!important;box-shadow:0 0 22px #9f82e366,0 8px 22px #0009!important}
+
+.bridgeEntrance{--accent:#6ea5c8}.forestEntrance{--accent:#78a85c}.libraryEntrance{--accent:#9a73c8}.plazaEntrance{--accent:#d6a45b}.castleEntrance{--accent:#c74f60}.lakeEntrance{--accent:#6fb8c5}.ruinsEntrance{--accent:#d07a46}.cemeteryEntrance{--accent:#8a7799}
+.bridgeEntrance span,.forestEntrance span,.libraryEntrance span,.plazaEntrance span,.castleEntrance span,.lakeEntrance span,.ruinsEntrance span,.cemeteryEntrance span{
+  border-color:var(--accent)!important;
+  box-shadow:0 0 0 5px #120813cc,0 0 25px color-mix(in srgb,var(--accent) 55%,transparent)!important
+}
+.bridgeEntrance b,.forestEntrance b,.libraryEntrance b,.plazaEntrance b,.castleEntrance b,.lakeEntrance b,.ruinsEntrance b,.cemeteryEntrance b{
+  border-color:var(--accent)!important;color:#f7e9ff!important
+}
+.secretEntrance{opacity:.64;filter:drop-shadow(0 8px 12px #000a) grayscale(.22)}
+.secretEntrance:hover{opacity:1;filter:drop-shadow(0 8px 12px #000a)}
+@media(max-width:720px){
+  .missionEntrance b{font-size:5px;padding:3px 5px}
+  .missionEntrance span{width:36px;height:36px;font-size:18px}
+}
