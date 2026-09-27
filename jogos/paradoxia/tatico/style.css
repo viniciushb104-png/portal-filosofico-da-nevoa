@@ -810,3 +810,188 @@ body[data-stage="academia_torre"] .tacticalBoard{
 @media(prefers-reduced-motion:reduce){
   body[data-stage="academia_torre"] .tile:has(.prop:not(.used)) .prop{animation:none}
 }
+
+
+/* ===== Identidades das demais regiões de Paradoxia ===== */
+body[data-stage="praca_agora"]{
+  --area-accent:#d6a657;--area-glow:#d6a65755;--area-dark:#2d1e18;--area-bg-pos:72% 56%;
+}
+body[data-stage="ponte_dilema"]{
+  --area-accent:#6fa7c5;--area-glow:#6fa7c555;--area-dark:#18232b;--area-bg-pos:61% 60%;
+}
+body[data-stage="bosque_teseu"]{
+  --area-accent:#78a85f;--area-glow:#78a85f55;--area-dark:#17251a;--area-bg-pos:17% 84%;
+}
+body[data-stage="lago_espelho"]{
+  --area-accent:#69b6c7;--area-glow:#69b6c755;--area-dark:#10222a;--area-bg-pos:56% 72%;
+}
+body[data-stage="biblioteca_fontes"]{
+  --area-accent:#9b75c9;--area-glow:#9b75c955;--area-dark:#20182b;--area-bg-pos:82% 81%;
+}
+body[data-stage="ruinas_sombras"]{
+  --area-accent:#d17a48;--area-glow:#d17a4855;--area-dark:#291711;--area-bg-pos:11% 80%;
+}
+body[data-stage="cemiterio_epitafios"]{
+  --area-accent:#8d7b9e;--area-glow:#8d7b9e55;--area-dark:#18151e;--area-bg-pos:7% 86%;
+}
+body[data-stage="castelo_certeza"]{
+  --area-accent:#c84e61;--area-glow:#c84e6155;--area-dark:#2a1118;--area-bg-pos:80% 20%;
+}
+body[data-stage="praca_agora"] .boardViewport,
+body[data-stage="ponte_dilema"] .boardViewport,
+body[data-stage="bosque_teseu"] .boardViewport,
+body[data-stage="lago_espelho"] .boardViewport,
+body[data-stage="biblioteca_fontes"] .boardViewport,
+body[data-stage="ruinas_sombras"] .boardViewport,
+body[data-stage="cemiterio_epitafios"] .boardViewport,
+body[data-stage="castelo_certeza"] .boardViewport{
+  background:
+    linear-gradient(180deg,rgba(6,5,11,.18),rgba(5,4,9,.72)),
+    radial-gradient(circle at 48% 30%,var(--area-glow),transparent 34%),
+    url("../assets/world/paradoxia_world_playable.webp") var(--area-bg-pos)/cover no-repeat;
+}
+body[data-stage="praca_agora"] .battleTop,
+body[data-stage="ponte_dilema"] .battleTop,
+body[data-stage="bosque_teseu"] .battleTop,
+body[data-stage="lago_espelho"] .battleTop,
+body[data-stage="biblioteca_fontes"] .battleTop,
+body[data-stage="ruinas_sombras"] .battleTop,
+body[data-stage="cemiterio_epitafios"] .battleTop,
+body[data-stage="castelo_certeza"] .battleTop{
+  background:linear-gradient(90deg,#0b0810f4,var(--area-dark) 50%,#0b0810f4);
+  border-bottom-color:var(--area-accent);
+}
+body[data-stage="praca_agora"] .objectivePanel,
+body[data-stage="ponte_dilema"] .objectivePanel,
+body[data-stage="bosque_teseu"] .objectivePanel,
+body[data-stage="lago_espelho"] .objectivePanel,
+body[data-stage="biblioteca_fontes"] .objectivePanel,
+body[data-stage="ruinas_sombras"] .objectivePanel,
+body[data-stage="cemiterio_epitafios"] .objectivePanel,
+body[data-stage="castelo_certeza"] .objectivePanel,
+body[data-stage="praca_agora"] .commandBox,
+body[data-stage="ponte_dilema"] .commandBox,
+body[data-stage="bosque_teseu"] .commandBox,
+body[data-stage="lago_espelho"] .commandBox,
+body[data-stage="biblioteca_fontes"] .commandBox,
+body[data-stage="ruinas_sombras"] .commandBox,
+body[data-stage="cemiterio_epitafios"] .commandBox,
+body[data-stage="castelo_certeza"] .commandBox{
+  background:linear-gradient(180deg,color-mix(in srgb,var(--area-dark) 78%,#09060d),#08060df4);
+  border-color:color-mix(in srgb,var(--area-accent) 60%,#35243b);
+}
+body[data-stage="praca_agora"] .tile,
+body[data-stage="ponte_dilema"] .tile,
+body[data-stage="bosque_teseu"] .tile,
+body[data-stage="lago_espelho"] .tile,
+body[data-stage="biblioteca_fontes"] .tile,
+body[data-stage="ruinas_sombras"] .tile,
+body[data-stage="cemiterio_epitafios"] .tile,
+body[data-stage="castelo_certeza"] .tile{
+  border-color:color-mix(in srgb,var(--area-accent) 48%,#443449);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--area-dark) 72%,#332d38),#151219);
+  box-shadow:0 8px 0 #0d0a10,0 10px 18px #0008;
+}
+body[data-stage="praca_agora"] .tile.h3,
+body[data-stage="ponte_dilema"] .tile.h3,
+body[data-stage="bosque_teseu"] .tile.h3,
+body[data-stage="lago_espelho"] .tile.h3,
+body[data-stage="biblioteca_fontes"] .tile.h3,
+body[data-stage="ruinas_sombras"] .tile.h3,
+body[data-stage="cemiterio_epitafios"] .tile.h3,
+body[data-stage="castelo_certeza"] .tile.h3{
+  box-shadow:0 8px 0 #0d0a10,0 0 20px var(--area-glow);
+}
+body[data-stage="praca_agora"] .tile:has(.prop:not(.used)) .prop,
+body[data-stage="ponte_dilema"] .tile:has(.prop:not(.used)) .prop,
+body[data-stage="bosque_teseu"] .tile:has(.prop:not(.used)) .prop,
+body[data-stage="lago_espelho"] .tile:has(.prop:not(.used)) .prop,
+body[data-stage="biblioteca_fontes"] .tile:has(.prop:not(.used)) .prop,
+body[data-stage="ruinas_sombras"] .tile:has(.prop:not(.used)) .prop,
+body[data-stage="cemiterio_epitafios"] .tile:has(.prop:not(.used)) .prop,
+body[data-stage="castelo_certeza"] .tile:has(.prop:not(.used)) .prop{
+  filter:drop-shadow(0 0 8px var(--area-accent));
+  animation:regionalPropGlow 1.05s ease-in-out infinite alternate;
+}
+@keyframes regionalPropGlow{to{transform:rotateZ(-45deg) rotateX(-54deg) translateY(-4px) scale(1.13)}}
+body[data-stage="praca_agora"] .enemyCard,
+body[data-stage="ponte_dilema"] .enemyCard,
+body[data-stage="bosque_teseu"] .enemyCard,
+body[data-stage="lago_espelho"] .enemyCard,
+body[data-stage="biblioteca_fontes"] .enemyCard,
+body[data-stage="ruinas_sombras"] .enemyCard,
+body[data-stage="cemiterio_epitafios"] .enemyCard,
+body[data-stage="castelo_certeza"] .enemyCard{
+  border-color:color-mix(in srgb,var(--area-accent) 52%,#3d293e);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--area-dark) 70%,#160b15),#0b0810);
+}
+body[data-stage="praca_agora"] .enemyCard:hover,
+body[data-stage="ponte_dilema"] .enemyCard:hover,
+body[data-stage="bosque_teseu"] .enemyCard:hover,
+body[data-stage="lago_espelho"] .enemyCard:hover,
+body[data-stage="biblioteca_fontes"] .enemyCard:hover,
+body[data-stage="ruinas_sombras"] .enemyCard:hover,
+body[data-stage="cemiterio_epitafios"] .enemyCard:hover,
+body[data-stage="castelo_certeza"] .enemyCard:hover,
+body[data-stage="praca_agora"] .enemyCard.active,
+body[data-stage="ponte_dilema"] .enemyCard.active,
+body[data-stage="bosque_teseu"] .enemyCard.active,
+body[data-stage="lago_espelho"] .enemyCard.active,
+body[data-stage="biblioteca_fontes"] .enemyCard.active,
+body[data-stage="ruinas_sombras"] .enemyCard.active,
+body[data-stage="cemiterio_epitafios"] .enemyCard.active,
+body[data-stage="castelo_certeza"] .enemyCard.active{
+  border-color:var(--area-accent);
+  box-shadow:0 0 18px var(--area-glow);
+}
+body[data-stage="praca_agora"] .argumentShield,
+body[data-stage="ponte_dilema"] .argumentShield,
+body[data-stage="bosque_teseu"] .argumentShield,
+body[data-stage="lago_espelho"] .argumentShield,
+body[data-stage="biblioteca_fontes"] .argumentShield,
+body[data-stage="ruinas_sombras"] .argumentShield,
+body[data-stage="cemiterio_epitafios"] .argumentShield,
+body[data-stage="castelo_certeza"] .argumentShield{
+  border-color:var(--area-accent);
+  box-shadow:0 0 18px var(--area-glow),0 4px 8px #0008;
+}
+body[data-stage="praca_agora"] .unit.enemy::before{content:"🕰 ORÁCULO";background:#554022;border-color:#d6a657}
+body[data-stage="ponte_dilema"] .unit.enemy::before{content:"⚖ DILEMA";background:#243c4a;border-color:#6fa7c5}
+body[data-stage="bosque_teseu"] .unit.enemy::before{content:"🍂 MEMÓRIA";background:#28402a;border-color:#78a85f}
+body[data-stage="lago_espelho"] .unit.enemy::before{content:"🪞 REFLEXO";background:#183e48;border-color:#69b6c7}
+body[data-stage="biblioteca_fontes"] .unit.enemy::before{content:"📚 BOATO";background:#352449;border-color:#9b75c9}
+body[data-stage="ruinas_sombras"] .unit.enemy::before{content:"🔥 SOMBRA";background:#4a2417;border-color:#d17a48}
+body[data-stage="cemiterio_epitafios"] .unit.enemy::before{content:"🪦 EPITÁFIO";background:#312938;border-color:#8d7b9e}
+body[data-stage="castelo_certeza"] .unit.enemy::before{content:"👑 DOGMA";background:#511824;border-color:#c84e61}
+body[data-stage="castelo_certeza"] .unit.enemy[data-sprite-key="lord"]::before{content:"👑 CHEFE FINAL"}
+body[data-stage="praca_agora"] #briefOverlay .briefCard,
+body[data-stage="ponte_dilema"] #briefOverlay .briefCard,
+body[data-stage="bosque_teseu"] #briefOverlay .briefCard,
+body[data-stage="lago_espelho"] #briefOverlay .briefCard,
+body[data-stage="biblioteca_fontes"] #briefOverlay .briefCard,
+body[data-stage="ruinas_sombras"] #briefOverlay .briefCard,
+body[data-stage="cemiterio_epitafios"] #briefOverlay .briefCard,
+body[data-stage="castelo_certeza"] #briefOverlay .briefCard{
+  border-color:var(--area-accent);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--area-dark) 78%,#130d18),#08060df8);
+}
+@media(max-width:820px){
+  body[data-stage="praca_agora"] .boardViewport,
+  body[data-stage="ponte_dilema"] .boardViewport,
+  body[data-stage="bosque_teseu"] .boardViewport,
+  body[data-stage="lago_espelho"] .boardViewport,
+  body[data-stage="biblioteca_fontes"] .boardViewport,
+  body[data-stage="ruinas_sombras"] .boardViewport,
+  body[data-stage="cemiterio_epitafios"] .boardViewport,
+  body[data-stage="castelo_certeza"] .boardViewport{background-position:var(--area-bg-pos)}
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-stage="praca_agora"] .tile:has(.prop:not(.used)) .prop,
+  body[data-stage="ponte_dilema"] .tile:has(.prop:not(.used)) .prop,
+  body[data-stage="bosque_teseu"] .tile:has(.prop:not(.used)) .prop,
+  body[data-stage="lago_espelho"] .tile:has(.prop:not(.used)) .prop,
+  body[data-stage="biblioteca_fontes"] .tile:has(.prop:not(.used)) .prop,
+  body[data-stage="ruinas_sombras"] .tile:has(.prop:not(.used)) .prop,
+  body[data-stage="cemiterio_epitafios"] .tile:has(.prop:not(.used)) .prop,
+  body[data-stage="castelo_certeza"] .tile:has(.prop:not(.used)) .prop{animation:none}
+}
