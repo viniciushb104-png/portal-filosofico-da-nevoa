@@ -614,3 +614,95 @@ body[data-stage="feira_falacias"] .battleTop{
   .unitSprite.hasCharacterArt{width:70px;height:84px}
   .miniPortrait{width:28px;height:34px}
 }
+
+
+/* ===== Vila das Abóboras ===== */
+body[data-stage="vila_ecos"] .boardViewport{
+  background:
+    linear-gradient(180deg,rgba(8,7,15,.28),rgba(5,4,9,.66)),
+    radial-gradient(circle at 50% 28%,rgba(255,164,62,.20),transparent 36%),
+    url("../assets/world/paradoxia_world_playable.webp") 16% 56% / cover no-repeat;
+}
+body[data-stage="vila_ecos"] .battleTop{
+  background:linear-gradient(90deg,#160a12f2,#332014f2 50%,#15100cf2);
+  border-bottom-color:#7a4b2d;
+}
+body[data-stage="vila_ecos"] .objectivePanel,
+body[data-stage="vila_ecos"] .commandBox{
+  background:linear-gradient(180deg,#120c0bf3,#09080bf2);
+  border-color:#5a3a26;
+}
+body[data-stage="vila_ecos"] .tacticalBoard{
+  filter:drop-shadow(0 28px 28px #000a) saturate(.98);
+}
+body[data-stage="vila_ecos"] .tile{
+  background:linear-gradient(145deg,#30251f,#151317);
+  border-color:#72523d;
+  box-shadow:0 8px 0 #100c0c,0 10px 16px #0008;
+}
+body[data-stage="vila_ecos"] .tile.h2{
+  background:linear-gradient(145deg,#443226,#20191a);
+}
+body[data-stage="vila_ecos"] .tile.reachable{
+  outline-color:#7bcf9b;
+  box-shadow:0 8px 0 #112016,0 0 22px #78d59d55;
+}
+body[data-stage="vila_ecos"] .prop{
+  position:relative;
+  z-index:3;
+}
+body[data-stage="vila_ecos"] .tile:has(.prop:not(.used)){
+  box-shadow:0 8px 0 #100c0c,0 0 18px #ffb65c33;
+}
+body[data-stage="vila_ecos"] .tile:has(.prop:not(.used)) .prop{
+  animation:evidencePulse 1.15s ease-in-out infinite alternate;
+  filter:drop-shadow(0 0 7px #ffd081);
+}
+@keyframes evidencePulse{to{transform:rotateZ(-45deg) rotateX(-54deg) translateY(-3px) scale(1.12)}}
+body[data-stage="vila_ecos"] .unit.enemy .unitSprite{
+  border-color:#b875d8!important;
+  background:#28102f!important;
+  box-shadow:0 0 0 3px #50205d88,0 0 20px #a451c988;
+}
+body[data-stage="vila_ecos"] .unit.enemy::before{
+  content:"🗯 RUMOR";
+  background:#50205d;
+  border-color:#bc73dc;
+  color:#f4d7ff;
+}
+body[data-stage="vila_ecos"] .enemyCard.rumorCard{
+  border-color:#623572;
+  background:linear-gradient(135deg,#1b0d21,#110b13);
+}
+body[data-stage="vila_ecos"] .enemyCard.rumorCard:hover,
+body[data-stage="vila_ecos"] .enemyCard.rumorCard.active{
+  border-color:#b86fd7;
+  box-shadow:0 0 18px #a44fc744;
+}
+.panicMeter{
+  border-color:#8b3e2d!important;
+  background:#21100b!important;
+}
+.panicMeter .credibilityBar{
+  background:#2a0c0c;
+}
+.panicMeter .credibilityBar i{
+  background:linear-gradient(90deg,#67c590,#e6a34b 52%,#d3414f);
+}
+body[data-stage="vila_ecos"] #briefOverlay .briefCard{
+  background:
+    linear-gradient(145deg,rgba(39,20,18,.94),rgba(11,8,13,.97)),
+    radial-gradient(circle at 80% 12%,rgba(255,166,67,.18),transparent 35%);
+  border-color:#805230;
+}
+body[data-stage="vila_ecos"] #briefOverlay .briefIcon{
+  filter:drop-shadow(0 0 18px #ff9d4b88);
+}
+@media(max-width:820px){
+  body[data-stage="vila_ecos"] .boardViewport{
+    background-position:18% 50%;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-stage="vila_ecos"] .tile:has(.prop:not(.used)) .prop{animation:none}
+}
