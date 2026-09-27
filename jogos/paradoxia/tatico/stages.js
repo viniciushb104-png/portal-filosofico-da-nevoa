@@ -75,43 +75,198 @@ const stages={
    ]
   },
   praca_agora:{
-   key:'praca_agora',title:'Ágora do Livre-Arbítrio',subtitle:'Praça do Livre-Arbítrio',icon:'🕰️',type:'tactical-hybrid',size:{w:10,h:9},turnLimit:13,
-   objective:{type:'switches',text:'Ative 3 relógios de possibilidade e alcance o centro da Ágora.',target:3},
+   key:'praca_agora',title:'Ágora do Livre-Arbítrio',subtitle:'Praça do Livre-Arbítrio',icon:'🕰️',type:'tactical-hybrid',size:{w:10,h:9},turnLimit:14,
+   objective:{type:'switches',text:'Ative os 3 Relógios de Possibilidade e alcance o centro da Ágora.',target:3},
+   battleRules:{winText:'Ative os 3 Relógios e alcance o centro.',loseText:'Todo o grupo KO ou fim do turno 14.'},
+   analysisPrompt:'Que erro existe ao tratar uma previsão como se fosse um destino necessário?',
+   concepts:[
+     {key:'previsao_nao_necessidade',label:'Previsão não é necessidade',desc:'Antecipar um resultado provável não prova que ele seja inevitável.'},
+     {key:'possibilidade_nao_destino',label:'Possibilidade não é destino',desc:'Um caminho possível não elimina outras alternativas.'},
+     {key:'responsabilidade_contextual',label:'Responsabilidade e contexto',desc:'Avaliar escolhas exige considerar circunstâncias e consequências sem apagar a agência.'},
+     {key:'falso_dilema',label:'Falso dilema',desc:'Apresenta apenas duas opções quando outras podem existir.'}
+   ],
+   attackQuestions:{
+     oracle1:[
+       {q:'Uma máquina prevê que alguém escolherá a porta A. O que NÃO segue logicamente disso?',options:[{key:'a',label:'Que a pessoa necessariamente não poderia escolher outra porta.'},{key:'b',label:'Que a máquina fez uma previsão.'},{key:'c',label:'Que a previsão pode ser testada.'}],ok:'a',feedback:'Previsão e necessidade lógica não são a mesma coisa.'},
+       {q:'Qual frase preserva melhor a diferença entre probabilidade e inevitabilidade?',options:[{key:'a',label:'“É provável, portanto é obrigatório.”'},{key:'b',label:'“Há indícios para um resultado, mas alternativas continuam possíveis.”'},{key:'c',label:'“Se aconteceu uma vez, acontecerá sempre.”'}],ok:'b',feedback:'Probabilidade descreve expectativa, não destino necessário.'}
+     ],
+     oracle2:[
+       {q:'“Ou segue o relógio ou rejeita toda razão.” O problema principal é...',options:[{key:'a',label:'um falso dilema.'},{key:'b',label:'uma definição precisa.'},{key:'c',label:'uma prova matemática.'}],ok:'a',feedback:'A frase apaga outras formas possíveis de decidir.'},
+       {q:'Que pergunta ajuda a recuperar agência numa previsão?',options:[{key:'a',label:'“Que alternativas ainda estão abertas e quais condições influenciam cada uma?”'},{key:'b',label:'“Como provar que só existe uma escolha?”'},{key:'c',label:'“Quem consegue prever mais alto?”'}],ok:'a',feedback:'Mapear alternativas e condições evita confundir previsão com destino.'}
+     ]
+   },
    terrain:['1111111111','1112222111','1122222211','1122332211','1123443211','1122332211','1122222211','1112222111','1111111111'],
-   ideaFields:[{x:4,y:4,type:'autonomia',label:'Escolha Própria',effect:'+1 movimento'},{x:5,y:4,type:'dialogo',label:'Responsabilidade',effect:'+1 Cadeia'}],
+   ideaFields:[
+     {x:4,y:4,type:'autonomia',label:'Escolha Própria',effect:'+1 movimento'},
+     {x:5,y:4,type:'dialogo',label:'Responsabilidade',effect:'+1 Cadeia'},
+     {x:3,y:5,type:'razao',label:'Mapa de Possibilidades',effect:'+1 alcance'}
+   ],
    playerSpawns:[{x:4,y:8},{x:5,y:8},{x:3,y:8},{x:6,y:8}],
-   enemies:[{id:'oracle1',name:'Profecia Mecânica',icon:'🧿',x:2,y:2,hp:2},{id:'oracle2',name:'Profecia Mecânica',icon:'🧿',x:7,y:2,hp:2}],
-   props:[{id:'clock1',icon:'🕰️',x:2,y:6,type:'switch'},{id:'clock2',icon:'🕰️',x:7,y:6,type:'switch'},{id:'clock3',icon:'🕰️',x:5,y:2,type:'switch'},{id:'goal',icon:'✦',x:5,y:4,type:'goal'}],
-   briefing:['A praça prevê caminhos possíveis, não destinos obrigatórios.','Ative os relógios e escolha sua rota.','Chegar ao centro exige liberdade e responsabilidade.']
+   enemies:[
+     {id:'oracle1',name:'Oráculo Mecânico',icon:'🧿',x:2,y:2,hp:4,tag:'argument',answer:'previsao_nao_necessidade',role:'ORÁCULO • Destino aparente',attackName:'Sentença do Futuro',quote:'“Eu previ, então só pode acontecer assim.”',threat:2},
+     {id:'oracle2',name:'Relógio Fatalista',icon:'⏳',x:7,y:2,hp:4,tag:'argument',answer:'falso_dilema',role:'ORÁCULO • Escolha fechada',attackName:'Duas Portas',quote:'“Ou obedece ao relógio ou abandona toda razão.”',threat:2}
+   ],
+   props:[
+     {id:'clock1',icon:'🕰️',x:2,y:6,type:'switch',label:'Relógio da Possibilidade I'},
+     {id:'clock2',icon:'🕰️',x:7,y:6,type:'switch',label:'Relógio da Possibilidade II'},
+     {id:'clock3',icon:'🕰️',x:5,y:2,type:'switch',label:'Relógio da Possibilidade III'},
+     {id:'goal',icon:'✦',x:5,y:4,type:'goal',label:'Centro da Ágora'}
+   ],
+   briefing:[
+     'Os relógios mostram futuros possíveis, não destinos obrigatórios.',
+     'Ative os três Relógios de Possibilidade e depois leve uma unidade ao centro da praça.',
+     'Os Oráculos usam previsões como se fossem necessidade. Quebre seus Escudos de Argumento.',
+     'A fase não pontua uma posição moral sobre livre-arbítrio; pontua distinções conceituais e consistência.',
+     'VITÓRIA: três relógios + centro. DERROTA: grupo KO ou fim do turno 14.'
+   ]
   },
   ponte_dilema:{
-   key:'ponte_dilema',title:'Ponte do Dilema',subtitle:'Ponte das Escolhas',icon:'🌉',type:'tactical-hybrid',size:{w:12,h:6},turnLimit:12,
-   objective:{type:'escort',text:'Leve o Mensageiro até a margem oposta sem abandonar o grupo.',target:{x:11,y:2}},
+   key:'ponte_dilema',title:'Ponte do Dilema',subtitle:'Ponte das Escolhas',icon:'🌉',type:'tactical-hybrid',size:{w:12,h:6},turnLimit:14,
+   objective:{type:'escort',text:'Escolte o Mensageiro até a margem oposta.',target:{x:11,y:2}},
+   battleRules:{winText:'Leve o Mensageiro ao marco final.',loseText:'Todo o grupo KO ou fim do turno 14.'},
+   analysisPrompt:'Qual leitura argumentativa identifica melhor o conflito apresentado?',
+   concepts:[
+     {key:'tradeoff',label:'Conflito de consequências',desc:'Há custos e benefícios relevantes em mais de uma alternativa.'},
+     {key:'principio_e_consequencia',label:'Princípio e consequência',desc:'Uma decisão pode envolver tanto regras quanto efeitos previsíveis.'},
+     {key:'premissa_oculta',label:'Premissa oculta',desc:'Uma conclusão depende de uma suposição que não foi explicitada.'},
+     {key:'falso_dilema',label:'Falso dilema',desc:'Duas opções são apresentadas como únicas sem justificar a exclusão das demais.'}
+   ],
+   attackQuestions:{
+     weight1:[
+       {q:'Qual análise é mais cuidadosa diante de um dilema real?',options:[{key:'a',label:'Identificar consequências relevantes para cada alternativa.'},{key:'b',label:'Escolher a opção com nome mais bonito.'},{key:'c',label:'Ignorar quem será afetado.'}],ok:'a',feedback:'Mapear consequências torna explícito o custo de cada caminho.'},
+       {q:'Reconhecer consequências significa que só elas importam?',options:[{key:'a',label:'Sim, qualquer princípio deve ser ignorado.'},{key:'b',label:'Não; consequências podem ser uma dimensão entre outras razões relevantes.'},{key:'c',label:'Sim, desde que a decisão seja rápida.'}],ok:'b',feedback:'A fase não escolhe uma teoria moral vencedora; ela exige razões explícitas.'}
+     ],
+     weight2:[
+       {q:'Uma regra é usada para decidir. Qual pergunta crítica é legítima?',options:[{key:'a',label:'“Essa regra se aplica a este caso e quais razões a justificam?”'},{key:'b',label:'“Quem fala mais alto?”'},{key:'c',label:'“A regra rima com a conclusão?”'}],ok:'a',feedback:'Aplicação e justificativa do princípio precisam ser examinadas.'},
+       {q:'Se a conclusão depende de “ninguém jamais mudará de ideia”, isso funciona como...',options:[{key:'a',label:'premissa oculta que precisa ser defendida.'},{key:'b',label:'prova automática.'},{key:'c',label:'mera pontuação.'}],ok:'a',feedback:'Suposições escondidas podem sustentar silenciosamente uma conclusão.'}
+     ]
+   },
    terrain:['111111111111','122222222221','123333333321','123333333321','122222222221','111111111111'],
-   ideaFields:[{x:4,y:2,type:'etica',label:'Consequências',effect:'proteção'},{x:7,y:3,type:'razao',label:'Princípios',effect:'+1 alcance'}],
+   ideaFields:[
+     {x:4,y:2,type:'etica',label:'Consequências',effect:'proteção'},
+     {x:7,y:3,type:'razao',label:'Princípios',effect:'+1 alcance'},
+     {x:9,y:2,type:'dialogo',label:'Justificação Pública',effect:'+1 Cadeia'}
+   ],
    playerSpawns:[{x:0,y:2},{x:0,y:3},{x:1,y:2},{x:1,y:3}],
-   enemies:[{id:'weight1',name:'Peso da Consequência',icon:'⚓',x:5,y:1,hp:3},{id:'weight2',name:'Peso do Princípio',icon:'⚓',x:6,y:4,hp:3}],
-   props:[{id:'messenger',icon:'📨',x:1,y:2,type:'escort'},{id:'goal',icon:'🏁',x:11,y:2,type:'goal'}],
-   briefing:['A ponte não pede uma resposta moral única.','O desafio é proteger possibilidades e justificar prioridades.','Alguns caminhos são mais curtos; outros, mais seguros.']
+   enemies:[
+     {id:'weight1',name:'Peso das Consequências',icon:'⚓',x:5,y:1,hp:5,tag:'argument',answer:'tradeoff',role:'PESO • Custos do caminho',attackName:'Carga das Consequências',quote:'“Só existe um custo que importa.”',threat:2},
+     {id:'weight2',name:'Peso do Princípio',icon:'⚖️',x:6,y:4,hp:5,tag:'argument',answer:'principio_e_consequencia',role:'PESO • Regra sem exame',attackName:'Regra de Ferro',quote:'“Se é regra, nenhuma pergunta é permitida.”',threat:2}
+   ],
+   props:[
+     {id:'messenger',icon:'📨',x:1,y:2,type:'escort',label:'Mensageiro da Ponte'},
+     {id:'goal',icon:'🏁',x:11,y:2,type:'goal',label:'Margem Oposta'}
+   ],
+   briefing:[
+     'Use INTERAGIR junto ao Mensageiro para assumir a escolta.',
+     'O Mensageiro acompanha a unidade que o estiver carregando. Se ela cair, a escolta é interrompida.',
+     'Os inimigos não representam uma teoria moral “errada”; eles representam argumentos mal justificados.',
+     'Proteja a equipe, examine princípios e consequências e atravesse.',
+     'VITÓRIA: Mensageiro na margem oposta. DERROTA: grupo KO ou fim do turno 14.'
+   ]
   },
   bosque_teseu:{
-   key:'bosque_teseu',title:'O Abóbora de Teseu',subtitle:'Bosque de Teseu',icon:'🌲',type:'tactical-puzzle',size:{w:9,h:9},turnLimit:13,
-   objective:{type:'collect',text:'Encontre as 4 peças da armadura de Sir Cucurbita.',target:4},
+   key:'bosque_teseu',title:'O Abóbora de Teseu',subtitle:'Bosque de Teseu',icon:'🌲',type:'tactical-boss',size:{w:9,h:9},turnLimit:15,
+   objective:{type:'boss',text:'Recupere as 4 peças de Sir Cucurbita e confronte a Memória do Bosque.',target:4},
+   battleRules:{winText:'Colete as 4 peças e derrote a Memória do Bosque.',loseText:'Todo o grupo KO ou fim do turno 15.'},
+   analysisPrompt:'Que problema filosófico está sendo levantado por esta mudança de partes?',
+   concepts:[
+     {key:'identidade_mudanca',label:'Identidade através da mudança',desc:'Pergunta o que faz algo continuar sendo o mesmo apesar de alterações.'},
+     {key:'criterio_persistencia',label:'Critério de persistência',desc:'Pergunta qual critério usamos para dizer que algo continua sendo a mesma entidade.'},
+     {key:'memoria_continuidade',label:'Memória e continuidade',desc:'Uma possível dimensão da continuidade, sem ser a única resposta possível.'},
+     {key:'composicao_partes',label:'Composição por partes',desc:'Foca na relação entre um todo e as peças que o compõem.'}
+   ],
+   attackQuestions:{
+     memory1:[
+       {q:'O experimento de Teseu pergunta principalmente...',options:[{key:'a',label:'o que conta como continuidade de identidade quando partes mudam.'},{key:'b',label:'qual material é mais caro.'},{key:'c',label:'qual objeto é mais popular.'}],ok:'a',feedback:'O foco é o critério de identidade ao longo da mudança.'},
+       {q:'Substituir uma peça já resolve definitivamente o problema da identidade?',options:[{key:'a',label:'Não; o problema depende do critério adotado e se torna mais forte com mudanças acumuladas.'},{key:'b',label:'Sim; toda troca cria automaticamente outro ser.'},{key:'c',label:'Sim; nenhuma troca jamais importa.'}],ok:'a',feedback:'O experimento existe justamente porque critérios diferentes podem entrar em tensão.'}
+     ],
+     memory2:[
+       {q:'Se as peças antigas forem remontadas em outro lugar, surge qual dificuldade?',options:[{key:'a',label:'Dois candidatos podem reivindicar continuidade com o original.'},{key:'b',label:'A lógica deixa de existir.'},{key:'c',label:'A pergunta deixa de envolver identidade.'}],ok:'a',feedback:'A remontagem torna o critério de identidade ainda mais disputado.'},
+       {q:'Qual resposta é filosoficamente mais cuidadosa?',options:[{key:'a',label:'Explicitar qual critério de identidade está sendo usado.'},{key:'b',label:'Declarar uma resposta sem critério.'},{key:'c',label:'Proibir qualquer hipótese alternativa.'}],ok:'a',feedback:'A clareza do critério permite comparar posições sem impor uma única teoria.'}
+     ],
+     memory_core:[
+       {q:'O chefe afirma: “Só as peças originais definem identidade”. O que devemos perguntar primeiro?',options:[{key:'a',label:'Por que esse critério deve prevalecer sobre continuidade de forma, função ou história?'},{key:'b',label:'Qual peça é mais brilhante?'},{key:'c',label:'Quantas pessoas concordam?'}],ok:'a',feedback:'Critérios de identidade precisam ser justificados e comparados.'},
+       {q:'A melhor conclusão desta fase é...',options:[{key:'a',label:'que o problema exige declarar e testar critérios de continuidade.'},{key:'b',label:'que existe uma resposta única imposta pelo jogo.'},{key:'c',label:'que mudanças nunca alteram nada.'}],ok:'a',feedback:'O jogo não resolve o experimento por você; ele torna os critérios explícitos.'}
+     ]
+   },
    terrain:['111111111','112222211','122111221','121111121','121333121','121111121','122111221','112222211','111111111'],
-   ideaFields:[{x:4,y:4,type:'autonomia',label:'Identidade',effect:'+1 movimento'}],
-   playerSpawns:[{x:4,y:8},{x:3,y:8},{x:5,y:8}],
-   enemies:[{id:'memory1',name:'Memória Antiga',icon:'🍂',x:2,y:2,hp:2},{id:'memory2',name:'Memória Nova',icon:'🍂',x:6,y:2,hp:2}],
-   props:[{id:'part1',icon:'🪖',x:1,y:4,type:'collect'},{id:'part2',icon:'🛡️',x:7,y:4,type:'collect'},{id:'part3',icon:'🥾',x:3,y:1,type:'collect'},{id:'part4',icon:'🧤',x:5,y:1,type:'collect'}],
-   briefing:['Cada peça pode ser substituída.','Colete todas e observe como o jogo registra continuidade e mudança.','O objetivo não força uma resposta sobre identidade.']
+   ideaFields:[
+     {x:4,y:4,type:'autonomia',label:'Núcleo da Identidade',effect:'+1 movimento'},
+     {x:2,y:6,type:'razao',label:'Continuidade',effect:'+1 alcance'},
+     {x:6,y:2,type:'dialogo',label:'Memória Compartilhada',effect:'+1 Cadeia'}
+   ],
+   playerSpawns:[{x:4,y:8},{x:3,y:8},{x:5,y:8},{x:4,y:7}],
+   enemies:[
+     {id:'memory1',name:'Memória Antiga',icon:'🍂',x:2,y:2,hp:4,tag:'argument',answer:'criterio_persistencia',role:'MEMÓRIA • Partes antigas',attackName:'Peso do Passado',quote:'“Só o material original importa.”',threat:1},
+     {id:'memory2',name:'Memória Nova',icon:'🍃',x:6,y:2,hp:4,tag:'argument',answer:'identidade_mudanca',role:'MEMÓRIA • Forma renovada',attackName:'Fluxo da Mudança',quote:'“Se mudou, então nada permanece.”',threat:2},
+     {id:'memory_core',name:'Memória do Bosque',icon:'🎃',x:4,y:1,hp:7,tag:'boss',answer:'identidade_mudanca',requiresSeals:4,role:'CHEFE • Critério Absoluto',attackName:'Quem é o Original?',quote:'“Só um critério pode definir tudo.”',threat:3}
+   ],
+   props:[
+     {id:'seal_part1',icon:'🪖',x:1,y:4,type:'collect',label:'Elmo de Sir Cucurbita'},
+     {id:'seal_part2',icon:'🛡️',x:7,y:4,type:'collect',label:'Escudo de Sir Cucurbita'},
+     {id:'seal_part3',icon:'🥾',x:3,y:1,type:'collect',label:'Botas de Sir Cucurbita'},
+     {id:'seal_part4',icon:'🧤',x:5,y:1,type:'collect',label:'Luvas de Sir Cucurbita'}
+   ],
+   briefing:[
+     'Sir Cucurbita perdeu quatro partes de sua armadura pelo bosque.',
+     'Colete as quatro peças com INTERAGIR. Cada troca reabre a pergunta sobre continuidade.',
+     'As Memórias do Bosque possuem Escudo de Argumento e Duelos próprios.',
+     'O chefe só pode ser confrontado depois das quatro peças.',
+     'A fase não escolhe uma teoria de identidade correta; ela exige critérios claros.',
+     'VITÓRIA: quatro peças + chefe. DERROTA: grupo KO ou fim do turno 15.'
+   ]
   },
   lago_espelho:{
-   key:'lago_espelho',title:'Espelho da Autonomia',subtitle:'Lago do Espelho Interior',icon:'🪞',type:'tactical-puzzle',size:{w:10,h:8},turnLimit:12,
-   objective:{type:'mirror',text:'Faça os quatro reflexos alcançarem posições coerentes com suas escolhas.',target:4},
+   key:'lago_espelho',title:'Espelho da Autonomia',subtitle:'Lago do Espelho Interior',icon:'🪞',type:'tactical-boss',size:{w:10,h:8},turnLimit:14,
+   objective:{type:'boss',text:'Ative os 4 Espelhos de Coerência e enfrente o Reflexo Sem Rosto.',target:4},
+   battleRules:{winText:'Ative os 4 Espelhos e derrote o Reflexo Sem Rosto.',loseText:'Todo o grupo KO ou fim do turno 14.'},
+   analysisPrompt:'Que distinção ajuda a avaliar esta afirmação sobre autonomia?',
+   concepts:[
+     {key:'autonomia_reflexiva',label:'Autonomia reflexiva',desc:'Distingue simplesmente agir de examinar razões e assumir uma escolha.'},
+     {key:'coerencia_escolhas',label:'Coerência entre razões e escolhas',desc:'Pergunta se ações e razões declaradas se sustentam mutuamente.'},
+     {key:'pressao_externa',label:'Pressão externa',desc:'Identifica condições externas que limitam ou influenciam escolhas.'},
+     {key:'possibilidade_revisao',label:'Possibilidade de revisão',desc:'Reconhece que uma escolha pode ser reavaliada diante de novas razões.'}
+   ],
+   attackQuestions:{
+     echo1:[
+       {q:'Qual situação descreve melhor pressão externa?',options:[{key:'a',label:'Uma ameaça explícita reduzindo as alternativas disponíveis.'},{key:'b',label:'Refletir e mudar de opinião.'},{key:'c',label:'Comparar duas razões.'}],ok:'a',feedback:'Pressões externas podem limitar opções sem determinar toda a vida interior.'},
+       {q:'Reconhecer influência externa significa que toda escolha é falsa?',options:[{key:'a',label:'Não; influência e ausência total de agência não são a mesma coisa.'},{key:'b',label:'Sim; qualquer influência elimina toda escolha.'},{key:'c',label:'Sim; contexto nunca importa.'}],ok:'a',feedback:'A distinção evita transformar influência em determinação absoluta.'}
+     ],
+     echo2:[
+       {q:'Se alguém diz valorizar X mas age repetidamente contra X, surge uma questão de...',options:[{key:'a',label:'coerência entre razões declaradas e escolhas.'},{key:'b',label:'geometria.'},{key:'c',label:'popularidade.'}],ok:'a',feedback:'A tensão é de coerência, não uma prova automática de falta de autonomia.'},
+       {q:'Uma escolha pode ser autônoma e depois ser revista?',options:[{key:'a',label:'Sim; revisão diante de novas razões pode fazer parte da própria autonomia.'},{key:'b',label:'Não; mudar de ideia prova sempre coerção.'},{key:'c',label:'Não; escolhas autônomas são imutáveis.'}],ok:'a',feedback:'Autonomia não exige imutabilidade.'}
+     ],
+     mirror_core:[
+       {q:'O Reflexo diz: “Ser autônomo é nunca receber influência”. O problema é...',options:[{key:'a',label:'confundir autonomia com ausência total de contexto e influência.'},{key:'b',label:'usar uma palavra curta.'},{key:'c',label:'considerar razões.'}],ok:'a',feedback:'Autonomia pode ser discutida em termos de reflexão, razões e condições, não isolamento absoluto.'},
+       {q:'Qual pergunta testa melhor a coerência de uma escolha?',options:[{key:'a',label:'“As razões que afirmo ter se conectam à ação que estou tomando?”'},{key:'b',label:'“Todo mundo faria o mesmo?”'},{key:'c',label:'“A escolha parece misteriosa?”'}],ok:'a',feedback:'Coerência examina a relação entre razões e ação.'}
+     ]
+   },
    terrain:['0011111100','0112222110','1122222211','1223333221','1223333221','1122222211','0112222110','0011111100'],
-   ideaFields:[{x:4,y:3,type:'autonomia',label:'Autonomia',effect:'+1 movimento'},{x:5,y:4,type:'razao',label:'Coerência',effect:'+1 alcance'}],
+   ideaFields:[
+     {x:4,y:3,type:'autonomia',label:'Autonomia',effect:'+1 movimento'},
+     {x:5,y:4,type:'razao',label:'Coerência',effect:'+1 alcance'},
+     {x:2,y:4,type:'dialogo',label:'Reconhecimento',effect:'+1 Cadeia'}
+   ],
    playerSpawns:[{x:4,y:7},{x:5,y:7},{x:3,y:7},{x:6,y:7}],
-   enemies:[],props:[{id:'mirror1',icon:'🪞',x:2,y:2,type:'switch'},{id:'mirror2',icon:'🪞',x:7,y:2,type:'switch'},{id:'mirror3',icon:'🪞',x:2,y:5,type:'switch'},{id:'mirror4',icon:'🪞',x:7,y:5,type:'switch'}],
-   briefing:['Reflexos copiam movimentos, mas não decisões.','Ative quatro espelhos em uma ordem coerente.','Autonomia aqui é mecânica de percurso, não gabarito moral.']
+   enemies:[
+     {id:'echo1',name:'Eco da Pressão',icon:'🌊',x:2,y:3,hp:4,tag:'argument',answer:'pressao_externa',role:'ECO • Influência absoluta',attackName:'Maré da Pressão',quote:'“Se algo te influencia, então nunca escolheste.”',threat:1},
+     {id:'echo2',name:'Eco da Incoerência',icon:'🫧',x:7,y:4,hp:4,tag:'argument',answer:'coerencia_escolhas',role:'ECO • Razões quebradas',attackName:'Reflexo Partido',quote:'“Uma contradição momentânea define toda a pessoa.”',threat:2},
+     {id:'mirror_core',name:'Reflexo Sem Rosto',icon:'🪞',x:5,y:1,hp:7,tag:'boss',answer:'autonomia_reflexiva',requiresSeals:4,role:'CHEFE • Autonomia absoluta',attackName:'Imagem Perfeita',quote:'“Só és livre se nada jamais te influenciar.”',threat:3}
+   ],
+   props:[
+     {id:'seal_mirror1',icon:'🪞',x:2,y:2,type:'switch',label:'Espelho da Influência'},
+     {id:'seal_mirror2',icon:'🪞',x:7,y:2,type:'switch',label:'Espelho da Coerência'},
+     {id:'seal_mirror3',icon:'🪞',x:2,y:5,type:'switch',label:'Espelho da Revisão'},
+     {id:'seal_mirror4',icon:'🪞',x:7,y:5,type:'switch',label:'Espelho da Escolha'}
+   ],
+   briefing:[
+     'Quatro espelhos mostram dimensões diferentes da autonomia.',
+     'Ative os quatro com INTERAGIR e compare influência, coerência, revisão e escolha.',
+     'Os Ecos transformam questões graduais em afirmações absolutas.',
+     'O Reflexo Sem Rosto só fica disponível depois dos quatro espelhos.',
+     'A fase trabalha distinções conceituais sem impor uma teoria única de autonomia.',
+     'VITÓRIA: quatro espelhos + chefe. DERROTA: grupo KO ou fim do turno 14.'
+   ]
   },
   biblioteca_fontes:{
    key:'biblioteca_fontes',title:'Arquivo das Fontes',subtitle:'Biblioteca dos Boatos',icon:'📚',type:'tactical-puzzle',size:{w:11,h:8},turnLimit:14,
