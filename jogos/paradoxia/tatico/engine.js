@@ -227,10 +227,11 @@ function openCommand(u){state.mode='command';renderCommands(u)}
 function renderCommands(u){
  const box=$('#commandBox');box.hidden=false;$('#commandUnit').textContent=u.icon+' '+u.name+' • Nv.'+u.level+(u.moved?' • moveu':' • pronto');
  const canMove=!u.moved,canUndo=!!u.moveSnapshot&&u.moved&&!u.acted;
+ const targetCount=state.enemies.filter(en=>en.alive&&dist(u,en)<=(u.skillPending?.range??u.range)).length;
  $('#commandButtons').innerHTML=
    '<button data-cmd="move" '+(canMove?'':'disabled')+'>👣 Mover'+(canMove?'':' • usado')+'</button>'+
    (canUndo?'<button data-cmd="undo">↶ Desfazer movimento</button>':'')+
-   '<button data-cmd="attack">⚔️ Analisar / Atacar</button>'+
+   '<button data-cmd="attack">⚔️ Analisar / Atacar <small>'+targetCount+' alvo(s) no alcance</small></button>'+
    '<button data-cmd="skill">✦ Habilidades</button>'+
    '<button data-cmd="interact">🔎 Interagir</button>'+
    '<button data-cmd="wait">✓ Encerrar ação</button>'+
