@@ -37,3 +37,6 @@
 
 .villageEntrance{border-color:#9b5f32!important;background:linear-gradient(180deg,#5f321d,#29140f)!important;color:#ffe0a6!important;box-shadow:0 0 0 2px #f39b4033,0 7px 18px #0008!important}
 .villageEntrance:hover{border-color:#f0a052!important;box-shadow:0 0 22px #e8873f66,0 8px 22px #0009!important}
+
+.academyEntrance{border-color:#7763a8!important;background:linear-gradient(180deg,#392c60,#171329)!important;color:#eadfff!important;box-shadow:0 0 0 2px #9d82dd33,0 7px 18px #0008!important}
+.academyEntrance:hover{border-color:#bea4ff!important;box-shadow:0 0 22px #9f82e366,0 8px 22px #0009!important}
