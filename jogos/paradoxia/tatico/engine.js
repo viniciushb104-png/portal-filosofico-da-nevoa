@@ -42,7 +42,7 @@ function initState(){
   units:loadParty(),
   enemies:clone(stage.enemies||[]).map((e,i)=>({...e,team:'enemy',maxHp:e.hp||3,sp:0,acted:false,moved:false,alive:true,id:e.id||'e'+i,move:e.move||2,range:e.range||1})),
   props:clone(stage.props||[]),switches:{},answers:{},firstAnswers:{},revealed:0,analysisCount:0,log:[],score:0,startedAt:Date.now(),
-  competitive:false,attempt:null,ended:false,chain:0,maxChain:0,inspectTarget:null,
+  competitive:false,attempt:null,ended:false,chain:0,maxChain:0,inspectTarget:null,lastEnemyActor:null,
   credibility:stage.battleRules?.credibility??null,maxCredibility:stage.battleRules?.credibility??null
  };
 }
@@ -51,6 +51,27 @@ function occupied(x,y,ignore=null){return [...state.units,...state.enemies].find
 function selection(){return [...state.units,...state.enemies].find(u=>u.id===state.selected)||null}
 function ideaAt(x,y){return (stage.ideaFields||[]).find(f=>f.x===x&&f.y===y)}
 function propAt(x,y){return state.props.find(p=>p.x===x&&p.y===y)}
+
+function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+function enemyIntent(enemy){
+ const targets=state.units.filter(u=>u.alive);
+ if(!targets.length)return null;
+ targets.sort((a,b)=>dist(enemy,a)-dist(enemy,b));
+ const target=targets[0],d=dist(enemy,target);
+ return {target,willAttack:d<=Math.max(1,enemy.range||1),distance:d};
+}
+function renderTurnRoster(){
+ const host=$('#turnRoster');if(!host)return;
+ host.innerHTML=state.units.map(u=>{
+   const status=!u.alive?'KO':u.acted?'AGIU':u.moved?'MOVIDO':'PRONTO';
+   return '<button class="turnUnit '+(!u.alive?'ko ':u.acted?'done ':u.moved?'moved ':'ready ')+(state.selected===u.id?'active':'')+'" data-turn-unit="'+u.id+'" '+(!u.alive?'disabled':'')+'><span>'+u.icon+'</span><b>'+u.name+'</b><small>'+status+'</small></button>';
+ }).join('');
+ $('[data-turn-unit]').forEach(b=>b.onclick=()=>{
+   const u=state.units.find(x=>x.id===b.dataset.turnUnit);
+   if(!u||!u.alive||u.acted||state.phase!=='player')return;
+   state.inspectTarget=null;state.selected=u.id;state.mode='command';render();openCommand(u);
+ });
+}
 
 function assistCount(attacker,target){
  return state.units.filter(a=>a.alive&&a.id!==attacker.id&&!a.acted&&dist(a,target)<=1).length;
@@ -75,7 +96,7 @@ function renderInspector(){
    name.textContent=u.icon+' '+u.name+' • Nv.'+(u.level||1);
    hp.textContent=Math.max(0,u.hp)+'/'+u.maxHp;sp.textContent=(u.sp??0)+'/'+(u.maxSp??0);
    const assists=state.enemies.filter(en=>en.alive&&dist(u,en)<=u.range).reduce((n,en)=>Math.max(n,assistCount(u,en)),0);
-   text.textContent='MOV '+u.move+' • ALC '+u.range+(u.guard?' • Protegido':'')+(assists?' • até '+assists+' assistência(s)':'');
+   text.textContent=(u.moved?'MOVIMENTO USADO • ':'PRONTO PARA MOVER • ')+'MOV '+u.move+' • ALC '+u.range+(u.guard?' • Protegido':'')+(assists?' • até '+assists+' assistência(s)':'');
    return;
  }
  if(enemy){
@@ -83,7 +104,8 @@ function renderInspector(){
    name.textContent=enemy.icon+' '+enemy.name;
    hp.textContent=enemy.alive?Math.max(0,enemy.hp)+'/'+enemy.maxHp:'0/'+enemy.maxHp;
    sp.textContent=String(enemy.threat||enemy.range||1);
-   text.textContent=(enemy.role||'INIMIGO')+' • '+(enemy.attackName||'Pressão')+(enemy.quote?' • '+enemy.quote:'')+(enemy.failedAttempts?' • '+enemy.failedAttempts+' análise(s) incorreta(s) registrada(s).':'');
+   const intent=enemyIntent(enemy);
+   text.textContent=(enemy.role||'INIMIGO')+' • '+(enemy.attackName||'Pressão')+(intent?.target?' • 🎯 alvo provável: '+intent.target.name+(intent.willAttack?' (ATACA AGORA)':' (vai se aproximar)'):'')+(enemy.quote?' • '+enemy.quote:'')+(enemy.failedAttempts?' • '+enemy.failedAttempts+' análise(s) incorreta(s) registrada(s).':'');
    return;
  }
  if(hpLabel)hpLabel.textContent='HP';if(spLabel)spLabel.textContent='SP';
@@ -93,7 +115,9 @@ function renderEnemyRoster(){
  const host=$('#enemyRoster');if(!host)return;
  host.innerHTML=state.enemies.map(en=>{
    const status=en.solved?'DESMASCARADO':!en.alive?'SUPERADO':en.failedAttempts?'AINDA ATIVO • '+en.failedAttempts+' erro(s)':'AMEAÇA ATIVA';
-   return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+'</span></button>';
+   const intent=en.alive?enemyIntent(en):null;
+   const intentText=intent?.target?(intent.willAttack?'🎯 ATACA '+intent.target.name:'↠ segue '+intent.target.name):'';
+   return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+(state.lastEnemyActor===en.id?' acting':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+(intentText?' • '+intentText:'')+'</span></button>';
  }).join('');
  $$('.enemyCard').forEach(card=>card.onclick=()=>{state.inspectTarget=card.dataset.enemyId;state.selected=null;state.mode='select';$('#commandBox').hidden=true;render()});
 }
@@ -201,22 +225,29 @@ function applyIdea(unit){
 }
 function openCommand(u){state.mode='command';renderCommands(u)}
 function renderCommands(u){
- const box=$('#commandBox');box.hidden=false;$('#commandUnit').textContent=u.icon+' '+u.name+' • Nv.'+u.level;
- const canMove=!u.moved;
+ const box=$('#commandBox');box.hidden=false;$('#commandUnit').textContent=u.icon+' '+u.name+' • Nv.'+u.level+(u.moved?' • moveu':' • pronto');
+ const canMove=!u.moved,canUndo=!!u.moveSnapshot&&u.moved&&!u.acted;
  $('#commandButtons').innerHTML=
    '<button data-cmd="move" '+(canMove?'':'disabled')+'>👣 Mover'+(canMove?'':' • usado')+'</button>'+
+   (canUndo?'<button data-cmd="undo">↶ Desfazer movimento</button>':'')+
    '<button data-cmd="attack">⚔️ Analisar / Atacar</button>'+
    '<button data-cmd="skill">✦ Habilidades</button>'+
    '<button data-cmd="interact">🔎 Interagir</button>'+
    '<button data-cmd="wait">✓ Encerrar ação</button>'+
    '<button data-cmd="cancel">↶ Trocar unidade</button>';
- $$('#commandButtons button').forEach(b=>b.onclick=()=>{if(!b.disabled)command(b.dataset.cmd)});
+ $('#commandButtons button').forEach(b=>b.onclick=()=>{if(!b.disabled)command(b.dataset.cmd)});
 }
 function command(cmd){
  const u=selection();if(!u)return;
  if(cmd==='move'){
    if(u.moved)return toast('Esta unidade já se moveu neste turno.');
+   u.moveSnapshot={x:u.x,y:u.y,range:u.range,move:u.move,guard:u.guard,score:state.score,logLen:state.log.length};
    state.mode='move';$('#commandBox').hidden=true;toast('👣 Casas verdes = movimento possível.');render();return;
+ }
+ if(cmd==='undo'){
+   if(!u.moveSnapshot)return toast('Não há movimento para desfazer.');
+   const s=u.moveSnapshot;u.x=s.x;u.y=s.y;u.range=s.range;u.move=s.move;u.guard=s.guard;u.moved=false;state.score=s.score;state.log=state.log.slice(0,s.logLen);u.moveSnapshot=null;
+   state.mode='command';toast('↶ Movimento desfeito.');render();renderCommands(u);return;
  }
  if(cmd==='attack'){
    state.mode='attack';$('#commandBox').hidden=true;
@@ -296,38 +327,46 @@ function interact(u){
  finishUnit(u);
 }
 function finishUnit(u){
- u.acted=true;u.moved=true;state.selected=null;state.mode='select';$('#commandBox').hidden=true;
+ u.moveSnapshot=null;u.acted=true;u.moved=true;state.selected=null;state.mode='select';$('#commandBox').hidden=true;
  if(checkDefeat())return;
  if(checkObjective())return;
  if(!state.units.some(x=>x.alive&&!x.acted))enemyPhase();else render();
 }
-function enemyPhase(){
+async function enemyPhase(){
  state.phase='enemy';state.chain=0;state.selected=null;state.mode='select';$('#commandBox').hidden=true;showTurnBanner('TURNO INIMIGO',true);render();
- setTimeout(()=>{
-  state.enemies.filter(e=>e.alive).forEach(e=>{
-   const targets=state.units.filter(u=>u.alive);if(!targets.length)return;
-   targets.sort((a,b)=>dist(e,a)-dist(e,b));const t=targets[0];
-   if(dist(e,t)<=1){
-     const dmg=t.guard?0:1;t.guard=0;t.hp-=dmg;
+ await wait(420);
+ const enemies=state.enemies.filter(e=>e.alive);
+ for(const enemy of enemies){
+   if(state.ended) return;
+   const targets=state.units.filter(u=>u.alive);if(!targets.length)break;
+   targets.sort((a,b)=>dist(enemy,a)-dist(enemy,b));const target=targets[0];
+   state.lastEnemyActor=enemy.id;state.inspectTarget=enemy.id;render();await wait(320);
+   if(dist(enemy,target)<=Math.max(1,enemy.range||1)){
+     const dmg=target.guard?0:1;target.guard=0;target.hp-=dmg;
      let extra='';
      if(dmg&&state.credibility!==null){
        const loss=Number(stage.battleRules?.enemyHitLoss)||1;state.credibility=Math.max(0,state.credibility-loss);extra=' • Credibilidade -'+loss;
      }
-     state.log.unshift('👁️ '+e.name+' usou '+(e.attackName||'Pressão')+' em '+t.name+(dmg?' (-1 HP)':' mas a defesa segurou.')+extra);
-     if(t.hp<=0)t.alive=false;
+     state.log.unshift('👁️ '+enemy.name+' usou '+(enemy.attackName||'Pressão')+' em '+target.name+(dmg?' (-1 HP)':' mas a defesa segurou.')+extra);
+     if(target.hp<=0)target.alive=false;
+     render();await wait(480);
+   }else{
+     const dx=Math.sign(target.x-enemy.x),dy=Math.sign(target.y-enemy.y),candidates=Math.abs(target.x-enemy.x)>Math.abs(target.y-enemy.y)?[[dx,0],[0,dy]]:[[0,dy],[dx,0]];
+     for(const [mx,my] of candidates){
+       const nx=enemy.x+mx,ny=enemy.y+my;
+       if(terrainHeight(nx,ny)&&!occupied(nx,ny,enemy.id)){enemy.x=nx;enemy.y=ny;break}
+     }
+     state.log.unshift('↠ '+enemy.name+' avançou em direção a '+target.name+'.');
+     render();await wait(360);
    }
-   else{
-    const dx=Math.sign(t.x-e.x),dy=Math.sign(t.y-e.y),candidates=Math.abs(t.x-e.x)>Math.abs(t.y-e.y)?[[dx,0],[0,dy]]:[[0,dy],[dx,0]];
-    for(const [mx,my] of candidates){const nx=e.x+mx,ny=e.y+my;if(terrainHeight(nx,ny)&&!occupied(nx,ny,e.id)){e.x=nx;e.y=ny;break}}
-   }
-  });
-  if(checkDefeat())return;
-  state.turn++;state.phase='player';state.chain=0;showTurnBanner('SEU TURNO',false);
-  state.units.filter(u=>u.alive).forEach(u=>{u.acted=false;u.moved=false;u.range=u.baseRange;u.move=u.baseMove;u.sp=Math.min(u.maxSp,u.sp+1)});
-  if(state.turn>stage.turnLimit)return end(false,'O limite de turnos acabou.');
-  if(!state.units.some(u=>u.alive))return end(false,'Seu grupo ficou sem argumentos para continuar.');
-  if(!checkObjective())render();
- },480);
+   if(checkDefeat())return;
+ }
+ state.lastEnemyActor=null;state.inspectTarget=null;
+ state.turn++;state.phase='player';state.chain=0;showTurnBanner('SEU TURNO',false);
+ state.units.filter(u=>u.alive).forEach(u=>{u.acted=false;u.moved=false;u.moveSnapshot=null;u.range=u.baseRange;u.move=u.baseMove;u.sp=Math.min(u.maxSp,u.sp+1)});
+ if(state.turn>stage.turnLimit)return end(false,'O limite de turnos acabou.');
+ if(!state.units.some(u=>u.alive))return end(false,'Seu grupo ficou sem argumentos para continuar.');
+ if(!checkObjective())render();
 }
 function checkObjective(){
  if(state.ended)return true;
@@ -380,7 +419,7 @@ function render(){
  const winText=stage.battleRules?.winText||stage.objective.text,loseText=stage.battleRules?.loseText||('Todo o grupo KO ou ultrapassar '+stage.turnLimit+' turnos.');
  if($('#winCondition'))$('#winCondition').textContent=winText;if($('#loseCondition'))$('#loseCondition').textContent=loseText;
  const credBox=$('#credibilityBox'),credMiniBox=$('#credibilityMiniBox');if(credBox){credBox.hidden=state.credibility===null;if(state.credibility!==null){const max=state.maxCredibility||1,pct=Math.max(0,Math.min(100,(state.credibility/max)*100));$('#credibilityValue').textContent=state.credibility+'/'+max;$('#credibilityFill').style.width=pct+'%'}}if(credMiniBox){credMiniBox.hidden=state.credibility===null;if(state.credibility!==null)$('#credibilityMini').textContent=state.credibility+'/'+state.maxCredibility;}
- renderEnemyRoster();renderInspector();
+ renderEnemyRoster();renderTurnRoster();renderInspector();
 
  const board=$('#tacticalBoard');board.style.setProperty('--cols',stage.size.w);board.style.setProperty('--rows',stage.size.h);board.innerHTML='';
  const reach=selection()&&state.mode==='move'?reachable(selection()):new Map();
