@@ -75,7 +75,7 @@ function initState(){
   turn:1,phase:'deploy',selected:null,mode:'select',
   units:loadParty(),
   enemies:clone(stage.enemies||[]).map((e,i)=>({...e,team:'enemy',maxHp:e.hp||3,sp:0,acted:false,moved:false,alive:true,id:e.id||'e'+i,move:e.move||2,range:e.range||1})),
-  props:clone(stage.props||[]),switches:{},answers:{},firstAnswers:{},revealed:0,analysisCount:0,log:[],score:0,startedAt:Date.now(),
+  props:clone(stage.props||[]),switches:{},answers:{},firstAnswers:{},questionCursor:{},revealed:0,analysisCount:0,quizCorrect:0,quizWrong:0,log:[],score:0,startedAt:Date.now(),
   competitive:false,attempt:null,ended:false,chain:0,maxChain:0,inspectTarget:null,lastEnemyActor:null,
   credibility:stage.battleRules?.credibility??null,maxCredibility:stage.battleRules?.credibility??null,
   panic:stage.battleRules?.panic??null,maxPanic:stage.battleRules?.maxPanic??null
@@ -141,8 +141,8 @@ function renderInspector(){
    sp.textContent=String(enemy.threat||enemy.range||1);
    const intent=enemyIntent(enemy);
    const proof=enemy.requiresEvidence?state.props.find(p=>p.id===enemy.requiresEvidence):null;
-   const proofText=enemy.requiresEvidence?(state.switches[enemy.requiresEvidence]?' • 📚 evidência coletada':' • 🔎 investigue '+(proof?.label||'a evidência')):'';
-   text.textContent=(enemy.role||'INIMIGO')+' • '+(enemy.attackName||'Pressão')+proofText+(intent?.target?' • 🎯 alvo provável: '+intent.target.name+(intent.willAttack?' (ATACA AGORA)':' (vai se aproximar)'):'')+(enemy.quote?' • '+enemy.quote:'')+(enemy.failedAttempts?' • '+enemy.failedAttempts+' análise(s) incorreta(s) registrada(s).':'');
+   const proofText=enemy.requiresEvidence?(state.switches[enemy.requiresEvidence]?' • 📚 evidência coletada':' • 🔎 investigue '+(proof?.label||'a evidência')):'';const shieldText=enemy.answer?(enemy.conceptResolved?' • ⚔ escudo quebrado':' • 🛡 Escudo de Argumento ativo'):'';
+   text.textContent=(enemy.role||'INIMIGO')+' • '+(enemy.attackName||'Pressão')+proofText+shieldText+(intent?.target?' • 🎯 alvo provável: '+intent.target.name+(intent.willAttack?' (ATACA AGORA)':' (vai se aproximar)'):'')+(enemy.quote?' • '+enemy.quote:'')+(enemy.failedAttempts?' • '+enemy.failedAttempts+' análise(s) incorreta(s) registrada(s).':'');
    return;
  }
  if(hpLabel)hpLabel.textContent='HP';if(spLabel)spLabel.textContent='SP';
@@ -152,7 +152,7 @@ function renderEnemyRoster(){
  const host=$('#enemyRoster');if(!host)return;
  host.innerHTML=state.enemies.map(en=>{
    const evidenceReady=!en.requiresEvidence||!!state.switches[en.requiresEvidence];
-   const status=en.solved?'DESMASCARADO':!en.alive?'SUPERADO':en.requiresEvidence&&!evidenceReady?'🔎 EVIDÊNCIA PENDENTE':evidenceReady&&en.requiresEvidence?'📚 PRONTO PARA CONFRONTAR':en.failedAttempts?'AINDA ATIVO • '+en.failedAttempts+' erro(s)':'AMEAÇA ATIVA';
+   const status=!en.alive?(en.tag==='rumor'?'✅ DESMENTIDO':'✅ DERROTADO'):en.requiresEvidence&&!evidenceReady?'🔎 EVIDÊNCIA PENDENTE':en.answer&&!en.conceptResolved?'🛡 ESCUDO DE ARGUMENTO':en.answer&&en.conceptResolved?'⚔ VULNERÁVEL':en.failedAttempts?'AINDA ATIVO • '+en.failedAttempts+' erro(s)':'AMEAÇA ATIVA';
    const intent=en.alive?enemyIntent(en):null;
    const intentText=intent?.target?(intent.willAttack?'🎯 ATACA '+intent.target.name:'↠ segue '+intent.target.name):'';
    return '<button class="enemyCard '+(!en.alive?'defeated ':'')+(state.inspectTarget===en.id?'active':'')+(state.lastEnemyActor===en.id?' acting':'')+(en.tag==='rumor'?' rumorCard':'')+'" data-enemy-id="'+en.id+'"><span class="eTop"><span class="eIcon">'+en.icon+'</span><span><b>'+en.name+'</b><small>'+(en.role||'INIMIGO')+'</small></span><span class="eHp">HP '+Math.max(0,en.hp)+'/'+en.maxHp+'</span></span><span class="eStatus">'+status+(en.attackName?' • '+en.attackName:'')+(intentText?' • '+intentText:'')+'</span></button>';
@@ -225,7 +225,8 @@ function tileClick(x,y){
    const range=sel.skillPending?.range??sel.range;
    if(dist(sel,hit)<=range){
      state.inspectTarget=hit.id;
-     if(hit.answer&&!hit.solved&&!sel.skillPending){openLogicChoice(sel,hit);return}
+     if(hit.answer&&!hit.conceptResolved){openLogicChoice(sel,hit);return}
+     if(stage.attackQuestions?.[hit.id]?.length){openAttackQuestion(sel,hit);return}
      doAttack(sel,hit);return;
    }
    state.inspectTarget=hit.id;
@@ -275,7 +276,8 @@ function renderCommands(u){
    (canUndo?'<button data-cmd="undo">↶ Desfazer movimento</button>':'')+
    '<button data-cmd="attack">⚔️ Analisar / Atacar <small>'+targetCount+' alvo(s) no alcance</small></button>'+
    '<button data-cmd="skill">✦ Habilidades</button>'+
-   '<button data-cmd="interact">🔎 Interagir</button>'+
+   '<button data-cmd="interact">🔎 Interagir</button>'+ 
+   '<button data-cmd="defend">🛡 Defender <small>protege e recupera 1 SP</small></button>'+
    '<button data-cmd="wait">✓ Encerrar ação</button>'+
    '<button data-cmd="cancel">↶ Trocar unidade</button>';
  $$('#commandButtons button').forEach(b=>b.onclick=()=>{if(!b.disabled)command(b.dataset.cmd)});
@@ -299,6 +301,7 @@ function command(cmd){
    render();return}
  if(cmd==='skill'){renderSkills(u);return}
  if(cmd==='interact'){interact(u);return}
+ if(cmd==='defend'){u.guard=1;u.sp=Math.min(u.maxSp,u.sp+1);state.score+=5;state.log.unshift('🛡️ '+u.name+' assumiu postura defensiva.');toast('🛡 Defesa preparada • +1 SP');finishUnit(u);return}
  if(cmd==='wait'){finishUnit(u);return}
  if(cmd==='cancel'){state.selected=null;state.inspectTarget=null;state.mode='select';$('#commandBox').hidden=true;render()}
 }
@@ -316,6 +319,43 @@ function useSkill(u,k){
  if(skill.type==='support'){state.units.filter(a=>a.alive&&dist(a,u)<=1).forEach(a=>a.guard=1);state.score+=20;state.log.unshift('💬 Cadeia de Argumentos fortaleceu o grupo.');finishUnit(u);return}
  u.skillPending=skill;state.mode='attack';$('#commandBox').hidden=true;toast('Escolha o alvo da habilidade.');render();
 }
+function showBattleQuestion(eyebrow,target,prompt,options,onPick){
+ state.mode='logic';
+ $('#logicOverlay').classList.add('show');
+ if($('#logicEyebrow'))$('#logicEyebrow').textContent=eyebrow;
+ $('#logicTarget').textContent=target;
+ $('#logicText').textContent=prompt;
+ $('#logicChoices').innerHTML=options.map(o=>'<button data-concept="'+o.key+'"><b>'+o.label+'</b><small>'+(o.desc||'')+'</small></button>').join('');
+ $$('#logicChoices button').forEach(b=>b.onclick=()=>onPick(b.dataset.concept));
+}
+function attackAssists(u,e){return assistCount(u,e)}
+function consumePendingSkill(u){
+ const had=!!u.skillPending;u.skillPending=null;return had;
+}
+function defeatEnemy(e,verb='SUPERADO'){
+ if(!e.alive)return;
+ e.hp=0;e.alive=false;e.solved=true;state.revealed++;state.score+=90;
+ state.log.unshift('✨ '+e.name+' foi '+verb+'.');
+}
+function applyWrongMeterPenalty(){
+ if(state.credibility!==null){
+   const loss=Number(stage.battleRules?.wrongAttackCredibility??stage.battleRules?.wrongAnswerLoss)||1;
+   state.credibility=Math.max(0,state.credibility-loss);
+   return 'Credibilidade -'+loss;
+ }
+ if(state.panic!==null){
+   const rise=Number(stage.battleRules?.wrongAttackPanic??stage.battleRules?.wrongAnswerPanic)||1;
+   state.panic=Math.min(state.maxPanic||10,state.panic+rise);
+   return 'Pânico +'+rise;
+ }
+ return '';
+}
+function counterAttack(u,e){
+ const raw=Math.max(1,Math.ceil((Number(e.threat)||1)/2));
+ const dmg=u.guard?0:raw;u.guard=0;u.hp-=dmg;
+ if(u.hp<=0){u.hp=0;u.alive=false}
+ return dmg;
+}
 function openLogicChoice(u,e){
  if(e.requiresEvidence&&!state.switches[e.requiresEvidence]){
    const proof=state.props.find(p=>p.id===e.requiresEvidence);
@@ -323,56 +363,71 @@ function openLogicChoice(u,e){
    toast('🔎 Falta evidência. Investigue '+(proof?.label||'o local indicado')+' antes de confrontar este rumor.');
    render();openCommand(u);return;
  }
- state.mode='logic';const box=$('#logicOverlay');box.classList.add('show');
  const concepts=Array.isArray(stage.concepts)&&stage.concepts.length?stage.concepts:FALLACIES;
- $('#logicTarget').textContent=e.icon+' '+e.name;
- $('#logicText').textContent=stage.analysisPrompt||'Qual conceito descreve o truque argumentativo deste alvo?';
- $('#logicChoices').innerHTML=concepts.map(f=>'<button data-concept="'+f.key+'"><b>'+f.label+'</b><small>'+f.desc+'</small></button>').join('');
- $('#logicChoices button').forEach(b=>b.onclick=()=>resolveLogicChoice(u,e,b.dataset.concept));
+ showBattleQuestion('QUEBRE O ESCUDO DE ARGUMENTO',e.icon+' '+e.name,stage.analysisPrompt||'Qual conceito descreve o truque argumentativo deste alvo?',concepts,(choice)=>resolveLogicChoice(u,e,choice));
 }
 async function resolveLogicChoice(u,e,choice){
- $('#logicOverlay').classList.remove('show');u.animState='action';state.mode='animating';render();await wait(240);state.analysisCount++;state.answers[e.id]=choice;
- if(!(e.id in state.firstAnswers))state.firstAnswers[e.id]=choice;
- const correct=choice===e.answer,assists=assistCount(u,e);
+ $('#logicOverlay').classList.remove('show');u.animState='action';state.mode='animating';render();await wait(240);
+ state.analysisCount++;state.answers[e.id]=choice;if(!(e.id in state.firstAnswers))state.firstAnswers[e.id]=choice;
+ const correct=choice===e.answer,assists=attackAssists(u,e),skill=consumePendingSkill(u);
  state.inspectTarget=e.id;
  if(correct){
-   e.solved=true;e.hp=0;e.alive=false;state.revealed++;
-   state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);
-   state.score+=120+(assists*20);
-   state.log.unshift('✨ '+e.name+' foi DESMASCARADO.'+(assists?' • '+assists+' aliado(s) sustentaram a análise.':''));
-   toast('✅ Falácia desmascarada!');
+   state.quizCorrect++;e.conceptResolved=true;
+   let dmg=1+(assists?1:0)+(skill?1:0);
+   e.hp=Math.max(0,e.hp-dmg);
+   state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);state.score+=85+assists*20+(skill?15:0);
+   state.log.unshift('🧠 Escudo de Argumento de '+e.name+' foi quebrado. -'+dmg+' HP.');
+   if(e.hp<=0){defeatEnemy(e,e.tag==='rumor'?'DESMENTIDO':'DESMASCARADO');toast('✨ Conceito correto! '+e.name+' caiu.')}
+   else toast('🧠 Conceito correto! Escudo quebrado • -'+dmg+' HP • agora ele está vulnerável.');
  }else{
-   e.failedAttempts=(e.failedAttempts||0)+1;state.chain=0;state.score+=10;
-   if(state.credibility!==null){
-     const loss=Number(stage.battleRules?.wrongAnswerLoss)||1;
-     state.credibility=Math.max(0,state.credibility-loss);
-     state.log.unshift('🎭 Análise incorreta contra '+e.name+'. Credibilidade -'+loss+'. O inimigo continua ativo.');
-     toast('❌ Conceito incorreto. Credibilidade -'+loss+'. Tente novamente em outro turno.');
-   }else if(state.panic!==null){
-     const loss=Number(stage.battleRules?.wrongAnswerPanic)||1;
-     state.panic=Math.min(state.maxPanic||10,state.panic+loss);
-     state.log.unshift('🗯️ A análise não sustentou a refutação de '+e.name+'. Pânico +'+loss+'.');
-     toast('❌ O rumor ganhou força. Pânico +'+loss+'.');
-   }else{
-     state.log.unshift('🎭 Análise incorreta contra '+e.name+'. O inimigo continua ativo.');
-     toast('❌ O inimigo continua ativo.');
-   }
+   state.quizWrong++;e.failedAttempts=(e.failedAttempts||0)+1;state.chain=0;state.score+=5;
+   const meter=applyWrongMeterPenalty(),counter=counterAttack(u,e);
+   state.log.unshift('❌ Leitura incorreta contra '+e.name+'. '+(meter?meter+' • ':'')+(counter?'Contra-ataque -'+counter+' HP.':'A defesa segurou o contra-ataque.'));
+   toast('❌ Resposta incorreta • '+(meter?meter+' • ':'')+(counter?'-'+counter+' HP':'defesa segurou'));
+ }
+ finishUnit(u);
+}
+function openAttackQuestion(u,e){
+ const bank=stage.attackQuestions?.[e.id]||[];
+ if(!bank.length){doAttack(u,e);return}
+ const idx=state.questionCursor[e.id]||0,q=bank[idx%bank.length];
+ showBattleQuestion('DUELO DE ARGUMENTOS',e.icon+' '+e.name,q.q,q.options,(choice)=>resolveAttackQuestion(u,e,q,choice));
+}
+async function resolveAttackQuestion(u,e,q,choice){
+ $('#logicOverlay').classList.remove('show');u.animState='attack';state.mode='animating';render();await wait(240);
+ state.analysisCount++;state.questionCursor[e.id]=(state.questionCursor[e.id]||0)+1;
+ const correct=choice===q.ok,assists=attackAssists(u,e),skill=consumePendingSkill(u);
+ state.inspectTarget=e.id;
+ if(correct){
+   state.quizCorrect++;
+   const critical=assists>0||state.chain>=2;
+   let dmg=1+(critical?1:0)+(skill?1:0);
+   if(e.guard){e.guard=0;dmg=Math.max(0,dmg-1)}
+   e.hp=Math.max(0,e.hp-dmg);
+   state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);state.score+=60+assists*15+(critical?15:0)+(skill?10:0);
+   state.log.unshift('⚔️ '+u.name+' acertou '+e.name+' (-'+dmg+' HP)'+(critical?' • ACERTO CRÍTICO':'')+'.');
+   if(e.hp<=0){defeatEnemy(e,e.tag==='rumor'?'DESMENTIDO':'DERROTADO');toast('💥 '+(critical?'ACERTO CRÍTICO! ':'')+q.feedback)}
+   else toast('✅ '+q.feedback+' • -'+dmg+' HP'+(critical?' • CRÍTICO':''));
+ }else{
+   state.quizWrong++;state.chain=0;state.score+=5;
+   const meter=applyWrongMeterPenalty(),counter=counterAttack(u,e);
+   state.log.unshift('💢 '+e.name+' rebateu o ataque de '+u.name+'. '+(meter?meter+' • ':'')+(counter?'Contra-ataque -'+counter+' HP.':'Defesa segurou.'));
+   toast('💢 Contra-argumento! '+(meter?meter+' • ':'')+(counter?'-'+counter+' HP':'defesa segurou'));
  }
  finishUnit(u);
 }
 async function doAttack(u,e){
- u.animState='attack';state.mode='animating';render();await wait(240);const assists=assistCount(u,e),conceptLocked=!!e.answer&&!e.solved;let dmg=1+Math.min(2,assists);if(u.skillPending){dmg+=1;state.score+=10;u.skillPending=null}
- state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);state.score+=assists*15;
- if(e.guard){e.guard=0;dmg=Math.max(0,dmg-1)}
- e.hp-=dmg;state.analysisCount++;state.inspectTarget=e.id;
- if(conceptLocked&&e.hp<=0){
-   e.hp=1;
-   state.log.unshift('🧠 '+e.name+' não pode ser derrotado à força. Identifique a falácia com ANALISAR.');
-   toast('A máscara conceitual resistiu. Use Analisar e identifique a falácia.');
-   finishUnit(u);return;
+ u.animState='attack';state.mode='animating';render();await wait(240);
+ if(e.answer&&!e.conceptResolved){
+   u.animState='idle';state.mode='command';toast('🛡 O Escudo de Argumento ainda está ativo. Resolva o conceito primeiro.');render();openCommand(u);return;
  }
- state.log.unshift('⚔️ '+u.name+' analisou '+e.name+' (-'+dmg+')'+(assists?' com '+assists+' assistência(s).':'') );
- if(e.hp<=0){e.alive=false;state.score+=80;state.revealed++;state.log.unshift('✨ '+e.name+' foi superado.')}
+ const assists=attackAssists(u,e),skill=consumePendingSkill(u);
+ let dmg=1+(assists?1:0)+(skill?1:0);
+ if(e.guard){e.guard=0;dmg=Math.max(0,dmg-1)}
+ e.hp=Math.max(0,e.hp-dmg);state.analysisCount++;state.inspectTarget=e.id;
+ state.chain+=1+assists;state.maxChain=Math.max(state.maxChain,state.chain);state.score+=25+assists*15+(skill?10:0);
+ state.log.unshift('⚔️ '+u.name+' atacou '+e.name+' (-'+dmg+' HP).');
+ if(e.hp<=0)defeatEnemy(e,'DERROTADO');
  finishUnit(u);
 }
 function interact(u){
@@ -405,12 +460,12 @@ async function enemyPhase(){
    targets.sort((a,b)=>dist(enemy,a)-dist(enemy,b));const target=targets[0];
    state.lastEnemyActor=enemy.id;state.inspectTarget=enemy.id;render();await wait(320);
    if(dist(enemy,target)<=Math.max(1,enemy.range||1)){
-     const dmg=target.guard?0:1;target.guard=0;target.hp-=dmg;
+     const rawDmg=Math.max(1,Number(enemy.threat)||1),dmg=target.guard?0:rawDmg;target.guard=0;target.hp-=dmg;
      let extra='';
      if(dmg&&state.credibility!==null){
        const loss=Number(stage.battleRules?.enemyHitLoss)||1;state.credibility=Math.max(0,state.credibility-loss);extra=' • Credibilidade -'+loss;
      }
-     state.log.unshift('👁️ '+enemy.name+' usou '+(enemy.attackName||'Pressão')+' em '+target.name+(dmg?' (-1 HP)':' mas a defesa segurou.')+extra);
+     state.log.unshift('👁️ '+enemy.name+' usou '+(enemy.attackName||'Pressão')+' em '+target.name+(dmg?' (-'+dmg+' HP)':' mas a defesa segurou.')+extra);
      target.animState='action';
      if(target.hp<=0)target.alive=false;
      render();await wait(260);
@@ -480,9 +535,9 @@ function competitionPayload(){
 function outcomeRank(win){
  if(!win)return '—';
  const alive=state.units.filter(u=>u.alive).length,total=Math.max(1,state.units.length);
- const survival=alive/total,pace=state.turn/Math.max(1,stage.turnLimit),chain=state.maxChain;
- if(survival===1&&pace<=.65&&chain>=3)return 'S';
- if(survival>=.75&&pace<=.82)return 'A';
+ const survival=alive/total,pace=state.turn/Math.max(1,stage.turnLimit),chain=state.maxChain,wrong=state.quizWrong||0;
+ if(survival===1&&pace<=.65&&chain>=3&&wrong===0)return 'S';
+ if(survival>=.75&&pace<=.82&&wrong<=1)return 'A';
  if(survival>=.5)return 'B';
  return 'C';
 }
@@ -538,7 +593,7 @@ async function playOutcomeScene(win,msg,score,gains){
  $('#resultTurns').textContent=state.turn+'/'+stage.turnLimit;
  $('#resultChain').textContent='×'+state.maxChain;
  const alive=state.units.filter(u=>u.alive).length;
- $('#resultSurvivors').textContent=alive+'/'+state.units.length;
+ $('#resultSurvivors').textContent=alive+'/'+state.units.length;if($('#resultAccuracy'))$('#resultAccuracy').textContent=state.quizCorrect+'/'+(state.quizCorrect+state.quizWrong);
 
  const credBox=$('#resultCredibilityBox');
  if(credBox){
@@ -615,7 +670,7 @@ function render(){
  }
  [...state.units,...state.enemies].filter(u=>u.alive).forEach(u=>{
   const el=document.createElement('button');const sel=selection();const assisted=u.team==='player'&&sel&&u.id!==sel.id&&state.enemies.some(en=>en.alive&&dist(u,en)<=1&&dist(sel,en)<=(sel.skillPending?.range??sel.range));const inRange=u.team==='enemy'&&sel&&sel.team==='player'&&dist(sel,u)<=(sel.skillPending?.range??sel.range);
-  el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'')+(assisted?' assisted':'')+(u.team==='enemy'&&state.inspectTarget===u.id?' targeted':'')+(inRange?' inRange':'');el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
+  el.className='unit '+u.team+(u.id===state.selected?' selected':'')+(u.acted?' acted':'')+(assisted?' assisted':'')+(u.team==='enemy'&&state.inspectTarget===u.id?' targeted':'')+(inRange?' inRange':'');el.dataset.unitId=u.id;el.style.setProperty('--x',u.x);el.style.setProperty('--y',u.y);el.style.setProperty('--h',terrainHeight(u.x,u.y));el.onclick=e=>{e.stopPropagation();tileClick(u.x,u.y)};
   el.innerHTML='<span class="unitSprite">'+u.icon+'</span><span class="unitName">'+u.name+'</span><span class="hp"><i style="width:'+Math.max(0,u.hp/u.maxHp*100)+'%"></i></span>';
   window.ParadoxiaSpriteRuntime?.decorateUnitElement(el,u);
   board.appendChild(el);
