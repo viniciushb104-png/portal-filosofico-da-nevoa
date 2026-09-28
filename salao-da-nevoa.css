@@ -17,3 +17,9 @@
 @media(max-width:980px){.salaoHeroGrid{grid-template-columns:1fr}.salaoShell{grid-template-columns:220px 1fr}.modGrid{grid-template-columns:1fr}.privacyCard{grid-template-columns:1fr}}
 @media(max-width:720px){.salaoHero{padding-top:34px}.salaoHero h1{font-size:52px}.guardianCard{align-items:flex-start}.guardianOrb{width:60px;height:60px;flex-basis:60px;font-size:32px}.salaoShell{display:block}.roomsPanel{position:static;margin-bottom:12px}.roomList{grid-template-columns:repeat(3,minmax(160px,1fr));overflow-x:auto;padding-bottom:5px}.chatPanel{min-height:70dvh}.messages{max-height:none;min-height:54dvh}.msg{max-width:94%}.moderatorHead{display:block}.moderatorHead .refreshBtn{margin-top:10px}.privacyCard{margin-left:14px;margin-right:14px}.composerBottom{align-items:flex-end}.composerBottom span{max-width:52%}}
 @media(max-width:480px){.salaoTopIn{height:62px}.salaoBrand b{font-size:12px}.salaoBrand small{font-size:8px}.userChip{display:none}.salaoHero h1{font-size:46px}.gateCard{align-items:flex-start}.gateIcon{font-size:34px}.chatHead h2{font-size:22px}.composerBottom button{padding:9px 10px;font-size:11px}.safetyPills span{font-size:9px}}
+
+/* V3 — avatares do salão */
+.userChip{display:flex;align-items:center;gap:7px;padding:5px 10px 5px 5px}.userChipAvatar{width:30px;height:30px;flex:0 0 30px}
+.msgAvatar{overflow:hidden;padding:0}.msgAvatar img{width:100%;height:100%;object-fit:cover}
+.msg.mine .msgAvatar{border-color:#d78348}.msg:not(.mine) .msgAvatar{border-color:#8c55a3}
+@media(max-width:620px){.userChipText{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.userChipAvatar{width:28px;height:28px;flex-basis:28px}}
