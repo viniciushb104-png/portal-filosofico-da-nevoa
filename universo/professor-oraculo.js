@@ -47,8 +47,10 @@
   var state={mode:"professor",difficulty:1,seed:0,last:null,voice:true,expression:"idle",aiBusy:false,chatHistory:[],memory:null,memoryLoaded:false};
 
   app.innerHTML=[
-    '<div class="oracle-app">',
+    '<div class="oracle-app" id="oracleApp">',
       '<div class="oracle-stars" id="oracleStars"></div>',
+      '<div class="oracle-global-mist oracle-global-mist-a" aria-hidden="true"></div>',
+      '<div class="oracle-global-mist oracle-global-mist-b" aria-hidden="true"></div>',
       '<header class="oracle-topbar">',
         '<a class="oracle-brand" href="../index.html"><span class="oracle-brand-mark">📚</span><span><strong>Oráculo Pedagógico da Névoa</strong><small>IDEIAS MÁGICAS PARA GRANDES APRENDIZAGENS</small></span></a>',
         '<nav class="oracle-nav"><a href="../index.html">Início</a><a class="active" href="professor.html">Central do Professor</a><a href="#" data-scroll="result">Atividades</a><a href="mapa.html">Explorar</a><a href="grimorio.html">Recursos</a></nav>',
@@ -69,9 +71,13 @@
             '<div class="oracle-welcome-actions"><button class="oracle-btn" id="emergency">⚡ Modo emergência</button><button class="oracle-btn" id="showSavedTop">★ Atividades salvas</button></div>',
           '</section>',
           '<section class="oracle-hero-grid">',
-            '<article class="oracle-card oracle-stage">',
-              '<div class="oracle-stage-decor"><div class="oracle-moon"></div><div class="oracle-window"></div><div class="oracle-pumpkins">🎃🎃</div><div class="oracle-cat">🐈‍⬛</div></div>',
+            '<article class="oracle-card oracle-stage" id="oracleStage" data-state="idle">',
+              '<div class="oracle-stage-decor"><div class="oracle-moon"></div><div class="oracle-window"></div><div class="oracle-rune rune-a">φ</div><div class="oracle-rune rune-b">?</div><div class="oracle-rune rune-c">✦</div><div class="oracle-rune rune-d">∞</div><div class="oracle-pumpkins">🎃🎃</div><div class="oracle-cat">🐈‍⬛</div></div>',
+              '<div class="oracle-stage-mist oracle-stage-mist-a" aria-hidden="true"></div><div class="oracle-stage-mist oracle-stage-mist-b" aria-hidden="true"></div>',
+              '<div class="oracle-magic-circle" id="oracleMagicCircle" aria-hidden="true"><span></span><span></span><i>✦</i><i>φ</i><i>☾</i><i>?</i></div>',
+              '<div class="oracle-stage-effects" id="oracleStageEffects" aria-hidden="true"></div>',
               '<div class="oracle-character" id="oracleCharacter" data-expression="idle"><img class="oracle-character-img" id="oracleSprite" alt="Oráculo Pedagógico" hidden><div class="oracle-fallback" id="oracleFallback">🔮</div></div>',
+              '<div class="oracle-crystal-ball" id="oracleCrystalBall" aria-hidden="true"><div class="oracle-crystal-core"><span></span></div><div class="oracle-crystal-base"></div></div>',
               '<div class="oracle-speech"><div class="oracle-speech-name">ORÁCULO PEDAGÓGICO</div><p id="oracleLine">Olá, professor! Que pensamento devemos despertar hoje?</p><div class="oracle-expression" id="oracleExpression">Observando a névoa...</div></div>',
             '</article>',
             '<form class="oracle-card oracle-builder" id="oracleForm">',
@@ -150,12 +156,17 @@
 
   function setExpression(name){
     state.expression=name;
-    var box=q("#oracleCharacter"),img=q("#oracleSprite"),fallback=q("#oracleFallback");
+    var box=q("#oracleCharacter"),img=q("#oracleSprite"),fallback=q("#oracleFallback"),stage=q("#oracleStage");
     if(box)box.dataset.expression=name;
+    if(stage)stage.dataset.state=name;
     if(q("#oracleExpression"))q("#oracleExpression").textContent=expressionLabels[name]||name;
     if(!img)return;
-    img.onload=function(){img.hidden=false;if(fallback)fallback.hidden=true};
-    img.onerror=function(){img.hidden=true;if(fallback)fallback.hidden=false};
+    img.classList.add("oracle-sprite-changing");
+    img.onload=function(){
+      img.hidden=false;if(fallback)fallback.hidden=true;
+      requestAnimationFrame(function(){img.classList.remove("oracle-sprite-changing")});
+    };
+    img.onerror=function(){img.hidden=true;if(fallback)fallback.hidden=false;img.classList.remove("oracle-sprite-changing")};
     img.src=sprites[name]||sprites.idle;
   }
 
@@ -190,6 +201,42 @@
     u.onend=function(){setExpression("idle");q("#oracleWave").classList.remove("active")};
     u.onerror=function(){setExpression("idle");q("#oracleWave").classList.remove("active")};
     window.speechSynthesis.speak(u);
+  }
+
+  function magicBurst(kind){
+    var wrap=q("#oracleStageEffects");if(!wrap)return;
+    var count=kind==="success"?18:kind==="emergency"?14:10;
+    for(var i=0;i<count;i++){
+      var p=document.createElement("span");
+      p.className="oracle-magic-particle "+(kind||"soft");
+      var angle=(Math.PI*2*i/count)+(Math.random()*.35);
+      var dist=55+Math.random()*105;
+      p.style.setProperty("--mx",(Math.cos(angle)*dist).toFixed(1)+"px");
+      p.style.setProperty("--my",(Math.sin(angle)*dist).toFixed(1)+"px");
+      p.style.left=(45+Math.random()*10)+"%";
+      p.style.top=(48+Math.random()*8)+"%";
+      p.style.animationDelay=(Math.random()*.12)+"s";
+      wrap.appendChild(p);
+      window.setTimeout(function(node){if(node&&node.parentNode)node.parentNode.removeChild(node)},1150,p);
+    }
+  }
+
+  function materializeResult(){
+    var paper=q(".oracle-result-main");if(!paper)return;
+    paper.classList.remove("oracle-materialize");
+    void paper.offsetWidth;
+    paper.classList.add("oracle-materialize");
+    magicBurst("success");
+    window.setTimeout(function(){paper.classList.remove("oracle-materialize")},1050);
+  }
+
+  function emergencyMagic(){
+    var root=q("#oracleApp");if(!root)return;
+    root.classList.remove("oracle-emergency-flash");
+    void root.offsetWidth;
+    root.classList.add("oracle-emergency-flash");
+    magicBurst("emergency");
+    window.setTimeout(function(){root.classList.remove("oracle-emergency-flash")},900);
   }
 
   function config(){
@@ -519,6 +566,7 @@
       '<div class="activity-block"><b>Fechamento</b><p>'+esc(a.closure||'Peça uma frase final começando por “Antes eu pensava..., agora eu penso...” ou “A pergunta que ficou foi...”.')+'</p></div>'+
       '<div class="activity-block"><b>Avaliação rápida</b><p>'+esc(a.assessment||'Observe se o participante compreendeu o problema, apresentou ao menos uma razão e conseguiu rever ou sustentar sua posição.')+'</p></div>';
     q("#resultActions").hidden=false;
+    materializeResult();
     var scrollBody=q("#resultBody");
     if(scrollBody)scrollBody.scrollTop=0;
     window.setTimeout(function(){q("#result").scrollIntoView({behavior:"smooth",block:"start"})},120);
@@ -563,14 +611,17 @@
   qa(".oracle-chip").forEach(function(b){b.onclick=function(){preset(b.dataset.preset)}});
   q("#speakOracle").onclick=function(){speak(q("#oracleLine").textContent)};
   q("#voiceToggle").onclick=function(){state.voice=!state.voice;q("#voiceToggle").textContent=state.voice?"🔊":"🔇";if(!state.voice&&"speechSynthesis" in window)window.speechSynthesis.cancel();toast(state.voice?"Voz do Oráculo ativada.":"Voz do Oráculo desligada.")};
-  q("#emergency").onclick=function(){setMode("professor");q("#oracleLevel").value="8º ano";q("#oracleDiscipline").value="Filosofia";q("#oracleTime").value="50 minutos";q("#oracleParticipation").value="Baixa";q("#oracleResources").value="Giz e lousa";q("#oracleFormat").value="Analógica";q("#oracleObjective").value="Reflexão filosófica";dialogue("Sem tempo? Cinquenta minutos, giz e lousa, participação baixa. Eu cuido do restante.","surprise",state.voice);smartGenerate()};
+  q("#emergency").onclick=function(){emergencyMagic();setMode("professor");q("#oracleLevel").value="8º ano";q("#oracleDiscipline").value="Filosofia";q("#oracleTime").value="50 minutos";q("#oracleParticipation").value="Baixa";q("#oracleResources").value="Giz e lousa";q("#oracleFormat").value="Analógica";q("#oracleObjective").value="Reflexão filosófica";dialogue("Sem tempo? Cinquenta minutos, giz e lousa, participação baixa. Eu cuido do restante.","surprise",state.voice);smartGenerate()};
   q("#resultActions").onclick=function(e){var a=e.target.dataset.action;if(!a)return;if(a==="again")smartGenerate();if(a==="simple"){state.difficulty=0;refineWithAI("Simplifique a atividade, use linguagem mais acessível, menos etapas e exemplos concretos.",false)}if(a==="hard"){state.difficulty=2;refineWithAI("Aumente o desafio intelectual: exija conceito, justificativa, objeção e revisão da posição.",false)}if(a==="game"){q("#oracleObjective").value="Jogo filosófico";refineWithAI("Transforme esta atividade em um jogo filosófico viável com os mesmos recursos e tempo.",false)}if(a==="notech"){q("#oracleResources").value="Giz e lousa";q("#oracleFormat").value="Analógica";refineWithAI("Retire toda dependência de tecnologia e adapte para funcionar apenas com giz, lousa e fala.",false)}if(a==="save")saveCurrent();if(a==="print")window.print()};
   q("#showSavedTop").onclick=openSaved;q("#sideSaved").onclick=function(e){e.preventDefault();openSaved()};q("#drawerSaved").onclick=function(e){e.preventDefault();toggleDrawer(false);openSaved()};
   q("#menuButton").onclick=function(){toggleDrawer()};q("#oracleDrawer").onclick=function(e){if(e.target===q("#oracleDrawer"))toggleDrawer(false)};
   qa("[data-mobile]").forEach(function(b){b.onclick=function(){if(b.dataset.mobile==="activities")q("#result").scrollIntoView({behavior:"smooth"});if(b.dataset.mobile==="saved")openSaved()}});
   qa("[data-scroll]").forEach(function(a){a.onclick=function(e){e.preventDefault();q("#"+a.dataset.scroll).scrollIntoView({behavior:"smooth"})}});
 
-  q("#memorySaveCurrent").onclick=saveCurrentMemory;
+  q("#oracleTopic").addEventListener("focus",function(){setExpression("mystery")});
+  q("#oracleTopic").addEventListener("blur",function(){if(!state.aiBusy)setExpression("idle")});
+  q("#oracleTopic").addEventListener("input",function(){var stage=q("#oracleStage");if(stage)stage.classList.toggle("oracle-topic-awake",this.value.trim().length>2)});
+    q("#memorySaveCurrent").onclick=saveCurrentMemory;
   q("#memoryApply").onclick=function(){if(state.memory&&state.memory.preferences)applyMemoryPreferences(state.memory.preferences,true);else toast("Ainda não há preferências guardadas.")};
   q("#memoryClear").onclick=clearMemory;
   q("#memoryLearning").onchange=function(){setLearningPreference(this.checked)};
