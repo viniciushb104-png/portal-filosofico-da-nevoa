@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#09060f">
 <meta name="description" content="Portal Filosófico da Névoa — jogos, enigmas e aventuras filosóficas com estética Halloween anime/cartoon, BNCC e Currículo Paulista.">
 <title>Portal Filosófico da Névoa</title>
-<link rel="stylesheet" href="styles.css?v=7.6">
+<link rel="stylesheet" href="styles.css?v=9.1">
 <link rel="stylesheet" href="avatar-runtime.css?v=1">
 </head>
 <body>
@@ -30,7 +30,7 @@
     <div class="navlinks">
       <a href="#inicio" class="active">Início</a>
       <a href="#jogos">Jogos</a>
-      <button class="navLinkBtn" id="openMapTop">Mapa</button>
+      <a href="#grande-mapa">Mapa</a>
       <a href="universo/">Universo</a>
       <a href="salao-da-nevoa.html">Salão</a>
       <a href="universo/professor.html?v=15">Professor</a>
@@ -57,13 +57,13 @@
     <div class="heroCore">
       <div class="eyebrow">Halloween • Filosofia • Ciências Humanas</div>
       <h1>Portal Filosófico <span>da Névoa</span></h1>
-      <p>Uma mansão de enigmas onde cada porta abre um problema filosófico. Pense antes da névoa fechar o caminho.</p>
+      <p>Um mundo de jogos, enigmas e aventuras onde cada caminho abre um problema filosófico. Escolha seu destino e atravesse a névoa.</p>
       <div class="mantra"><span>Questionar</span><span>Pensar</span><span>Argumentar</span><span>Transformar</span></div>
       <div class="actions">
-        <button class="cta" id="openMapHero">🗺 Explorar a mansão</button>
+        <a class="cta" href="#grande-mapa">🗺 Explorar o Grande Mapa</a>
         <a class="cta alt" href="#jogos">🎮 Escolher um jogo</a>
-        <a class="cta alt" href="universo/">🌫 Universo da Névoa</a>
-        <a class="cta alt" href="grimorio-de-colorir/">🎨 Grimório de Colorir</a>
+        <a class="cta alt" href="universo/perfil.html">🧙 Minha jornada</a>
+        
       </div>
       <div class="heroQuote"><b>Mensagem da Mansão</b><br><span id="dailyQuote">“Uma boa pergunta pode abrir portas que uma resposta pronta mantém fechadas.”</span></div>
     </div>
@@ -83,9 +83,6 @@
     <button class="feature featured" data-game="socrates"><span class="featureIcon">🏚️</span><span><small>AVENTURA PRINCIPAL</small><b>A Mansão de Sócrates</b><em>7 cômodos • senha final</em></span><i>→</i></button>
     <a class="feature platformFeature" href="jogos/plataforma-filosofica/"><span class="featureIcon">🎮</span><span><small>JOGO COMPLETO • PLATAFORMA FILOSÓFICA</small><b>O Labirinto dos Filósofos</b><em>5 fases • Sócrates, Platão, Descartes, Hume e Ética • mobile</em></span><i>→</i></a>
     <a class="feature rpgFeature" href="jogos/paradoxia/"><span class="featureIcon">🎭</span><span><small>NOVO • RPG FILOSÓFICO</small><b>Paradoxia — O Reino das Escolhas</b><em>Classes • dilemas • falácias • +120 XP</em></span><i>→</i></a>
-    <a class="feature" href="universo/"><span class="featureIcon">🌫️</span><span><small>NOVO • UNIVERSO CONECTADO</small><b>Universo da Névoa</b><em>Grimório • Museu • Diário • Cartas • Teatro • Professor</em></span><i>→</i></a>
-    <a class="feature" href="grimorio-de-colorir/"><span class="featureIcon">🎨</span><span><small>NOVO • ARTE & FILOSOFIA</small><b>Grimório de Colorir</b><em>6 páginas para baixar e imprimir</em></span><i>→</i></a>
-    <a class="feature" href="salao-da-nevoa.html"><span class="featureIcon">🦉</span><span><small>NOVO • COMUNIDADE MODERADA</small><b>Salão da Névoa</b><em>Chat coletivo • sem DM • moderação • denúncias</em></span><i>→</i></a>
     <button class="feature" id="dailyChallenge"><span class="featureIcon">🌙</span><span><small>DESAFIO DO DIA</small><b>Enigma da Meia-Noite</b><em>+15 XP na primeira conclusão</em></span><i>→</i></button>
     <button class="feature" id="achievementBtn"><span class="featureIcon">🏆</span><span><small>CONQUISTAS</small><b id="achievementCount">0 de 8</b><em>Insígnias da Névoa</em></span><i>→</i></button>
   </div>
@@ -213,7 +210,7 @@
         <div class="rank"><div class="orb">👑</div><strong>Mestre</strong><small>240 XP</small></div>
         <div class="rank"><div class="orb">🦇</div><strong>Guardião</strong><small>360 XP</small></div>
       </div>
-      <button class="smallBtn" id="openMapProgress">Ver mapa da mansão</button>
+      <button class="smallBtn" id="openMapProgress">Explorar Grande Mapa</button>
     </div>
     <div class="panel levelPanel">
       <div class="eyebrow">Escolha seu caminho</div><h3>Níveis escolares</h3>
@@ -244,51 +241,6 @@
   <div class="wrap aboutGrid">
     <div class="aboutArt"><img src="" data-media="mansion" alt="Mansão do Portal Filosófico da Névoa"></div>
     <div><div class="eyebrow">Sobre o Portal</div><h2>Filosofia com atmosfera</h2><p>O Portal Filosófico da Névoa transforma problemas filosóficos em pequenas aventuras de exploração. A estética Halloween é parte da narrativa, mas o centro continua sendo a pergunta, a justificativa e o pensamento.</p><p class="signature">Adentre o Portal. 🎃</p></div>
-  </div>
-</section>
-
-<section id="atelier" class="atelierSection">
-  <div class="wrap">
-    <div class="sectionHead"><div class="eyebrow">🎬 Ateliê Gemini</div><h2>Personagens prontos para ganhar vida</h2><p>Se você quiser animar no Gemini, estas fichas já organizam personagem, atmosfera e proposta de cena em blocos rápidos de referência.</p></div>
-    <div class="videoReadyNotice"><span>🎞️</span><div><b>Versão 5 preparada para vídeo</b><p>Coloque os quatro MP4 em <code>assets/videos/</code>. O portal detecta cada arquivo e troca automaticamente o poster pela animação.</p></div></div>
-    <div class="atelierGrid">
-      <article class="atelierCard">
-        <div class="atelierArt"><div class="mediaSlot atelierMedia" data-video-slot>
-      <img class="mediaPoster" src="" data-media="poster_guia" alt="Guia da Névoa">
-      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
-        <source src="assets/videos/guia_da_nevoa.mp4" type="video/mp4">
-      </video>
-    </div><span class="videoState">Imagem base</span></div>
-        <div class="atelierBody"><div class="tag">PERSONAGEM-GUIA</div><h3>Guia da Névoa</h3><p>A personagem-anfitriã do portal, sempre elegante, curiosa e acolhedora, conduzindo o aluno para dentro da mansão.</p><button class="smallBtn promptBtn" data-prompt="guia">Abrir prompt Gemini</button></div>
-      </article>
-      <article class="atelierCard">
-        <div class="atelierArt"><div class="mediaSlot atelierMedia" data-video-slot>
-      <img class="mediaPoster" src="" data-media="poster_mansao" alt="Mansão da Névoa">
-      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
-        <source src="assets/videos/mansao_da_nevoa.mp4" type="video/mp4">
-      </video>
-    </div><span class="videoState">Imagem base</span></div>
-        <div class="atelierBody"><div class="tag">CENÁRIO</div><h3>Mansão da Névoa</h3><p>Plano geral cinematográfico da mansão com névoa, luar, lanternas e atmosfera de aventura filosófica.</p><button class="smallBtn promptBtn" data-prompt="mansao">Abrir prompt Gemini</button></div>
-      </article>
-      <article class="atelierCard">
-        <div class="atelierArt"><div class="mediaSlot atelierMedia" data-video-slot>
-      <img class="mediaPoster" src="" data-media="poster_guardiao" alt="Guardião dos Filósofos">
-      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
-        <source src="assets/videos/guardiao_dos_filosofos.mp4" type="video/mp4">
-      </video>
-    </div><span class="videoState">Imagem base</span></div>
-        <div class="atelierBody"><div class="tag">SALA VIVA</div><h3>Guardião dos Filósofos</h3><p>Um retrato antigo desperta, observa o visitante e lança um enigma, como se a própria parede estivesse pensando.</p><button class="smallBtn promptBtn" data-prompt="filosofos">Abrir prompt Gemini</button></div>
-      </article>
-      <article class="atelierCard">
-        <div class="atelierArt"><div class="mediaSlot atelierMedia" data-video-slot>
-      <img class="mediaPoster" src="" data-media="poster_espelho" alt="Sombra do Espelho">
-      <video class="mediaVideo" muted loop playsinline preload="metadata" aria-hidden="true">
-        <source src="assets/videos/espelho_guardiao_sombrio.mp4" type="video/mp4">
-      </video>
-    </div><span class="videoState">Imagem base</span></div>
-        <div class="atelierBody"><div class="tag">CENA CURTA</div><h3>Sombra do Espelho</h3><p>O espelho pulsa, reflete a dúvida e cria uma cena curta perfeita para epistemologia, mistério e suspense.</p><button class="smallBtn promptBtn" data-prompt="espelho">Abrir prompt Gemini</button></div>
-      </article>
-    </div>
   </div>
 </section>
 
