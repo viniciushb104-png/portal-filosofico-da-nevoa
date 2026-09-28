@@ -1,0 +1,318 @@
+/* Oráculo 3.0 — Rituais e acontecimentos mágicos
+   Camada modular: não substitui a estrutura principal. */
+
+.oracle-ritual-layer{
+  position:fixed;
+  z-index:180;
+  inset:0;
+  display:grid;
+  place-items:center;
+  pointer-events:none;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .22s ease,visibility .22s;
+}
+.oracle-ritual-layer.active{opacity:1;visibility:visible}
+.ritual-darkness{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 50% 52%,rgba(108,43,143,.16),transparent 28%),
+    rgba(6,3,10,.62);
+  backdrop-filter:blur(2px);
+}
+.ritual-vortex{
+  position:relative;
+  width:210px;height:210px;
+  border:1px solid rgba(224,174,248,.30);
+  border-radius:50%;
+  box-shadow:0 0 75px rgba(169,72,215,.20),inset 0 0 35px rgba(168,72,213,.12);
+  animation:ritualVortex 5s linear infinite;
+}
+.ritual-vortex:before,.ritual-vortex:after{
+  content:"";position:absolute;border-radius:50%;inset:17px;
+  border:1px dashed rgba(243,204,139,.34);
+}
+.ritual-vortex:after{inset:42px;border-style:solid;border-color:rgba(213,155,239,.22)}
+.ritual-vortex span{position:absolute;color:#e4bdf5;text-shadow:0 0 14px rgba(210,131,247,.8);font-size:1.1rem}
+.ritual-vortex span:nth-child(1){left:50%;top:-9px}
+.ritual-vortex span:nth-child(2){right:-7px;top:50%}
+.ritual-vortex span:nth-child(3){left:50%;bottom:-9px}
+.ritual-vortex span:nth-child(4){left:-7px;top:50%}
+.ritual-copy{
+  position:absolute;top:calc(50% + 125px);
+  width:min(460px,88vw);text-align:center;
+  color:#e9dcef;
+}
+.ritual-copy small{display:block;color:#d597ef;font-size:.52rem;letter-spacing:.17em;font-weight:900}
+.ritual-copy b{display:block;margin-top:6px;color:#f3d79d;font-size:.82rem}
+.oracle-ritual-running .oracle-stage,
+.oracle-ritual-running .oracle-builder{filter:saturate(1.15)}
+.oracle-rune.ritual-lit{
+  color:#fff1bd!important;
+  text-shadow:0 0 8px #fff,0 0 20px #cf74ff,0 0 38px #a633d8;
+  transform:scale(1.32)!important;
+}
+.oracle-crystal-ball.ritual-charge{
+  animation:ritualCrystal .62s ease-in-out infinite alternate!important;
+}
+.oracle-cauldron.ritual-brew .cauldron-pot{
+  animation:ritualCauldron .36s ease-in-out infinite alternate;
+  filter:drop-shadow(0 0 13px rgba(207,103,242,.54));
+}
+.oracle-flying-ingredient{
+  position:fixed;z-index:190;width:28px;height:28px;display:grid;place-items:center;
+  border-radius:50%;background:rgba(46,20,62,.88);border:1px solid rgba(237,193,255,.46);
+  box-shadow:0 0 18px rgba(199,95,237,.35);pointer-events:none;font-size:.86rem;
+}
+@keyframes ritualVortex{to{transform:rotate(360deg)}}
+@keyframes ritualCrystal{to{transform:scale(1.08);filter:brightness(1.42) drop-shadow(0 0 18px rgba(213,116,255,.75))}}
+@keyframes ritualCauldron{to{transform:translateY(-2px) scale(1.025)}}
+
+/* 2. Entrada cinematográfica */
+#oracleEntrance.portal-opening .oracle-entrance-panel{
+  animation:entryPanelOpen .8s cubic-bezier(.2,.8,.2,1) forwards;
+}
+#oracleEntrance.portal-opening .oracle-entrance-orb{
+  animation:entryOrbOpen .72s ease-out forwards!important;
+}
+#oracleEntrance.portal-opening .oracle-entrance-stars{
+  animation:entryStarsOpen .9s ease-out forwards!important;
+}
+#oracleEntrance.portal-opening .oracle-entrance-mist-a{animation:entryMistA .9s ease-out forwards!important}
+#oracleEntrance.portal-opening .oracle-entrance-mist-b{animation:entryMistB .9s ease-out forwards!important}
+#oracleEntrance.portal-opening:after{
+  content:"";position:absolute;z-index:3;left:50%;top:50%;width:20px;height:20px;border-radius:50%;
+  border:1px solid rgba(239,211,255,.8);transform:translate(-50%,-50%);
+  animation:entryPortalRing .85s ease-out forwards;
+}
+@keyframes entryOrbOpen{55%{transform:scale(1.2);filter:brightness(1.65)}100%{transform:scale(2.5);opacity:0;filter:brightness(2)}}
+@keyframes entryPanelOpen{45%{box-shadow:0 0 80px rgba(195,91,238,.38)}100%{transform:scale(1.04);filter:blur(5px);opacity:.18}}
+@keyframes entryStarsOpen{to{letter-spacing:2.2em;opacity:0}}
+@keyframes entryMistA{to{transform:translateX(55vw) scale(1.6);opacity:.52}}
+@keyframes entryMistB{to{transform:translateX(-55vw) scale(1.6);opacity:.52}}
+@keyframes entryPortalRing{to{width:115vmax;height:115vmax;opacity:0;border-width:14px}}
+
+/* 3. Selos mágicos do pergaminho */
+.oracle-seal-row{
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin:2px 6px 7px;padding-bottom:6px;
+  border-bottom:1px solid rgba(83,51,47,.12);
+}
+.oracle-seal{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 7px;border:1px solid rgba(94,53,54,.18);
+  border-radius:999px;background:rgba(105,60,70,.055);
+  color:#5f3d3f;transform-origin:center;
+}
+.oracle-seal i{font-style:normal;font-size:.72rem}
+.oracle-seal b{font-size:.52rem;letter-spacing:.02em}
+.oracle-seal-row.stamp .oracle-seal{animation:sealStamp .46s cubic-bezier(.18,.85,.25,1) backwards}
+.oracle-seal-row.stamp .oracle-seal:nth-child(2){animation-delay:.09s}
+.oracle-seal-row.stamp .oracle-seal:nth-child(3){animation-delay:.18s}
+@keyframes sealStamp{0%{opacity:0;transform:scale(1.6) rotate(-8deg)}65%{opacity:1;transform:scale(.94) rotate(1deg)}100%{transform:none}}
+.oracle-paper-window.freshly-summoned:after{
+  content:"";position:absolute;inset:8% 7%;pointer-events:none;border-radius:18px;
+  box-shadow:inset 0 0 38px rgba(145,77,117,.12);
+  animation:parchmentAfterglow 1.6s ease-out forwards;
+}
+@keyframes parchmentAfterglow{from{opacity:1}to{opacity:0}}
+
+/* 4. Aparição filosófica */
+.oracle-apparition{
+  position:absolute;z-index:9;right:7%;top:20%;
+  width:170px;min-height:190px;padding:20px 12px 12px;
+  text-align:center;pointer-events:none;
+  opacity:0;transform:translateY(13px) scale(.88);
+  filter:blur(7px);
+  background:radial-gradient(ellipse at 50% 32%,rgba(221,192,237,.17),transparent 54%);
+}
+.oracle-apparition.show{
+  animation:apparitionVisit 6s ease-in-out forwards;
+}
+.apparition-halo{
+  position:absolute;left:50%;top:3px;width:102px;height:135px;transform:translateX(-50%);
+  border-radius:50% 50% 44% 44%;border:1px solid rgba(224,199,235,.16);
+  box-shadow:0 0 38px rgba(196,145,225,.16),inset 0 0 28px rgba(222,202,234,.08);
+}
+.apparition-face{
+  position:relative;z-index:2;display:grid;place-items:center;
+  width:74px;height:92px;margin:0 auto 12px;
+  border-radius:48% 48% 43% 43%;
+  background:linear-gradient(180deg,rgba(224,212,229,.23),rgba(75,57,83,.14));
+  border:1px solid rgba(233,218,239,.25);
+  color:rgba(250,241,255,.82);font-family:Georgia,serif;font-size:1.45rem;font-weight:900;
+  text-shadow:0 0 16px rgba(237,215,249,.8);
+}
+.oracle-apparition small{display:block;color:#d6a4e8;font-size:.43rem;letter-spacing:.12em}
+.oracle-apparition b{display:block;margin:4px 0;color:#ecd7b0;font-size:.68rem}
+.oracle-apparition p{margin:0;color:#c9b9cf;font-size:.52rem;line-height:1.35}
+@keyframes apparitionVisit{
+  0%{opacity:0;filter:blur(8px);transform:translateY(15px) scale(.88)}
+  18%,72%{opacity:.88;filter:blur(0);transform:translateY(0) scale(1)}
+  100%{opacity:0;filter:blur(8px);transform:translateY(-9px) scale(.96)}
+}
+
+/* 5. Biblioteca viva */
+.oracle-growing-library{
+  position:absolute;z-index:5;left:16px;bottom:152px;width:142px;
+  padding:7px 8px 6px;border-radius:11px;
+  background:rgba(12,7,17,.48);border:1px solid rgba(226,188,239,.09);
+  backdrop-filter:blur(4px);pointer-events:auto;
+}
+.oracle-growing-library>small{display:block;margin-top:4px;color:#8f7b98;font-size:.40rem;text-align:center;letter-spacing:.05em}
+.growing-shelf{
+  position:relative;display:flex;align-items:flex-end;justify-content:center;gap:2px;
+  min-height:37px;padding:0 5px 4px;border-bottom:4px solid #4b2d2d;
+  box-shadow:0 5px 5px rgba(0,0,0,.20);
+}
+.journey-book{
+  display:block;position:relative;width:9px;height:calc(20px + (var(--i) % 4)*4px);
+  border-radius:2px 2px 0 0;
+  background:linear-gradient(90deg,#4a225e,#7a3a86 45%,#3c1c4b);
+  border:1px solid rgba(236,203,153,.16);
+  transform:rotate(calc((var(--i) % 3 - 1)*1.8deg));
+}
+.journey-book:nth-child(3n){background:linear-gradient(90deg,#593726,#8a5b34,#442819)}
+.journey-book:nth-child(4n){background:linear-gradient(90deg,#273b54,#48647b,#1c2c40)}
+.journey-book i{position:absolute;left:2px;right:2px;top:5px;height:1px;background:rgba(245,218,162,.45)}
+.oracle-growing-library.awaken .journey-book:last-child{animation:bookAwaken .85s ease}
+.journey-book.new-book{animation:newBookShelved .9s ease}
+.oracle-growing-library.empty{opacity:.45}
+@keyframes bookAwaken{45%{transform:translateY(-12px) rotate(6deg);filter:brightness(1.5)}}
+@keyframes newBookShelved{0%{transform:translateY(-32px) rotate(-14deg);opacity:0}65%{transform:translateY(3px) rotate(2deg);opacity:1}100%{transform:none}}
+
+/* Materialização */
+.oracle-result.oracle-result-reveal .oracle-result-main{
+  animation:resultSummon .8s cubic-bezier(.18,.75,.2,1);
+}
+@keyframes resultSummon{from{opacity:.35;transform:translateY(12px) scale(.985);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+
+/* 7. Runas e Arquivo Proibido */
+.oracle-rune[role="button"]{cursor:pointer;transition:.2s ease}
+.oracle-rune[role="button"]:hover,.oracle-rune.rune-touched{
+  color:#fff0bc!important;transform:scale(1.25);text-shadow:0 0 16px rgba(214,119,255,.8);
+}
+.oracle-stage.archive-unlocked:before{
+  content:"⟁";position:absolute;z-index:5;right:14px;bottom:13px;
+  color:rgba(220,171,242,.52);font-size:.72rem;text-shadow:0 0 12px rgba(191,97,232,.55);
+}
+.oracle-archive-modal .oracle-modal-panel{
+  width:min(760px,100%);
+  background:
+    radial-gradient(circle at 50% 0%,rgba(109,44,140,.25),transparent 38%),
+    linear-gradient(155deg,#170a21,#08040c 76%);
+}
+.archive-heading{display:flex;align-items:center;gap:13px;padding-right:42px}
+.archive-heading>span{
+  display:grid;place-items:center;width:52px;height:52px;border-radius:50%;
+  border:1px solid rgba(231,191,248,.25);color:#e9c3f8;font-size:1.35rem;
+  box-shadow:0 0 24px rgba(177,73,218,.16);
+}
+.archive-heading small{color:#c98be3;font-size:.52rem;letter-spacing:.15em}
+.archive-heading h2{margin:3px 0;color:#f0d49b;font-size:1.22rem}
+.archive-intro{color:#a994b3;font-size:.68rem;line-height:1.45}
+.archive-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:13px}
+.archive-grid button{
+  position:relative;text-align:left;min-height:112px;padding:12px 12px 10px 34px;
+  border:1px solid rgba(224,174,244,.14);border-radius:14px;
+  background:linear-gradient(145deg,rgba(71,28,94,.34),rgba(14,7,20,.75));
+  color:#dfd0e5;cursor:pointer;
+}
+.archive-grid button>span{position:absolute;left:12px;top:13px;color:#d59aea}
+.archive-grid p{margin:0;font-size:.68rem;line-height:1.42}
+.archive-grid small{display:block;margin-top:8px;color:#b77ece;font-size:.5rem}
+.archive-grid button:hover{border-color:rgba(222,141,254,.4);transform:translateY(-1px)}
+.archive-mark{text-align:center;margin-top:14px;color:#684c73;font-size:.62rem;letter-spacing:.55em}
+
+/* 8. Modo Aula teatral */
+.oracle-class-in-session .oracle-main{
+  filter:brightness(.72) saturate(.88);
+}
+.oracle-classroom-modal.oracle-class-theatrical{
+  background:
+    radial-gradient(circle at 50% 2%,rgba(104,42,137,.32),transparent 28%),
+    radial-gradient(circle at 50% 110%,rgba(214,144,63,.08),transparent 35%),
+    linear-gradient(160deg,#13091b,#060309 72%);
+  box-shadow:0 0 0 1px rgba(231,189,251,.15),0 35px 100px rgba(0,0,0,.72);
+}
+.oracle-classroom-modal.oracle-class-theatrical .classroom-question{
+  box-shadow:0 0 28px rgba(175,79,218,.08);
+}
+.classroom-candles{
+  display:flex;justify-content:center;align-items:flex-end;gap:9px;
+  min-height:48px;margin:10px 0 4px;padding:5px 8px;
+}
+.class-candle{
+  position:relative;display:block;width:10px;height:27px;border-radius:3px 3px 1px 1px;
+  background:linear-gradient(90deg,#765a55,#c1a080 45%,#6a4d49);opacity:.34;
+  transition:.35s ease;
+}
+.class-candle:after{
+  content:"";position:absolute;left:50%;top:-10px;width:7px;height:11px;
+  border-radius:50% 50% 44% 44%;transform:translateX(-50%) scale(.3);
+  background:radial-gradient(circle at 50% 65%,#fff6bd 0 20%,#f0a84c 45%,rgba(204,84,43,.15) 72%);
+  opacity:0;filter:drop-shadow(0 0 6px rgba(255,184,78,.8));transition:.35s ease;
+}
+.class-candle.lit{opacity:1;box-shadow:0 0 14px rgba(239,168,83,.10)}
+.class-candle.lit:after{opacity:1;transform:translateX(-50%) scale(1);animation:candleFlicker .8s ease-in-out infinite alternate}
+@keyframes candleFlicker{to{transform:translateX(-50%) scale(.88) rotate(3deg);filter:drop-shadow(0 0 9px rgba(255,190,87,.9))}}
+.oracle-class-finale{
+  position:fixed;z-index:220;inset:0;display:grid;place-content:center;text-align:center;
+  padding:22px;background:radial-gradient(circle at 50% 46%,rgba(115,47,151,.35),rgba(6,3,10,.93) 54%);
+  color:#eadfeb;opacity:0;visibility:hidden;pointer-events:none;
+}
+.oracle-class-finale.show{visibility:visible;animation:classFinale 2.55s ease forwards}
+.finale-rune{font-size:2.5rem;color:#f1d49c;text-shadow:0 0 28px rgba(215,117,249,.7)}
+.oracle-class-finale small{margin-top:10px;color:#cb8fe4;font-size:.55rem;letter-spacing:.18em}
+.oracle-class-finale b{margin-top:7px;color:#f4dda9;font:700 clamp(1.6rem,5vw,2.5rem)/1 Georgia,serif}
+.oracle-class-finale p{max-width:480px;margin:8px auto 0;color:#b8a5c0;font-size:.72rem}
+@keyframes classFinale{0%{opacity:0;filter:blur(8px)}20%,75%{opacity:1;filter:none}100%{opacity:0;filter:blur(7px)}}
+
+/* Emergência participa do ritual sem atrasar o fluxo */
+.oracle-emergency-ritual .oracle-magic-circle{animation-duration:1.1s!important;filter:brightness(1.45)}
+.oracle-emergency-ritual .oracle-crystal-ball{filter:brightness(1.45) drop-shadow(0 0 14px rgba(232,142,255,.55))}
+
+/* Responsivo */
+@media(max-width:760px){
+  .ritual-vortex{width:154px;height:154px}
+  .ritual-copy{top:calc(50% + 96px)}
+  .ritual-copy b{font-size:.72rem}
+  .oracle-seal-row{gap:4px;margin-left:2px;margin-right:2px}
+  .oracle-seal{padding:4px 6px}
+  .oracle-seal b{font-size:.49rem}
+  .oracle-apparition{right:3%;top:19%;width:132px;min-height:155px;padding:15px 8px 8px}
+  .apparition-halo{width:76px;height:102px}
+  .apparition-face{width:58px;height:70px;font-size:1.05rem;margin-bottom:8px}
+  .oracle-apparition p{font-size:.46rem}
+  .oracle-growing-library{left:8px;bottom:123px;width:112px;padding:5px}
+  .growing-shelf{min-height:29px}
+  .journey-book{width:7px;height:calc(16px + (var(--i) % 4)*3px)}
+  .oracle-growing-library>small{font-size:.34rem}
+  .archive-grid{grid-template-columns:1fr}
+  .archive-grid button{min-height:86px}
+  .archive-heading h2{font-size:1rem}
+  .classroom-candles{gap:7px}
+}
+@media(max-width:390px){
+  .oracle-apparition{display:none}
+  .oracle-growing-library{bottom:112px;width:98px}
+  .oracle-seal-resource{display:none}
+}
+@media(max-height:560px) and (orientation:landscape){
+  .oracle-ritual-layer .ritual-vortex{width:118px;height:118px}
+  .ritual-copy{top:calc(50% + 70px)}
+  .oracle-apparition{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .ritual-vortex,.oracle-crystal-ball.ritual-charge,.oracle-cauldron.ritual-brew .cauldron-pot,
+  .oracle-seal-row.stamp .oracle-seal,.oracle-apparition.show,.journey-book.new-book,
+  .oracle-result.oracle-result-reveal .oracle-result-main,.class-candle.lit:after,
+  #oracleEntrance.portal-opening .oracle-entrance-panel,#oracleEntrance.portal-opening .oracle-entrance-orb,
+  #oracleEntrance.portal-opening .oracle-entrance-stars,#oracleEntrance.portal-opening:after{
+    animation:none!important;
+  }
+}
+@media print{
+  .oracle-ritual-layer,.oracle-apparition,.oracle-growing-library,.oracle-class-finale,
+  .oracle-archive-modal,.classroom-candles{display:none!important}
+}
