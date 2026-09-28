@@ -181,7 +181,7 @@ if(workflow){
     '<nav class="oracle-workflow-nav" aria-label="Etapas da Central">'+
       '<button type="button" data-flow-target="oraclePrepare"><span>01</span><b>Preparar</b><small>turma e objetivo</small></button>'+
       '<button type="button" data-flow-target="result"><span>02</span><b>Atividade</b><small>pergaminho pronto</small></button>'+
-      '<button type="button" data-flow-target="oracleRefine"><span>03</span><b>Lapidar</b><small>cartas e conversa</small></button>'+
+      '<button type="button" data-flow-target="oracleRefine"><span>03</span><b>Adaptar</b><small>Cartas da Névoa</small></button>'+
       '<button type="button" data-flow-target="magicGrimoireBtn"><span>04</span><b>Memória</b><small>grimório pessoal</small></button>'+
     '</nav>'
   );
@@ -204,16 +204,14 @@ if(result){
 }
 
 const magicTools=$('#oracleMagicTools');
-const aiChat=$('#oracleAiChat');
-if(magicTools&&aiChat){
+if(magicTools){
   const refine=document.createElement('section');
-  refine.className='oracle-refine-zone';
+  refine.className='oracle-refine-zone oracle-refine-zone-solo';
   refine.id='oracleRefine';
-  refine.innerHTML='<div class="oracle-section-heading"><div><span>03 • LAPIDAR</span><h2>Transforme, converse e refine</h2><p>Escolha uma carta ou peça mudanças diretamente à Oráculo.</p></div></div><div class="oracle-refine-grid"></div>';
+  refine.innerHTML='<div class="oracle-section-heading"><div><span>03 • ADAPTAR</span><h2>Transforme a atividade com as Cartas da Névoa</h2><p>Escolha uma adaptação pronta sem precisar conversar com a IA.</p></div></div><div class="oracle-refine-grid"></div>';
   magicTools.parentNode.insertBefore(refine,magicTools);
   const grid=$('.oracle-refine-grid',refine);
   grid.appendChild(magicTools);
-  grid.appendChild(aiChat);
 }
 
 const saved=$('#savedArea');
