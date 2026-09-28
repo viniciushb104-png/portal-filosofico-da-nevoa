@@ -135,7 +135,7 @@ function isWalkable(x,y){
  return WALK_PATHS.some(([ax,ay,bx,by,w])=>pointSegmentDistance(x,y,ax,ay,bx,by)<=w);
 }
 let moveKeys={up:false,down:false,left:false,right:false};
-let nearbyPoi=null,nearbyExtra=null,lastWorldFrame=0,lastPositionSave=0,accountName='Explorador',worldReady=false;
+let nearbyPoi=null,nearbyExtra=null,lastWorldFrame=0,lastPositionSave=0,accountName='Explorador',accountAvatarKey='avatar-01',worldReady=false;
 let walkFrame=0,lastWalkFrameAt=0;
 
 const fresh=()=>({
@@ -678,13 +678,35 @@ function startPresence(){
  }
 }
 async function initAccount(){
- const badge=$('#accountBadge');
+ const badge=$('#accountBadge'),text=$('#accountText');
  if(window.NevoaOnline?.getSession()){
    try{
-     const p=await window.NevoaOnline.sessionProfile();
-     if(p){accountName=p.nickname;badge.classList.add('online');badge.innerHTML='<span class="dot"></span><span>'+p.nickname+' • '+p.xp+' XP</span>';startPresence();renderWorld()}
+     const [p,key]=await Promise.all([
+       window.NevoaOnline.sessionProfile(),
+       window.NevoaAvatar?.currentKey?.()||Promise.resolve('avatar-01')
+     ]);
+     if(p){
+       accountName=p.nickname;accountAvatarKey=key||'avatar-01';
+       badge.classList.add('online');
+       if(text)text.textContent=p.nickname+' • '+p.xp+' XP';
+       $('#paradoxiaHudName').textContent=p.nickname;
+       $('#endProfileName').textContent=p.nickname;
+       window.NevoaAvatar?.paint($('#accountAvatar'),accountAvatarKey,'Seu avatar');
+       window.NevoaAvatar?.paint($('#paradoxiaHudAvatar'),accountAvatarKey,'Seu avatar');
+       window.NevoaAvatar?.paint($('#endProfileAvatar'),accountAvatarKey,'Seu avatar');
+       const rank=window.NevoaAvatar?.rankClass(Number(p.xp)||0)||'rank-aprendiz';
+       const af=$('#accountAvatarFrame'),hf=$('#paradoxiaHudAvatarFrame'),ef=$('#endProfileAvatarFrame');
+       if(af)af.className='accountAvatar avatarFrame '+rank;
+       if(hf)hf.className='paradoxiaHudAvatar avatarFrame '+rank;
+       if(ef)ef.className='endProfileAvatar avatarFrame '+rank;
+       startPresence();renderWorld();
+     }
    }catch(e){}
  }else{
+   $('#paradoxiaHudName').textContent='Visitante';
+   if(text)text.textContent='Visitante';
+   window.NevoaAvatar?.paint($('#accountAvatar'),'avatar-01','Avatar padrão');
+   window.NevoaAvatar?.paint($('#paradoxiaHudAvatar'),'avatar-01','Avatar padrão');
    badge.onclick=()=>location.href='../../login.html';
  }
 }
