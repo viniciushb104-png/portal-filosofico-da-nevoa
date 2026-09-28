@@ -1,0 +1,17 @@
+GRANDE MAPA DO PORTAL — ARTE PRINCIPAL
+
+Nome exato da arte:
+grande-mapa-portal.png
+
+Caminho completo:
+universo/assets/grande-mapa-portal.png
+
+A página universo/mapa.html já está preparada para:
+- carregar a arte automaticamente;
+- manter os portais clicáveis por cima da ilustração;
+- funcionar em desktop e celular;
+- permitir modo de tela cheia;
+- manter um cenário de fallback se a arte ainda não estiver no repositório.
+
+Proporção recomendada: 4:3.
+A arte criada para este mapa tem 1448 x 1086 px.
