@@ -28,9 +28,20 @@ function publishableKey() {
   return Deno.env.get("SUPABASE_ANON_KEY") || "";
 }
 
+function serverSecretKey() {
+  const modern = Deno.env.get("SUPABASE_SECRET_KEYS");
+  if (modern) {
+    try {
+      const parsed = JSON.parse(modern);
+      if (parsed?.default) return String(parsed.default);
+    } catch (_) {}
+  }
+  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+}
+
 async function validatePortalSession(token: string) {
   if (!token || token.length < 16) return null;
-  const key = publishableKey();
+  const key = serverSecretKey() || publishableKey();
   if (!SUPABASE_URL || !key) return null;
 
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/session_profile`, {
@@ -51,8 +62,8 @@ async function validatePortalSession(token: string) {
 
 
 async function portalRpc(name: string, body: Record<string, unknown>) {
-  const key = publishableKey();
-  if (!SUPABASE_URL || !key) throw new Error("Supabase indisponível.");
+  const key = serverSecretKey();
+  if (!SUPABASE_URL || !key) throw new Error("Supabase secret indisponível.");
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
     method: "POST",
     headers: {
@@ -112,6 +123,22 @@ function learnedPatterns(recent: any[]) {
   return out;
 }
 
+
+async function savePedagogicalMemory(token: string, preferences: Record<string, unknown>, learningEnabled: boolean) {
+  const data = await portalRpc("save_oracle_pedagogical_memory", {
+    p_token: token,
+    p_preferences: preferences,
+    p_learning_enabled: learningEnabled,
+  });
+  const row = Array.isArray(data) ? data[0] : data;
+  return row || { preferences: {}, recent_configs: [], learning_enabled: learningEnabled };
+}
+
+async function clearPedagogicalMemory(token: string) {
+  await portalRpc("clear_oracle_pedagogical_memory", { p_token: token });
+  return { preferences: {}, recent_configs: [], learning_enabled: true };
+}
+
 function cleanText(value: unknown, max = 600) {
   return String(value ?? "").replace(/[\u0000-\u001f]+/g, " ").trim().slice(0, max);
 }
@@ -128,6 +155,20 @@ function safeConfig(input: any) {
     area: cleanText(input?.area, 100),
     topic: cleanText(input?.topic, 180),
     mode: cleanText(input?.mode, 40),
+  };
+}
+
+function safePreferences(input: any) {
+  return {
+    level: cleanText(input?.level, 80),
+    discipline: cleanText(input?.discipline, 80),
+    time: cleanText(input?.time, 60),
+    participation: cleanText(input?.participation, 60),
+    resources: cleanText(input?.resources, 120),
+    format: cleanText(input?.format, 60),
+    objective: cleanText(input?.objective, 100),
+    area: cleanText(input?.area, 100),
+    notes: cleanText(input?.notes, 240),
   };
 }
 
@@ -227,6 +268,32 @@ Deno.serve(async (req: Request) => {
     const profile = await validatePortalSession(sessionToken);
     if (!profile) return json({ error: "login_required", message: "Entre no Portal para usar a IA online." }, 401);
 
+    const requestedAction = cleanText(body?.action, 40) || "generate";
+
+    if (requestedAction === "memory_get") {
+      const memory = await loadPedagogicalMemory(sessionToken);
+      return json({ ok: true, source: "memory", memory });
+    }
+
+    if (requestedAction === "memory_save") {
+      const preferences = safePreferences(body?.preferences || {});
+      const learningEnabled = body?.learningEnabled !== false;
+      const memory = await savePedagogicalMemory(sessionToken, preferences, learningEnabled);
+      return json({ ok: true, source: "memory", memory });
+    }
+
+    if (requestedAction === "memory_clear") {
+      const memory = await clearPedagogicalMemory(sessionToken);
+      return json({ ok: true, source: "memory", memory });
+    }
+
+    if (requestedAction === "memory_record") {
+      const cfgToRecord = safeConfig(body?.config || {});
+      await recordPedagogicalConfig(sessionToken, cfgToRecord);
+      const memory = await loadPedagogicalMemory(sessionToken);
+      return json({ ok: true, source: "memory", memory });
+    }
+
     if (!OPENAI_API_KEY) {
       return json({
         error: "setup_required",
@@ -234,7 +301,7 @@ Deno.serve(async (req: Request) => {
       }, 503);
     }
 
-    const action = body?.action === "chat" ? "chat" : "generate";
+    const action = requestedAction === "chat" ? "chat" : "generate";
     const cfg = safeConfig(body?.config || {});
     const current = safeActivity(body?.activity);
     const userMessage = cleanText(body?.message, 800);
