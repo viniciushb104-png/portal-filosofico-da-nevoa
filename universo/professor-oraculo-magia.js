@@ -157,6 +157,84 @@ root.insertAdjacentHTML('beforeend',
   '</div>'
 );
 
+/* Organização visual — fluxo da Central */
+const heroGrid=$('.oracle-hero-grid');
+const builder=$('.oracle-builder');
+const voice=$('.oracle-voice');
+if(heroGrid&&stage&&builder){
+  heroGrid.id='oraclePrepare';
+  const companion=document.createElement('div');
+  companion.className='oracle-companion-column';
+  heroGrid.insertBefore(companion,stage);
+  companion.appendChild(stage);
+  if(voice)companion.appendChild(voice);
+  heroGrid.insertAdjacentHTML('beforebegin',
+    '<section class="oracle-section-heading oracle-section-heading-first">'+
+      '<div><span>01 • PREPARAR</span><h2>Converse com a Oráculo e monte a aula</h2><p>Defina o essencial. Os detalhes mágicos ficam disponíveis sem disputar atenção com o planejamento.</p></div>'+
+    '</section>'
+  );
+}
+
+const workflow=$('.oracle-welcome');
+if(workflow){
+  workflow.insertAdjacentHTML('afterend',
+    '<nav class="oracle-workflow-nav" aria-label="Etapas da Central">'+
+      '<button type="button" data-flow-target="oraclePrepare"><span>01</span><b>Preparar</b><small>turma e objetivo</small></button>'+
+      '<button type="button" data-flow-target="result"><span>02</span><b>Atividade</b><small>pergaminho pronto</small></button>'+
+      '<button type="button" data-flow-target="oracleRefine"><span>03</span><b>Lapidar</b><small>cartas e conversa</small></button>'+
+      '<button type="button" data-flow-target="magicGrimoireBtn"><span>04</span><b>Memória</b><small>grimório pessoal</small></button>'+
+    '</nav>'
+  );
+}
+
+if(memoryPanel){
+  memoryPanel.classList.add('oracle-memory-compact');
+  const head=$('.oracle-memory-head',memoryPanel);
+  if(head&&!$('#memoryPanelToggle')){
+    head.insertAdjacentHTML('beforeend','<button class="oracle-memory-expand" id="memoryPanelToggle" type="button" aria-expanded="false">Abrir memória ✦</button>');
+  }
+}
+
+if(result){
+  result.insertAdjacentHTML('beforebegin',
+    '<section class="oracle-section-heading">'+
+      '<div><span>02 • ATIVIDADE</span><h2>O pergaminho da aula</h2><p>O resultado principal fica sozinho, amplo e confortável para leitura.</p></div>'+
+    '</section>'
+  );
+}
+
+const magicTools=$('#oracleMagicTools');
+const aiChat=$('#oracleAiChat');
+if(magicTools&&aiChat){
+  const refine=document.createElement('section');
+  refine.className='oracle-refine-zone';
+  refine.id='oracleRefine';
+  refine.innerHTML='<div class="oracle-section-heading"><div><span>03 • LAPIDAR</span><h2>Transforme, converse e refine</h2><p>Escolha uma carta ou peça mudanças diretamente à Oráculo.</p></div></div><div class="oracle-refine-grid"></div>';
+  magicTools.parentNode.insertBefore(refine,magicTools);
+  const grid=$('.oracle-refine-grid',refine);
+  grid.appendChild(magicTools);
+  grid.appendChild(aiChat);
+}
+
+const saved=$('#savedArea');
+if(saved){
+  const h=$('.oracle-saved-head h3',saved);
+  if(h)h.textContent='📚 Biblioteca de atividades salvas';
+}
+
+$('[data-flow-target]').forEach(btn=>btn.addEventListener('click',()=>{
+  const id=btn.dataset.flowTarget;
+  if(id==='magicGrimoireBtn'){ $('#magicGrimoireBtn')?.click(); return; }
+  const target=document.getElementById(id);
+  if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+}));
+$('#memoryPanelToggle')?.addEventListener('click',e=>{
+  const compact=memoryPanel.classList.toggle('oracle-memory-compact');
+  e.currentTarget.setAttribute('aria-expanded',String(!compact));
+  e.currentTarget.textContent=compact?'Abrir memória ✦':'Recolher memória ↑';
+  if(!compact){renderConstellation();renderMirror();playChime('soft')}
+});
+
 /* Atmosphere */
 const thoughtPool=[
   'Se ninguém discordasse de você, ainda haveria filosofia?',
