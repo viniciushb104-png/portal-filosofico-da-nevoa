@@ -8,6 +8,9 @@ root.dataset.magicV2='1';
 
 const STORE='nevoaOracleMagicV2';
 const soundDefault=true;
+const THEME_SRC="assets/audio/oraculo/oraculo-da-nevoa-theme.mp3";
+let themeAudio=null;
+let themeWanted=false;
 let classroomTimer=null;
 let classroomSeconds=0;
 let classroomRunning=false;
@@ -62,6 +65,54 @@ function playChime(type='soft'){
     });
   }catch(e){}
 }
+
+function ensureThemeAudio(){
+  if(themeAudio)return themeAudio;
+  themeAudio=new Audio(THEME_SRC);
+  themeAudio.loop=true;
+  themeAudio.preload="none";
+  themeAudio.volume=.18;
+  themeAudio.addEventListener("play",updateThemeButton);
+  themeAudio.addEventListener("pause",updateThemeButton);
+  themeAudio.addEventListener("error",function(){
+    themeWanted=false;
+    updateThemeButton();
+    toast("Não consegui carregar o tema da Oráculo.");
+  });
+  return themeAudio;
+}
+function updateThemeButton(){
+  const btn=$("#magicThemeBtn");if(!btn)return;
+  const playing=!!(themeAudio&&!themeAudio.paused);
+  btn.setAttribute("aria-pressed",String(playing));
+  btn.classList.toggle("is-playing",playing);
+  btn.textContent=playing?"⏸ Pausar tema":"🎵 Tocar tema";
+}
+async function toggleTheme(){
+  const audio=ensureThemeAudio();
+  if(!audio.paused){
+    themeWanted=false;
+    audio.pause();
+    return;
+  }
+  themeWanted=true;
+  try{
+    await audio.play();
+    toast("🎵 O tema da Oráculo começou a tocar.");
+  }catch(e){
+    themeWanted=false;
+    updateThemeButton();
+    toast("Clique novamente para liberar a música neste navegador.");
+  }
+}
+document.addEventListener("visibilitychange",function(){
+  if(!themeAudio)return;
+  if(document.hidden){
+    if(!themeAudio.paused)themeAudio.pause();
+  }else if(themeWanted){
+    themeAudio.play().catch(function(){});
+  }
+});
 function oracleSay(text,expression){
   if(window.NevoaOracle?.say)window.NevoaOracle.say(text,expression||'mystery',false);
 }
@@ -73,7 +124,8 @@ const welcomeActions=$('.oracle-welcome-actions');
 if(welcomeActions){
   welcomeActions.insertAdjacentHTML('beforeend',
     '<button class="oracle-btn oracle-magic-grimoire-btn" id="magicGrimoireBtn" type="button">📖 Grimório da Oráculo</button>'+
-    '<button class="oracle-btn oracle-sound-btn" id="magicSoundBtn" type="button" aria-pressed="'+profile.sound+'">'+(profile.sound?'🔔 Som mágico':'🔕 Som desligado')+'</button>'
+    '<button class="oracle-btn oracle-theme-btn" id="magicThemeBtn" type="button" aria-pressed="false">🎵 Tocar tema</button>'+
+    '<button class="oracle-btn oracle-sound-btn" id="magicSoundBtn" type="button" aria-pressed="'+profile.sound+'">'+(profile.sound?'🔔 Efeitos':'🔕 Efeitos')+'</button>'
   );
 }
 
@@ -546,7 +598,8 @@ if(matchMedia('(hover:hover) and (pointer:fine)').matches&&stage){
 
 /* Events */
 $('#magicGrimoireBtn')?.addEventListener('click',()=>{renderGrimoire();openModal('#magicGrimoireModal');playChime('soft')});
-$('#magicSoundBtn')?.addEventListener('click',e=>{profile.sound=!profile.sound;save();e.currentTarget.textContent=profile.sound?'🔔 Som mágico':'🔕 Som desligado';e.currentTarget.setAttribute('aria-pressed',String(profile.sound));if(profile.sound)playChime('soft')});
+$('#magicThemeBtn')?.addEventListener('click',toggleTheme);
+$('#magicSoundBtn')?.addEventListener('click',e=>{profile.sound=!profile.sound;save();e.currentTarget.textContent=profile.sound?'🔔 Efeitos':'🔕 Efeitos';e.currentTarget.setAttribute('aria-pressed',String(profile.sound));if(profile.sound)playChime('soft')});
 $$('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
 $('#shuffleMagicCards')?.addEventListener('click',()=>{renderCards(profile.uses+Math.floor(Math.random()*20));playChime('soft')});
 $('#secretQuestionBtn')?.addEventListener('click',revealSecret);
