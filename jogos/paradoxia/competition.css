@@ -55,3 +55,7 @@
   .missionEntrance b{font-size:5px;padding:3px 5px}
   .missionEntrance span{width:36px;height:36px;font-size:18px}
 }
+
+/* V8 — avatares no ranking */
+.rankRow{grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center}.rankAvatar{width:38px;height:38px;flex:0 0 38px}.rankRow.me .rankAvatar{border-color:#ffb36a;box-shadow:0 0 0 3px #09050dcc,0 0 20px #ff8a434d}
+@media(max-width:620px){.rankRow{grid-template-columns:auto auto minmax(0,1fr) auto;gap:7px}.rankAvatar{width:32px;height:32px;flex-basis:32px}.rankPos{min-width:28px}}
