@@ -541,3 +541,31 @@
   .oracle-memory-head{align-items:center}
   .oracle-memory-expand{padding:5px 7px}
 }
+
+
+/* Sem chat — Cartas da Névoa em foco */
+.oracle-refine-zone-solo .oracle-refine-grid{
+  grid-template-columns:1fr !important;
+  width:min(100%,920px);
+  margin:0 auto;
+}
+.oracle-refine-zone-solo .oracle-magic-tools{
+  width:100%;
+}
+.oracle-refine-zone-solo .oracle-magic-tools-head h2{
+  font-size:1.18rem;
+}
+@media(min-width:900px){
+  .oracle-refine-zone-solo .oracle-adaptation-cards{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  }
+  .oracle-refine-zone-solo .oracle-adapt-card{
+    min-height:132px;
+    display:block;
+    padding:14px 12px;
+  }
+  .oracle-refine-zone-solo .oracle-adapt-card>span{display:block;font-size:1.45rem}
+  .oracle-refine-zone-solo .oracle-adapt-card b{display:block;margin:6px 0 4px}
+  .oracle-refine-zone-solo .oracle-adapt-card small{display:block}
+  .oracle-refine-zone-solo .oracle-adapt-card i{display:block;margin-top:10px}
+}
