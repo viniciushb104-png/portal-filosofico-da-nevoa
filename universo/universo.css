@@ -102,3 +102,65 @@
 .journeyLower{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin-top:14px}.journeyLower h3{font:900 25px Georgia,serif;margin:6px 0 14px}.journeyStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.journeyStats>div{padding:12px;text-align:center;border:1px solid #452750;border-radius:14px;background:#0b0610}.journeyStats b{display:block;font:900 24px Georgia,serif;color:#ffc184}.journeyStats small{font-size:9px;color:#a995b5}.chronicleLine{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid #35203d}.chronicleLine:last-child{border-bottom:0}.chronicleLine>span{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:#0a050e;border:1px solid #3d2646;filter:grayscale(.8);opacity:.65}.chronicleLine.done>span{filter:none;opacity:1;border-color:#765087;box-shadow:0 0 16px #b55ed329}.chronicleLine b,.chronicleLine small{display:block}.chronicleLine b{font:900 14px Georgia,serif}.chronicleLine small{margin-top:3px;color:#9f8baa;font-size:10px}
 @media(max-width:900px){.journeyHero{grid-template-columns:auto 1fr}.journeySeal{grid-column:1/-1;width:100%;aspect-ratio:auto;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:9px;padding:12px}.journeySeal em{display:none}.journeySeal b{font-size:24px;margin:0}.journeyWorlds{grid-template-columns:1fr}.journeyWorldCard{grid-template-columns:130px 1fr;grid-template-rows:auto}.journeyWorldArt{min-height:170px}.journeyLower{grid-template-columns:1fr}}
 @media(max-width:620px){.journeyHero{grid-template-columns:1fr;text-align:center;padding:20px}.journeyAvatar{width:112px;height:112px;margin:auto}.journeyIdentity .profileIdentityActions{justify-content:center}.journeyXpTrack{margin:auto}.journeyXpTrack>div:first-child{font-size:9px}.journeyNext{grid-template-columns:auto 1fr}.journeyNext .btn{grid-column:1/-1;width:100%}.journeySectionHead{display:block}.journeySectionHead p{text-align:left;margin-top:8px}.journeyWorldCard{grid-template-columns:100px 1fr}.journeyWorldArt{min-height:190px}.journeyWorldArt span{font-size:50px}.journeyWorldCopy h3{font-size:20px}.journeyWorldCopy p{min-height:0}.journeyStats{grid-template-columns:repeat(2,1fr)}}
+
+/* V7 — Direção de arte cinematográfica da Minha Jornada */
+body[data-page="perfil"]{background:
+radial-gradient(ellipse at 50% -5%,#5b236d55 0,transparent 34%),
+radial-gradient(ellipse at 10% 55%,#b85d3320 0,transparent 27%),
+radial-gradient(ellipse at 90% 62%,#5d3cb326 0,transparent 30%),
+linear-gradient(180deg,#09040d 0,#100717 46%,#07040a 100%);overflow-x:hidden}
+body[data-page="perfil"]::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.32;background:
+radial-gradient(circle at 12% 18%,#fff 0 1px,transparent 1.6px),
+radial-gradient(circle at 75% 13%,#fff 0 1px,transparent 1.5px),
+radial-gradient(circle at 86% 34%,#fff 0 1px,transparent 1.4px),
+radial-gradient(circle at 27% 41%,#fff 0 1px,transparent 1.5px);
+background-size:210px 190px,270px 230px,330px 290px,390px 340px}
+body[data-page="perfil"] .top{border-bottom-color:#593466;background:#08040bdc;box-shadow:0 8px 35px #0008}
+body[data-page="perfil"] .hero{position:relative;padding:58px 0 58px;overflow:hidden}
+body[data-page="perfil"] .hero::before{content:"☾";position:absolute;left:50%;top:-128px;transform:translateX(-50%) rotate(-12deg);font:280px/1 Georgia,serif;color:#f4dcff0a;text-shadow:0 0 90px #d369ff26;pointer-events:none}
+body[data-page="perfil"] .hero::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-20px;height:80px;background:radial-gradient(ellipse at center,#b27ac41d,transparent 67%);filter:blur(16px);pointer-events:none}
+body[data-page="perfil"] .hero h1{font-size:clamp(48px,8vw,92px);text-shadow:0 8px 28px #000,0 0 38px #a852ca25}
+body[data-page="perfil"] .hero .eyebrow{color:#ffc68d}
+body[data-page="perfil"] .hero .chips{margin-top:22px}
+body[data-page="perfil"] .hero .chip{background:#0c0611b8;border-color:#6b3e78;box-shadow:inset 0 0 16px #a34ac20d}
+.journeySection{position:relative}
+.journeySection::before,.journeySection::after{content:"";position:absolute;pointer-events:none;z-index:-1;border:1px solid #8e5aa31a;border-radius:50%;width:520px;height:520px}
+.journeySection::before{left:-360px;top:280px}.journeySection::after{right:-390px;top:840px}
+.journeyHero{border-radius:28px;padding:30px;background:
+linear-gradient(90deg,#ffffff05 1px,transparent 1px),
+linear-gradient(#ffffff04 1px,transparent 1px),
+radial-gradient(circle at 13% 20%,#b457dc3b,transparent 27%),
+radial-gradient(circle at 86% 8%,#ff994931,transparent 25%),
+linear-gradient(145deg,#1c0d26,#0a050f 72%);background-size:38px 38px,38px 38px,auto,auto,auto}
+.journeyHero::after{content:"✦  ·  ✦  ·  ✦";position:absolute;left:50%;bottom:9px;transform:translateX(-50%);font:10px Georgia,serif;letter-spacing:8px;color:#e4b4ef42}
+.journeyAvatar{width:146px;height:146px;border-radius:50%;border:2px solid #c27cda;box-shadow:0 0 0 6px #0d0712,0 0 0 7px #70427d,0 0 38px #c15de958,inset 0 0 28px #0008}
+.journeyAvatar::before{content:"✦";position:absolute;inset:5px auto auto 50%;transform:translate(-50%,-50%);z-index:3;width:27px;height:27px;display:grid;place-items:center;border-radius:50%;background:#160a1e;border:1px solid #e7ad75;color:#ffc184;font-size:12px;box-shadow:0 0 14px #ffb05c55}
+.journeyAvatar span{bottom:10px;left:16px;right:16px;background:#08040ce8}
+.journeyIdentity h2{letter-spacing:-.025em}.journeyIdentity .profileAccountHint{color:#c9b5d3}
+.journeyTitle{border-color:#b174bb80;background:linear-gradient(90deg,#28102fc4,#100817c4);box-shadow:inset 0 0 18px #c15fe717}
+.journeyXpTrack{padding:11px 13px;border:1px solid #4c2c57;border-radius:14px;background:#09050da8}
+.journeyProgress{border-color:#664071;background:#060309}
+.journeySeal{border-color:#e0a466;background:radial-gradient(circle at 50% 40%,#4a2236,#190b19 47%,#0a050d 72%);box-shadow:0 0 0 7px #0b0610,0 0 0 8px #9b674d,0 0 40px #ff914649,inset 0 0 28px #ffb0610c}
+.journeySeal::before,.journeySeal::after{content:"✦";position:absolute;top:50%;transform:translateY(-50%);font-size:9px;color:#eab87b}.journeySeal::before{left:10px}.journeySeal::after{right:10px}
+.journeyNext{position:relative;overflow:hidden;border-radius:20px;border-color:#865491;background:radial-gradient(circle at 8% 50%,#a64bd92a,transparent 22%),linear-gradient(90deg,#1c0d25,#0b0610)}
+.journeyNext::after{content:"PRÓXIMO CAPÍTULO";position:absolute;right:18px;top:8px;font:900 8px/1 Georgia,serif;letter-spacing:.16em;color:#d8b2e326}
+.journeyNextIcon{border-radius:50%;border-color:#a76bb3;background:radial-gradient(circle,#43204e,#14091b 70%);box-shadow:0 0 24px #b65ed339,inset 0 0 20px #0009}
+.journeySectionHead{padding:0 5px}.journeySectionHead h2{font-size:clamp(30px,4vw,42px)}
+.journeyWorlds{gap:18px}.journeyWorldCard{position:relative;border-radius:26px;border-color:#64406f;background:linear-gradient(160deg,#160a1e,#0b0610);box-shadow:0 22px 60px #0008}
+.journeyWorldCard::after{content:"";position:absolute;inset:7px;border:1px solid #ffffff09;border-radius:20px;pointer-events:none}
+.journeyWorldArt{height:168px}.journeyWorldArt::after{content:"";position:absolute;inset:auto 0 0;height:58%;background:linear-gradient(transparent,#0b0610d9);pointer-events:none}
+.journeyWorldArt span{font-size:74px;transform:translateY(-4px);transition:.25s ease}.journeyWorldCard:hover .journeyWorldArt span{transform:translateY(-8px) scale(1.08)}
+.journeyWorldCard.mansion .journeyWorldArt::before{content:"☾   ✦   🦇";position:absolute;inset:16px 16px auto;text-align:center;letter-spacing:18px;color:#f4c4bd38;background:none}
+.journeyWorldCard.labyrinth .journeyWorldArt::before{content:"✦   ?   ✦";position:absolute;inset:17px 16px auto;text-align:center;letter-spacing:18px;color:#ffd28c3d;background:none}
+.journeyWorldCard.paradoxia .journeyWorldArt::before{content:"◇   ✦   ◇";position:absolute;inset:17px 16px auto;text-align:center;letter-spacing:18px;color:#d5bdff42;background:none}
+.journeyWorldCopy{position:relative;z-index:2;padding:19px 20px 21px}.journeyWorldCopy h3{font-size:26px}.journeyWorldCopy small{color:#e9b6f6}.journeyWorldProgress{height:8px;border-color:#51305c;box-shadow:inset 0 0 8px #000}.journeyWorldProgress i{box-shadow:0 0 13px #dc65ef}
+.journeyLower{gap:18px;margin-top:18px}.journeyMemories,.journeyChronicle{position:relative;overflow:hidden;border-radius:24px;border-color:#5d3869;background:linear-gradient(150deg,#160a1e,#0a050f)}
+.journeyMemories::after{content:"📖";position:absolute;right:-8px;bottom:-24px;font-size:118px;opacity:.035;transform:rotate(-12deg);pointer-events:none}
+.journeyChronicle::after{content:"✦";position:absolute;right:17px;top:15px;color:#d596e944;font-size:28px}
+.journeyStats>div{position:relative;border-color:#4e3059;background:linear-gradient(145deg,#100716,#08040c);transition:.18s ease}.journeyStats>div:hover{transform:translateY(-2px);border-color:#875097}.journeyStats b{font-size:27px;text-shadow:0 0 16px #ff9f4c28}
+.chronicleLine{position:relative;padding:12px 0}.chronicleLine.done::before{content:"";position:absolute;left:18px;top:48px;width:1px;height:18px;background:linear-gradient(#8d599c,transparent)}.chronicleLine.done>span{background:radial-gradient(circle,#40204a,#100817);box-shadow:0 0 18px #c05de842}
+.profileAvatarEditor,.profileNameEditor{border-radius:24px;box-shadow:0 22px 65px #0009}
+.profileNextStep{border-radius:16px;background:#0b0610c7}
+@media(max-width:900px){.journeyAvatar{width:126px;height:126px}.journeyWorldArt{height:auto}.journeyWorldCard::after{inset:5px}}
+@media(max-width:620px){
+body[data-page="perfil"] .hero{padding:42px 0 38px}body[data-page="perfil"] .hero h1{font-size:48px}.journeyHero{padding:23px 16px;border-radius:23px}.journeyAvatar{width:118px;height:118px}.journeySeal{border-radius:14px}.journeyNext{padding:15px}.journeyWorlds{gap:12px}.journeyWorldCard{border-radius:20px}.journeyWorldCard::after{border-radius:15px}.journeyWorldArt{min-height:205px}.journeyWorldCopy{padding:16px 15px}.journeyWorldCopy h3{font-size:21px}.journeyLower{gap:12px}.journeyMemories,.journeyChronicle{border-radius:20px}.journeyStats>div{padding:10px 6px}.journeyStats b{font-size:23px}}
