@@ -603,3 +603,19 @@
 @media(prefers-reduced-motion:reduce){
   .oracle-theme-btn.is-playing:before{animation:none;transform:scaleX(1)}
 }
+
+
+/* Player robusto do tema */
+.oracle-theme-btn[data-audio-state="loading"]{
+  opacity:.82;
+}
+.oracle-theme-btn[data-audio-state="error"]{
+  border-color:rgba(255,130,130,.34);
+  color:#f0b6b6;
+}
+.oracle-theme-btn[data-audio-state="blocked"]{
+  animation:oracleAudioNudge .42s ease 2;
+}
+@keyframes oracleAudioNudge{
+  50%{transform:translateX(2px)}
+}
