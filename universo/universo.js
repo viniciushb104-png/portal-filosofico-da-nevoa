@@ -16,7 +16,113 @@ function museu(){shell("Museu dos Filósofos","Uma galeria de problemas e pergun
 function oficina(){const key="nevoaArgumentsV1";shell("Oficina de Argumentos","Monte um argumento por partes. A ferramenta avalia estrutura, não qual opinião você escolheu defender.",`<section class="section"><div class="wrap two"><div class="panel"><div class="field"><label>Tese</label><textarea id="thesis"></textarea></div><div class="field"><label>Razão</label><textarea id="reason"></textarea></div><div class="field"><label>Evidência ou exemplo</label><textarea id="evidence"></textarea></div><div class="field"><label>Possível objeção</label><textarea id="objection"></textarea></div><div class="field"><label>Resposta à objeção</label><textarea id="reply"></textarea></div><button class="btn" id="build">Construir argumento</button></div><div class="panel"><h2>Estrutura</h2><div id="preview" class="empty">Preencha os blocos para montar seu argumento.</div></div></div></section>`);$("#build").onclick=()=>{const ids=["thesis","reason","evidence","objection","reply"],vals=ids.map(id=>$("#"+id).value.trim()),names=["Tese","Razão","Evidência","Objeção","Resposta"];$("#preview").className="";$("#preview").innerHTML=vals.map((v,i)=>`<div class="note ${v?"success":"warning"}"><b>${names[i]}</b><small>${v||"Bloco ainda vazio"}</small></div>`).join("");if(vals.filter(Boolean).length===5){const a=readJSON(key,[]);a.push({date:new Date().toISOString(),values:vals});localStorage.setItem(key,JSON.stringify(a))}}}
 function bestiario(){const discovered=(p.completed?.logica||0)>0||u.unlocks.includes("popularidade");shell("Bestiário Filosófico","Falácias viram criaturas porque um erro de raciocínio fica mais fácil de reconhecer quando ganha rosto, nome e fraqueza.",`<section class="section"><div class="wrap collection">${D.beasts.map((x,i)=>`<article class="miniCard ${(discovered||i<2)?"":"locked"}"><div class="icon">${x.icon}</div><b>${(discovered||i<2)?x.name:"Criatura desconhecida"}</b><small>${(discovered||i<2)?x.fallacy:"Continue explorando a Sala da Lógica"}</small>${(discovered||i<2)?`<p>${x.weakness}</p>`:""}</article>`).join("")}</div></section>`)}
 function cartas(){shell("Cartas da Névoa","Coleção sem compra e sem vantagem paga: as cartas registram progresso e conhecimento conquistado nos jogos.",`<section class="section"><div class="wrap collection">${D.cards.map(x=>{const on=u.cards.includes(x.id);return `<article class="miniCard ${on?"":"locked"}"><div class="icon">${on?x.icon:"❔"}</div><b>${on?x.name:"Carta selada"}</b><small>${on?x.type:`Desbloqueia em ${x.xp} XP`}</small>${on?`<p>${x.skill}</p>`:""}</article>`}).join("")}</div></section>`)}
-function perfil(){const diary=readJSON("nevoaDiaryV1",[]),args=readJSON("nevoaArgumentsV1",[]),xp=p.xp||0,rank=xp>=360?"Guardião":xp>=240?"Mestre":xp>=140?"Filósofo":xp>=60?"Investigador":"Aprendiz";shell("Perfil do Explorador","A ficha centraliza tudo o que o visitante conquistou dentro do universo.",`<section class="section"><div class="wrap"><div class="panel"><div class="eyebrow">Título atual</div><h2>${rank} da Névoa</h2><div class="progress"><i style="width:${Math.min(100,xp/360*100)}%"></i></div></div><div class="statGrid" style="margin-top:14px"><div class="stat"><b>${xp}</b><small>XP</small></div><div class="stat"><b>${u.unlocks.length}</b><small>Grimório</small></div><div class="stat"><b>${u.cards.length}</b><small>Cartas</small></div><div class="stat"><b>${u.secrets.length}</b><small>Segredos</small></div><div class="stat"><b>${diary.length}</b><small>Reflexões</small></div><div class="stat"><b>${args.length}</b><small>Argumentos</small></div></div></div></section>`)}
+function perfil(){
+const diary=readJSON("nevoaDiaryV1",[]),args=readJSON("nevoaArgumentsV1",[]),xp=p.xp||0,rank=xp>=360?"Guardião":xp>=240?"Mestre":xp>=140?"Filósofo":xp>=60?"Investigador":"Aprendiz";
+shell("Perfil do Explorador","Sua identidade, progresso e coleções dentro do Portal — com privacidade pensada para estudantes.",`
+<section class="section"><div class="wrap">
+  <div class="profileIdentity panel">
+    <div class="profileAvatarPlaceholder" id="profileAvatarPreview" aria-hidden="true">🎃</div>
+    <div class="profileIdentityMain">
+      <div class="eyebrow">Identidade do explorador</div>
+      <h2 id="profileDisplayName">Explorador da Névoa</h2>
+      <p class="profileAccountHint" id="profileAccountHint">Conectando à sua conta...</p>
+      <div class="profileIdentityActions">
+        <button class="btn" id="editProfileName" type="button" hidden>✏️ Alterar nome do perfil</button>
+        <a class="btn subtle" id="profileLoginLink" href="../login.html" hidden>🔐 Entrar para editar</a>
+      </div>
+    </div>
+    <div class="profileRankSeal"><small>Título atual</small><b>${rank} da Névoa</b><span>${xp} XP</span></div>
+  </div>
+
+  <div class="panel profileNameEditor" id="profileNameEditor" hidden>
+    <div class="eyebrow">Editar identidade</div>
+    <h3>Nome visível no Portal</h3>
+    <p>Use apelido ou primeiro nome. Para proteger sua privacidade, não coloque nome completo, telefone, e-mail, link ou rede social.</p>
+    <form id="profileNameForm" class="profileNameForm">
+      <label for="profileNameInput">Novo nome</label>
+      <div class="profileNameRow">
+        <input class="input" id="profileNameInput" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Ex.: Luna 8A">
+        <button class="btn" id="saveProfileName" type="submit">Salvar nome</button>
+        <button class="btn subtle" id="cancelProfileName" type="button">Cancelar</button>
+      </div>
+      <small class="profileSafetyNote">2 a 24 caracteres. O filtro bloqueia contatos, termos inadequados e nomes que possam imitar contas oficiais. Seu apelido de entrada e seu PIN não mudam.</small>
+      <div class="profileNameStatus" id="profileNameStatus" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <div class="eyebrow">Progresso</div>
+    <h2>${rank} da Névoa</h2>
+    <div class="progress"><i style="width:${Math.min(100,xp/360*100)}%"></i></div>
+  </div>
+
+  <div class="statGrid" style="margin-top:14px">
+    <div class="stat"><b>${xp}</b><small>XP</small></div>
+    <div class="stat"><b>${u.unlocks.length}</b><small>Grimório</small></div>
+    <div class="stat"><b>${u.cards.length}</b><small>Cartas</small></div>
+    <div class="stat"><b>${u.secrets.length}</b><small>Segredos</small></div>
+    <div class="stat"><b>${diary.length}</b><small>Reflexões</small></div>
+    <div class="stat"><b>${args.length}</b><small>Argumentos</small></div>
+  </div>
+
+  <div class="note profileNextStep">
+    <b>🖼️ Próxima expansão: Galeria de Avatares da Névoa</b>
+    <small>O espaço do avatar já ficou preparado para receber a galeria segura que vamos montar em seguida.</small>
+  </div>
+</div></section>`);
+
+const nameEl=$("#profileDisplayName"),hint=$("#profileAccountHint"),edit=$("#editProfileName"),login=$("#profileLoginLink");
+const editor=$("#profileNameEditor"),form=$("#profileNameForm"),input=$("#profileNameInput"),cancel=$("#cancelProfileName"),save=$("#saveProfileName"),status=$("#profileNameStatus");
+let profile=null;
+
+const showStatus=(msg,type="")=>{status.textContent=msg;status.className="profileNameStatus "+type};
+const closeEditor=()=>{editor.hidden=true;showStatus("");input.value=profile?.nickname||""};
+const openEditor=()=>{if(!profile)return;input.value=profile.nickname||"";editor.hidden=false;showStatus("");requestAnimationFrame(()=>input.focus())};
+
+async function loadProfile(){
+  if(!window.NevoaOnline){
+    hint.textContent="O serviço de conta não carregou. Reabra a página para tentar novamente.";
+    login.hidden=false;return;
+  }
+  if(!window.NevoaOnline.getSession()){
+    nameEl.textContent="Explorador da Névoa";
+    hint.textContent="Entre na sua conta para editar o nome visível e, depois, escolher seu avatar.";
+    login.hidden=false;edit.hidden=true;return;
+  }
+  profile=await window.NevoaOnline.sessionProfile();
+  if(!profile){
+    nameEl.textContent="Explorador da Névoa";
+    hint.textContent="Sua sessão expirou. Entre novamente para editar o perfil.";
+    login.hidden=false;edit.hidden=true;return;
+  }
+  nameEl.textContent=profile.nickname||"Explorador da Névoa";
+  hint.textContent=(profile.class_name?profile.class_name+" • ":"")+profile.title+" • nome visível no ranking e no certificado";
+  login.hidden=true;edit.hidden=false;
+}
+edit.onclick=openEditor;
+cancel.onclick=closeEditor;
+form.onsubmit=async e=>{
+  e.preventDefault();
+  if(!profile)return;
+  const proposed=(input.value||"").replace(/\s+/g," ").trim();
+  if(proposed.length<2||proposed.length>24){showStatus("Escolha um nome entre 2 e 24 caracteres.","bad");return}
+  save.disabled=true;save.textContent="Salvando...";
+  showStatus("A Névoa está verificando o novo nome...","info");
+  try{
+    const updated=await window.NevoaOnline.updateProfileName(proposed);
+    profile=updated||await window.NevoaOnline.sessionProfile();
+    nameEl.textContent=profile?.nickname||proposed;
+    hint.textContent=(profile?.class_name?profile.class_name+" • ":"")+(profile?.title||(rank+" da Névoa"))+" • nome atualizado";
+    showStatus("✓ Nome atualizado com segurança.","ok");
+    setTimeout(()=>{editor.hidden=true;showStatus("")},900);
+  }catch(err){
+    showStatus(err?.message||"Não foi possível alterar o nome agora.","bad");
+  }finally{
+    save.disabled=false;save.textContent="Salvar nome";
+  }
+};
+loadProfile().catch(()=>{hint.textContent="Não foi possível carregar sua conta agora.";login.hidden=false;});
+}
 function teatro(){let stage=0;const scenes=[{who:"Sócrates",text:"Você afirma ter certeza. O que sustenta essa certeza?",choices:["Porque todo mundo concorda comigo.","Porque consigo apresentar razões e aceitar que sejam examinadas."]},{who:"Sócrates",text:"E se alguém mostrar uma objeção forte?",choices:["Ataco a pessoa que discordou.","Examino a objeção e reviso minha posição se necessário."]},{who:"Narrador",text:"O diálogo termina sem vencedor automático. O que mudou foi a qualidade das razões.",choices:[]}];shell("Teatro Filosófico","Pequenas cenas interativas em que o foco não é vencer uma luta, mas sustentar uma posição e lidar com objeções.",`<section class="section"><div class="wrap panel"><div class="eyebrow" id="speaker"></div><div class="dialogue" id="line"></div><div class="choices" id="choices"></div></div></section>`);const draw=()=>{const s=scenes[stage];$("#speaker").textContent=s.who;$("#line").textContent=s.text;$("#choices").innerHTML="";s.choices.forEach((c,i)=>{const b=document.createElement("button");b.textContent=c;b.onclick=()=>{if(i===1)NevoaUniverse.unlock("dialogo");stage=Math.min(stage+1,scenes.length-1);draw()};$("#choices").appendChild(b)});if(!s.choices.length)$("#choices").innerHTML='<a class="btn" href="teatro.html">Recomeçar cena</a>'};draw()}
 function fonografo(){shell("Fonógrafo da Névoa","As trilhas do Portal vivem aqui. Faixas já conectadas podem ser ouvidas diretamente; as demais continuam preservadas no catálogo para futuras integrações.",`<section class="section"><div class="wrap grid">${D.tracks.map(x=>`<article class="card"><div class="icon">🎵</div><div class="meta">${x.status}</div><h3>${x.title}</h3><p>${x.where}</p>${x.src?`<audio controls preload="metadata" playsinline style="width:100%;margin-top:12px" aria-label="Ouvir ${x.title}"><source src="${x.src}" type="audio/mpeg">Seu navegador não suporta reprodução de áudio.</audio>`:""}</article>`).join("")}</div></section>`)}
 function mapa(){
