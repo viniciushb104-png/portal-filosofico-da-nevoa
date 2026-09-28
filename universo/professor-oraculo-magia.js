@@ -673,60 +673,8 @@ if(titleNode){
   observer.observe(titleNode,{childList:true,characterData:true,subtree:true});
 }
 
-/* Entrada cinematográfica e trilha */
-(function oracleEntrance(){
-  const audio=ensureThemeAudio();
-  themeWanted=true;
+/* Entrada cinematográfica e trilha agora vivem no HTML para aparecerem antes de qualquer JS */
+ensureThemeAudio();
+updateThemeButton();
 
-  const gate=document.createElement("div");
-  gate.className="oracle-entrance";
-  gate.id="oracleEntrance";
-  gate.innerHTML=
-    '<div class="oracle-entrance-mist oracle-entrance-mist-a"></div>'+
-    '<div class="oracle-entrance-mist oracle-entrance-mist-b"></div>'+
-    '<div class="oracle-entrance-stars" aria-hidden="true">✦　·　✧　·　✦　·　✧</div>'+
-    '<div class="oracle-entrance-panel">'+
-      '<div class="oracle-entrance-orb"><span>🔮</span></div>'+
-      '<small>PORTAL FILOSÓFICO DA NÉVOA</small>'+
-      '<h1>O Oráculo da Névoa</h1>'+
-      '<p>Entre na biblioteca encantada e prepare sua próxima aula.</p>'+
-      '<button type="button" id="oracleEnterButton">✦ Adentrar a Névoa</button>'+
-      '<em>com trilha instrumental original</em>'+
-    '</div>';
-  document.body.appendChild(gate);
-
-  const enter=function(){
-    const btn=$("#oracleEnterButton");
-    if(btn){btn.disabled=true;btn.textContent="✦ Abrindo o portal...";}
-    audio.muted=false;
-    audio.volume=.55;
-    try{audio.currentTime=0}catch(e){}
-    const playback=audio.play();
-
-    gate.classList.add("leaving");
-    root.classList.add("oracle-entered");
-    window.setTimeout(function(){
-      if(gate&&gate.parentNode)gate.parentNode.removeChild(gate);
-    },850);
-
-    if(playback&&typeof playback.then==="function"){
-      playback.then(function(){
-        const soundBtn=$("#magicThemeBtn");
-        if(soundBtn)soundBtn.dataset.audioState="playing";
-        updateThemeButton();
-      }).catch(function(){
-        themeWanted=false;
-        const soundBtn=$("#magicThemeBtn");
-        if(soundBtn)soundBtn.dataset.audioState="error";
-        updateThemeButton();
-        toast("A Central abriu, mas o navegador não conseguiu reproduzir a trilha.");
-      });
-    }
-  };
-
-  $("#oracleEnterButton")?.addEventListener("click",enter,{once:true});
-  $("#oracleEnterButton")?.focus({preventScroll:true});
-})();
-
-updateCauldron();renderConstellation();renderMirror();renderCards();renderAchievements();renderAffinity();
 })();
