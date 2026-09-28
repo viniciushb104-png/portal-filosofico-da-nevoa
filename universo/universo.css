@@ -60,3 +60,23 @@
 .profileRankSeal{min-width:170px;text-align:center;border:1px solid #654073;border-radius:18px;padding:14px;background:#0d0712}.profileRankSeal small,.profileRankSeal b,.profileRankSeal span{display:block}.profileRankSeal small{color:#bca9c8;font-size:10px;text-transform:uppercase;letter-spacing:.09em}.profileRankSeal b{font:900 18px Georgia,serif;color:#ffc184;margin:6px 0}.profileRankSeal span{font-size:11px;color:#d7c4e1}
 .profileNameEditor{margin-top:14px;border-color:#7b468e;background:linear-gradient(145deg,#190b22,#0e0714)}.profileNameEditor h3{margin:6px 0;font-size:24px}.profileNameEditor>p{color:var(--muted);font-size:13px;line-height:1.55;max-width:800px}.profileNameForm{margin-top:13px}.profileNameForm>label{display:block;font-size:11px;font-weight:900;color:#ddcbe6;margin-bottom:6px}.profileNameRow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center}.profileNameRow .btn{margin:0;white-space:nowrap}.profileSafetyNote{display:block;margin-top:9px;color:#a995b5;line-height:1.45}.profileNameStatus{min-height:20px;margin-top:8px;font-size:12px;font-weight:800}.profileNameStatus.ok{color:#72dfb5}.profileNameStatus.bad{color:#ff9b89}.profileNameStatus.info{color:#e1b8f3}.profileNextStep{margin-top:14px}.profileNextStep small{line-height:1.45}
 @media(max-width:760px){.profileIdentity{grid-template-columns:auto 1fr}.profileRankSeal{grid-column:1/-1;min-width:0}.profileAvatarPlaceholder{width:76px;height:76px;border-radius:22px;font-size:39px}.profileNameRow{grid-template-columns:1fr}.profileNameRow .btn{width:100%}}
+
+
+/* V4 — Galeria oficial de avatares */
+.profileAvatarButton{position:relative;width:104px;height:104px;padding:0;border:1px solid #8b50a0;border-radius:28px;overflow:hidden;cursor:pointer;background:#120817;box-shadow:0 0 34px #bd58e538,inset 0 0 24px #0008;transition:.2s ease}
+.profileAvatarButton img{display:block;width:100%;height:100%;object-fit:cover}
+.profileAvatarButton span{position:absolute;left:7px;right:7px;bottom:7px;padding:5px 6px;border-radius:999px;background:#09050dcc;border:1px solid #f2bc8666;color:#fff;font-size:9px;font-weight:950;letter-spacing:.03em;backdrop-filter:blur(5px)}
+.profileAvatarButton:hover,.profileAvatarButton:focus-visible{transform:translateY(-2px) scale(1.025);border-color:#ffb36f;box-shadow:0 0 40px #bd58e55c,0 0 20px #ff8a4330;outline:none}
+.profileAvatarEditor{margin-top:14px;border-color:#7d468f;background:radial-gradient(circle at 12% 5%,#71358f28,transparent 30%),linear-gradient(145deg,#190b22,#0e0714)}
+.profileAvatarEditor h3{margin:6px 0;font-size:25px}.profileAvatarEditor>p{max-width:800px;color:var(--muted);font-size:13px;line-height:1.55}
+.avatarGallery{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}
+.avatarChoice{position:relative;display:grid;gap:7px;justify-items:center;padding:9px;border:1px solid #51305e;border-radius:18px;background:linear-gradient(145deg,#13091a,#0b0610);color:#e9dcef;cursor:pointer;transition:.18s ease;min-width:0}
+.avatarChoice img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:13px;border:1px solid #452750;background:#09050d}
+.avatarChoice span{font:900 12px/1.15 Georgia,serif;text-align:center}.avatarChoice small{font-size:9px;color:#a995b5;text-transform:uppercase;letter-spacing:.07em;font-weight:900}
+.avatarChoice:hover,.avatarChoice:focus-visible{transform:translateY(-3px);border-color:#a958c5;background:#1a0d23;outline:none}
+.avatarChoice.selected{border-color:#ffae68;box-shadow:0 0 0 2px #ff8a4324,0 0 28px #bd58e538;background:linear-gradient(145deg,#23102c,#120817)}
+.avatarChoice.selected img{border-color:#ffc07e}.avatarChoice.selected small{color:#ffc184}
+.avatarChoice:disabled{opacity:.55;cursor:wait;transform:none}
+.avatarGalleryFooter{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}.avatarGalleryFooter .profileNameStatus{flex:1;margin:0}.avatarGalleryFooter .btn{margin:0}
+@media(max-width:900px){.avatarGallery{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:620px){.profileAvatarButton{width:82px;height:82px;border-radius:22px}.profileAvatarButton span{font-size:8px}.avatarGallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.avatarChoice{padding:7px;border-radius:15px}.avatarChoice img{border-radius:11px}.avatarGalleryFooter{align-items:stretch;flex-direction:column}.avatarGalleryFooter .btn{width:100%}}
