@@ -956,3 +956,108 @@ body[data-page="professor"] #app{min-height:100vh}
  .oracle-memory-actions button:last-child{margin-left:0}
 }
 @media print{.oracle-memory-panel{display:none!important}}
+
+
+/* Oráculo Vivo — magia ambiental e reações */
+.oracle-app{isolation:isolate}
+.oracle-global-mist{position:fixed;z-index:0;pointer-events:none;left:-18%;width:136%;height:150px;filter:blur(24px);opacity:.12;background:radial-gradient(ellipse at center,rgba(177,104,255,.68),rgba(100,52,140,.22) 45%,transparent 72%);mix-blend-mode:screen}
+.oracle-global-mist-a{top:18%;animation:oracleMistDrift 19s ease-in-out infinite alternate}
+.oracle-global-mist-b{top:62%;opacity:.075;animation:oracleMistDriftReverse 26s ease-in-out infinite alternate}
+.oracle-shell,.oracle-topbar,.oracle-mobile-nav,.oracle-drawer{position:relative;z-index:2}
+
+.oracle-stage{overflow:hidden;isolation:isolate}
+.oracle-stage:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(circle at 50% 40%,rgba(191,101,255,.08),transparent 32%);transition:opacity .35s ease}
+.oracle-stage-mist{position:absolute;z-index:2;pointer-events:none;width:125%;height:100px;left:-12%;border-radius:50%;filter:blur(18px);opacity:.19;background:radial-gradient(ellipse at center,rgba(213,172,255,.55),rgba(128,66,175,.16) 55%,transparent 74%)}
+.oracle-stage-mist-a{bottom:145px;animation:oracleStageMist 10s ease-in-out infinite alternate}
+.oracle-stage-mist-b{bottom:235px;opacity:.1;animation:oracleStageMist 14s ease-in-out infinite alternate-reverse}
+
+.oracle-rune{position:absolute;z-index:1;color:#e0b8ff;font-family:Georgia,serif;text-shadow:0 0 12px rgba(199,117,255,.55);opacity:.09;animation:oracleRuneFloat 8s ease-in-out infinite}
+.oracle-rune.rune-a{left:12%;top:18%;font-size:1.4rem}
+.oracle-rune.rune-b{right:17%;top:36%;font-size:1.15rem;animation-delay:-2s}
+.oracle-rune.rune-c{left:17%;top:47%;font-size:1rem;animation-delay:-4.5s}
+.oracle-rune.rune-d{right:14%;top:15%;font-size:1.25rem;animation-delay:-6s}
+
+.oracle-magic-circle{position:absolute;z-index:2;pointer-events:none;width:310px;height:310px;left:50%;top:43%;transform:translate(-50%,-50%);border:1px solid rgba(219,157,255,.12);border-radius:50%;opacity:.34;transition:opacity .4s ease,filter .4s ease}
+.oracle-magic-circle:before,.oracle-magic-circle:after,.oracle-magic-circle span{content:"";position:absolute;border-radius:50%;inset:10%;border:1px dashed rgba(242,197,255,.19)}
+.oracle-magic-circle:after{inset:23%;border-style:solid;border-color:rgba(255,211,128,.14)}
+.oracle-magic-circle span:first-child{inset:4%;border-style:dotted;animation:oracleRingSpin 28s linear infinite}
+.oracle-magic-circle span:nth-child(2){inset:17%;border-style:dashed;animation:oracleRingSpinReverse 20s linear infinite}
+.oracle-magic-circle i{position:absolute;font-style:normal;color:#ecc9ff;font-size:.72rem;text-shadow:0 0 10px rgba(218,143,255,.7);opacity:.55}
+.oracle-magic-circle i:nth-of-type(1){left:50%;top:0;transform:translate(-50%,-50%)}
+.oracle-magic-circle i:nth-of-type(2){right:6%;top:50%;transform:translate(50%,-50%)}
+.oracle-magic-circle i:nth-of-type(3){left:50%;bottom:0;transform:translate(-50%,50%)}
+.oracle-magic-circle i:nth-of-type(4){left:6%;top:50%;transform:translate(-50%,-50%)}
+
+.oracle-crystal-ball{position:absolute;z-index:4;left:50%;bottom:178px;width:78px;height:94px;transform:translateX(-50%);pointer-events:none;filter:drop-shadow(0 9px 14px rgba(0,0,0,.32))}
+.oracle-crystal-core{position:absolute;left:7px;top:0;width:64px;height:64px;border-radius:50%;border:1px solid rgba(255,229,255,.55);background:
+ radial-gradient(circle at 35% 27%,rgba(255,255,255,.9) 0 5%,transparent 7%),
+ radial-gradient(circle at 50% 58%,rgba(228,163,255,.88),rgba(145,60,214,.64) 32%,rgba(70,20,113,.72) 62%,rgba(20,7,34,.92) 100%);
+ box-shadow:inset 0 0 16px rgba(255,255,255,.28),0 0 22px rgba(183,76,255,.38);overflow:hidden}
+.oracle-crystal-core:before{content:"";position:absolute;inset:12%;border-radius:50%;background:conic-gradient(from 10deg,transparent,rgba(255,221,255,.28),transparent 22%,rgba(179,97,255,.22),transparent 52%,rgba(255,211,128,.18),transparent);filter:blur(2px);animation:oracleOrbSwirl 7s linear infinite}
+.oracle-crystal-core:after{content:"✦";position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);color:rgba(255,236,255,.8);font-size:.82rem;text-shadow:0 0 8px #fff,0 0 17px #d27cff;animation:oracleOrbStar 2.8s ease-in-out infinite}
+.oracle-crystal-core span{position:absolute;left:-20%;bottom:5%;width:140%;height:34%;border-radius:50%;background:rgba(237,203,255,.18);filter:blur(5px);animation:oracleOrbFog 4.8s ease-in-out infinite alternate}
+.oracle-crystal-base{position:absolute;left:14px;top:57px;width:50px;height:25px;border-radius:50% 50% 34% 34%;background:linear-gradient(180deg,#c39252,#694225 58%,#29180f);border:1px solid rgba(255,214,142,.36);box-shadow:0 5px 10px rgba(0,0,0,.35)}
+
+.oracle-stage[data-state="thinking"] .oracle-magic-circle{opacity:.88;filter:drop-shadow(0 0 14px rgba(200,104,255,.35));animation:oracleCircleBreath 1.7s ease-in-out infinite}
+.oracle-stage[data-state="thinking"] .oracle-magic-circle span:first-child{animation-duration:6s}
+.oracle-stage[data-state="thinking"] .oracle-magic-circle span:nth-child(2){animation-duration:4.7s}
+.oracle-stage[data-state="thinking"] .oracle-crystal-core{box-shadow:inset 0 0 22px rgba(255,255,255,.4),0 0 35px rgba(202,91,255,.75),0 0 70px rgba(140,45,210,.32);animation:oracleOrbThink 1.25s ease-in-out infinite}
+.oracle-stage[data-state="talking"] .oracle-crystal-core{animation:oracleOrbTalk .7s ease-in-out infinite alternate}
+.oracle-stage[data-state="approve"] .oracle-magic-circle{opacity:.72;filter:drop-shadow(0 0 16px rgba(255,208,110,.3))}
+.oracle-stage[data-state="approve"] .oracle-crystal-core{box-shadow:inset 0 0 18px rgba(255,255,255,.4),0 0 35px rgba(255,189,83,.45),0 0 60px rgba(177,78,255,.28)}
+.oracle-stage[data-state="mystery"] .oracle-rune{opacity:.18}
+.oracle-stage[data-state="surprise"]:after{content:"";position:absolute;inset:-20%;z-index:1;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(239,190,255,.18),transparent 37%);animation:oracleSurprisePulse .75s ease-out}
+
+.oracle-stage-effects{position:absolute;z-index:6;inset:0;pointer-events:none;overflow:hidden}
+.oracle-magic-particle{--mx:0px;--my:-80px;position:absolute;width:5px;height:5px;border-radius:50%;background:#efccff;box-shadow:0 0 9px rgba(239,195,255,.9);animation:oracleParticleBurst .95s cubic-bezier(.15,.75,.25,1) forwards}
+.oracle-magic-particle.success:nth-child(3n){background:#ffd278;box-shadow:0 0 10px rgba(255,200,93,.85)}
+.oracle-magic-particle.emergency{background:#dda3ff;box-shadow:0 0 13px rgba(199,105,255,.98)}
+
+.oracle-character-img{transition:opacity .22s ease,filter .35s ease}
+.oracle-character-img.oracle-sprite-changing{opacity:.34}
+.oracle-stage[data-state="approve"] .oracle-character-img{filter:drop-shadow(0 18px 34px rgba(0,0,0,.46)) drop-shadow(0 0 28px rgba(255,201,102,.22))}
+.oracle-topic-awake .oracle-magic-circle{opacity:.5}
+.oracle-topic-awake .oracle-crystal-core{box-shadow:inset 0 0 18px rgba(255,255,255,.36),0 0 29px rgba(188,82,255,.52)}
+
+.oracle-result-main.oracle-materialize{animation:oraclePaperReveal .88s cubic-bezier(.2,.72,.22,1) both}
+.oracle-result-main.oracle-materialize:after{content:"";position:absolute;z-index:20;pointer-events:none;inset:8% 12%;background:radial-gradient(circle at 50% 44%,rgba(255,240,184,.55),rgba(219,156,255,.16) 28%,transparent 62%);mix-blend-mode:screen;animation:oraclePaperFlash .85s ease-out forwards}
+.oracle-paper-window{z-index:2}
+
+.oracle-emergency-flash:after{content:"";position:fixed;z-index:80;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 38%,rgba(230,173,255,.28),transparent 42%);animation:oracleEmergencyFlash .72s ease-out forwards}
+
+@keyframes oracleRingSpin{to{transform:rotate(360deg)}}
+@keyframes oracleRingSpinReverse{to{transform:rotate(-360deg)}}
+@keyframes oracleCircleBreath{0%,100%{transform:translate(-50%,-50%) scale(.98)}50%{transform:translate(-50%,-50%) scale(1.025)}}
+@keyframes oracleOrbSwirl{to{transform:rotate(360deg)}}
+@keyframes oracleOrbStar{0%,100%{opacity:.42;transform:translate(-50%,-50%) scale(.8)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}}
+@keyframes oracleOrbFog{from{transform:translateX(-9%) translateY(2px)}to{transform:translateX(8%) translateY(-5px)}}
+@keyframes oracleOrbThink{0%,100%{transform:scale(.98)}50%{transform:scale(1.055)}}
+@keyframes oracleOrbTalk{from{transform:scale(.99)}to{transform:scale(1.035)}}
+@keyframes oracleStageMist{from{transform:translateX(-4%) scaleX(.94)}to{transform:translateX(5%) scaleX(1.04)}}
+@keyframes oracleMistDrift{from{transform:translateX(-6%) scaleX(.94)}to{transform:translateX(8%) scaleX(1.06)}}
+@keyframes oracleMistDriftReverse{from{transform:translateX(8%) scaleX(1.04)}to{transform:translateX(-7%) scaleX(.93)}}
+@keyframes oracleRuneFloat{0%,100%{transform:translateY(0) rotate(-4deg);opacity:.07}50%{transform:translateY(-10px) rotate(4deg);opacity:.16}}
+@keyframes oracleParticleBurst{0%{opacity:0;transform:translate(0,0) scale(.25)}15%{opacity:1}100%{opacity:0;transform:translate(var(--mx),var(--my)) scale(1.15)}}
+@keyframes oraclePaperReveal{0%{opacity:.18;filter:blur(7px) brightness(1.45);transform:translateY(9px) scale(.985)}55%{opacity:1;filter:blur(0) brightness(1.14);transform:translateY(-1px) scale(1.003)}100%{filter:none;transform:none}}
+@keyframes oraclePaperFlash{0%{opacity:0;transform:scale(.72)}25%{opacity:.85}100%{opacity:0;transform:scale(1.14)}}
+@keyframes oracleEmergencyFlash{0%{opacity:0}22%{opacity:1}100%{opacity:0}}
+@keyframes oracleSurprisePulse{0%{opacity:0;transform:scale(.75)}40%{opacity:1}100%{opacity:0;transform:scale(1.15)}}
+
+@media(max-width:760px){
+  .oracle-global-mist{opacity:.065;height:100px;filter:blur(20px)}
+  .oracle-magic-circle{width:245px;height:245px;top:42%}
+  .oracle-crystal-ball{width:64px;height:80px;bottom:166px}
+  .oracle-crystal-core{left:7px;width:51px;height:51px}
+  .oracle-crystal-base{left:12px;top:46px;width:39px;height:21px}
+  .oracle-stage-mist{height:76px}
+  .oracle-rune{font-size:.9rem!important}
+}
+@media(max-width:390px){
+  .oracle-magic-circle{width:215px;height:215px}
+  .oracle-crystal-ball{bottom:159px}
+}
+@media(prefers-reduced-motion:reduce){
+  .oracle-global-mist,.oracle-stage-mist,.oracle-rune,.oracle-magic-circle span,.oracle-crystal-core:before,.oracle-crystal-core:after,.oracle-crystal-core span,.oracle-character-img,.oracle-magic-particle{animation:none!important}
+  .oracle-result-main.oracle-materialize{animation:none!important}
+}
+@media print{.oracle-global-mist,.oracle-stage-mist,.oracle-magic-circle,.oracle-crystal-ball,.oracle-stage-effects,.oracle-rune{display:none!important}}
