@@ -18,9 +18,14 @@ const state={profile:null,rooms:[],room:null,poll:null,reportMessageId:null,load
 
 function session(){return window.NevoaOnline?.getSession?.()||""}
 function toast(msg){els.toast.textContent=msg;els.toast.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>els.toast.classList.remove("show"),3200)}
-function notice(msg,type="warn"){
-  if(!msg){els.notice.hidden=true;els.notice.textContent="";return}
-  els.notice.hidden=false;els.notice.textContent=msg;
+function notice(msg,type="warn",action=null){
+  if(!msg){els.notice.hidden=true;els.notice.replaceChildren();return}
+  els.notice.hidden=false;els.notice.replaceChildren();
+  const span=document.createElement("span");span.textContent=msg;els.notice.append(span);
+  if(action?.label&&typeof action.fn==="function"){
+    const b=document.createElement("button");b.type="button";b.textContent=action.label;
+    b.addEventListener("click",action.fn);els.notice.append(b);
+  }
   els.notice.style.borderColor=type==="ok"?"#2d8b6c":"";
   els.notice.style.background=type==="ok"?"#10251d":"";
 }
@@ -95,7 +100,23 @@ async function sendMessage(ev){
     els.input.value="";els.count.textContent="0";
     if(p.pending)notice(p.message);
     else{notice("Mensagem publicada.","ok");await loadMessages(true)}
-  }catch(e){notice(e.message);toast(e.message)}
+  }catch(e){
+    const p=e.payload||{};
+    if(p.reviewable&&p.messageId){
+      notice(e.message,"warn",{
+        label:"Solicitar revisão humana",
+        fn:async()=>{
+          try{
+            const r=await api("appeal",{messageId:p.messageId});
+            notice(r.message||"Revisão solicitada.","ok");
+            if(state.profile?.moderator)loadModerator();
+          }catch(err){toast(err.message)}
+        }
+      });
+    }else{
+      notice(e.message);toast(e.message);
+    }
+  }
   finally{els.send.disabled=false}
 }
 function openReport(id){state.reportMessageId=id;els.reportReason.value="bullying";els.reportDetails.value="";els.reportDialog.showModal()}
@@ -127,12 +148,12 @@ async function loadModerator(){
     els.accessCount.textContent=q.access?.length||0;els.flaggedCount.textContent=q.flagged?.length||0;els.reportCount.textContent=q.reports?.length||0;
     els.accessQueue.replaceChildren(...((q.access?.length?q.access.map(a=>modItem(
       a.nickname,(a.className||"Sem turma")+" • pedido "+timeLabel(a.requestedAt),"",[
-        {label:"✓ Aprovar",cls:"ok",fn:()=>modAction("approve_access",{playerId:a.playerId})},
+        {label:"✓ Aprovar • autorização conferida",cls:"ok",fn:()=>modAction("approve_access",{playerId:a.playerId})},
         {label:"✕ Negar",cls:"danger",fn:()=>modAction("deny_access",{playerId:a.playerId})}
       ])):[emptyMod("Nenhum pedido pendente.")])));
 
     els.flaggedQueue.replaceChildren(...((q.flagged?.length?q.flagged.map(m=>modItem(
-      m.author,(m.className||"Sem turma")+" • "+m.room+" • "+m.status,
+      m.author,(m.className||"Sem turma")+" • "+m.room+" • "+m.status+(m.reviewRequestedAt?" • REVISÃO SOLICITADA":""),
       m.body+"\nMotivo: "+(m.reason||"revisão humana"),[
         {label:"✓ Publicar",cls:"ok",fn:()=>modAction("approve_message",{messageId:m.id,playerId:m.playerId})},
         {label:"🗑 Remover",cls:"danger",fn:()=>modAction("remove_message",{messageId:m.id,playerId:m.playerId})},
