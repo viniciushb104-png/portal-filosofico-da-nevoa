@@ -80,3 +80,10 @@
 .avatarGalleryFooter{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}.avatarGalleryFooter .profileNameStatus{flex:1;margin:0}.avatarGalleryFooter .btn{margin:0}
 @media(max-width:900px){.avatarGallery{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:620px){.profileAvatarButton{width:82px;height:82px;border-radius:22px}.profileAvatarButton span{font-size:8px}.avatarGallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.avatarChoice{padding:7px;border-radius:15px}.avatarChoice img{border-radius:11px}.avatarGalleryFooter{align-items:stretch;flex-direction:column}.avatarGalleryFooter .btn{width:100%}}
+
+/* perfil: molduras de rank */
+.profileAvatarButton.rank-aprendiz{border-color:#7d6688}
+.profileAvatarButton.rank-investigador{border-color:#d89455;box-shadow:0 0 0 3px #09050d66,0 0 28px #ff93454f,inset 0 0 24px #0008}
+.profileAvatarButton.rank-filosofo{border-color:#b95cdd;box-shadow:0 0 0 3px #09050d66,0 0 30px #c65bf05c,inset 0 0 24px #0008}
+.profileAvatarButton.rank-mestre{border-color:#f0c36a;box-shadow:0 0 0 3px #09050d66,0 0 32px #f0c36a61,inset 0 0 24px #0008}
+.profileAvatarButton.rank-guardiao{border-color:#67dfc2;box-shadow:0 0 0 3px #09050d66,0 0 34px #67dfc266,inset 0 0 24px #0008}
