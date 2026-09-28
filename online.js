@@ -235,7 +235,15 @@ async function syncLocal(state){
   }
   if(Number(c.plataforma||0)>0)tasks.push(claimProgress('platform_socrates',Number(c.plataforma||0)));
   if(Number(c.plataoPlataforma||0)>0)tasks.push(claimProgress('platform_plato',Number(c.plataoPlataforma||0)));
-  if(Number(c.rpgParadoxia||0)>0)tasks.push(claimProgress('rpg_paradoxia',Number(c.rpgParadoxia||0)));
+  if(Number(c.descartesPlataforma||0)>0)tasks.push(claimProgress('platform_descartes',Number(c.descartesPlataforma||0)));
+  if(Number(c.humePlataforma||0)>0)tasks.push(claimProgress('platform_hume',Number(c.humePlataforma||0)));
+  if(Number(c.eticaPlataforma||0)>0)tasks.push(claimProgress('platform_ethics',Number(c.eticaPlataforma||0)));
+  let rpgScore=Number(c.rpgParadoxia||0);
+  try{
+    const raw=localStorage.getItem('paradoxiaSaveV1');
+    if(raw){const current=JSON.parse(raw);rpgScore=Math.max(0,Number(current?.score||0));}
+  }catch(e){}
+  if(rpgScore>0)tasks.push(claimProgress('rpg_paradoxia',rpgScore));
   const today=new Date().toISOString().slice(0,10);
   if(state.daily===today)tasks.push(claimDaily());
   await Promise.allSettled(tasks);
