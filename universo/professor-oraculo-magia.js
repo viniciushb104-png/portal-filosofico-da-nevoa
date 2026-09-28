@@ -675,5 +675,41 @@ if(titleNode){
 
 /* Init */
 ensureThemeAudio();updateThemeButton();
+
+(function autoStartTheme(){
+  const audio=ensureThemeAudio();
+  themeWanted=true;
+  const tryPlay=function(){
+    if(!themeWanted||!audio.paused)return;
+    const p=audio.play();
+    if(p&&typeof p.then==="function"){
+      p.then(function(){
+        const btn=$("#magicThemeBtn");
+        if(btn)btn.dataset.audioState="playing";
+        updateThemeButton();
+        root.classList.remove("oracle-audio-awaiting");
+      }).catch(function(){
+        root.classList.add("oracle-audio-awaiting");
+      });
+    }
+  };
+  tryPlay();
+
+  const unlock=function(){
+    if(!themeWanted)return cleanup();
+    tryPlay();
+    if(!audio.paused)cleanup();
+  };
+  const cleanup=function(){
+    ["pointerdown","touchstart","keydown"].forEach(function(evt){
+      document.removeEventListener(evt,unlock,true);
+    });
+  };
+  ["pointerdown","touchstart","keydown"].forEach(function(evt){
+    document.addEventListener(evt,unlock,true);
+  });
+  audio.addEventListener("playing",cleanup,{once:true});
+})();
+
 updateCauldron();renderConstellation();renderMirror();renderCards();renderAchievements();renderAffinity();
 })();
