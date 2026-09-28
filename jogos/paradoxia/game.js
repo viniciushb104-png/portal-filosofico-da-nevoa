@@ -373,13 +373,13 @@ function renderHUD(){
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
 function renderMap(){
  const ids=scenes.map(s=>s.id);
- $('.mapNode').forEach(n=>{
+ $$('.mapNode').forEach(n=>{
    const idx=ids.indexOf(n.dataset.node),sc=scenes[idx];
    n.classList.toggle('done',sceneDone(sc));
    n.classList.toggle('active',idx===state.sceneIndex&&!sceneDone(sc));
    n.classList.remove('locked');
  });
- $('.worldPoi').forEach(n=>{
+ $$('.worldPoi').forEach(n=>{
    const idx=ids.indexOf(n.dataset.scene),sc=scenes[idx];
    n.classList.toggle('done',sceneDone(sc));
    n.classList.toggle('current',idx===state.sceneIndex&&!sceneDone(sc));
