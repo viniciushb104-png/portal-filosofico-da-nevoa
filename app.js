@@ -83,7 +83,7 @@ $('#achievementBtn').onclick=()=>{renderAchievements();$('#achievementDialog').s
 $('#dailyChallenge').onclick=()=>{const day=new Date().toISOString().slice(0,10);dailyPending=state.daily!==day;openGame('dilemas');toast(dailyPending?'Conclua o desafio para ganhar +15 XP de bônus!':'Bônus diário já coletado hoje.');};
 
 function openMap(){updateMap();$('#mapDialog').showModal()}
-$('#openMapTop').onclick=openMap; $('#openMapHero').onclick=openMap; $('#openMapProgress').onclick=openMap; $('#profileBtn').onclick=()=>{if(window.NevoaOnline?.getSession())location.href='universo/perfil.html';else $('#hall').scrollIntoView({behavior:'smooth'})};
+['openMapTop','openMapHero','openMapProgress'].forEach(id=>{const el=document.getElementById(id);if(el)el.onclick=openMap}); $('#profileBtn').onclick=()=>{if(window.NevoaOnline?.getSession())location.href='universo/perfil.html';else $('#hall').scrollIntoView({behavior:'smooth'})};
 $$('[data-close]').forEach(b=>b.onclick=()=>{document.getElementById(b.dataset.close).close();window.nevoaPresenceState={locationKey:'portal',locationLabel:'Portal principal',phase:0,stage:0};}); $$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
 $$('[data-game]').forEach(b=>b.onclick=()=>{const d=b.closest('dialog');if(d)d.close();openGame(b.dataset.game)});
 $$('.filter').forEach(btn=>btn.onclick=()=>{$$('.filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;$$('.room').forEach(r=>r.style.display=(f==='all'||r.dataset.tags.includes(f))?'':'none')});
@@ -102,7 +102,7 @@ const geminiPrompts={
  espelho:`Anime a Sombra do Espelho em uma cena de 8 a 10 segundos no Espelho de Descartes; um espelho oval gótico vibra com luz violeta, o reflexo da figura escura emerge lentamente e inclina o rosto como se questionasse a realidade. Estética Halloween anime/cartoon 2D, movimento contido e elegante, sem terror gore, com partículas luminosas, reflexos sutis, névoa e sensação de dúvida filosófica.`
 };
 $$('.promptBtn').forEach(btn=>btn.onclick=()=>{const key=btn.dataset.prompt; const titles={guia:'Guia da Névoa',mansao:'Mansão da Névoa',filosofos:'Guardião dos Filósofos',espelho:'Sombra do Espelho'}; $('#promptTitle').textContent=titles[key]; $('#promptText').value=geminiPrompts[key]; $('#promptDialog').showModal();});
-$('#copyPrompt').onclick=async()=>{try{await navigator.clipboard.writeText($('#promptText').value); toast('Prompt copiado para o Gemini.')}catch(e){toast('Não foi possível copiar automaticamente.')}};
+const copyPromptBtn=$('#copyPrompt');if(copyPromptBtn)copyPromptBtn.onclick=async()=>{try{const promptText=$('#promptText');if(!promptText)return;await navigator.clipboard.writeText(promptText.value);toast('Prompt copiado para o Gemini.')}catch(e){toast('Não foi possível copiar automaticamente.')}};
 
 let onlineRanking=[],onlineProfileData=null,portalPresenceStop=null;
 function escapeHTML(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
