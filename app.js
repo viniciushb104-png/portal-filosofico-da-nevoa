@@ -240,13 +240,30 @@ async function syncOnlineProfile(showToast=true){
    return null;
  }
 }
+async function restoreHomeIdentity(){
+ if(!window.NevoaOnline?.getSession?.())return null;
+ try{
+   const profile=await window.NevoaOnline.sessionProfile();
+   if(!profile)return null;
+   setOnlineProfile(profile,true);
+   if(window.NevoaAvatar){
+     const key=profile.avatar_key||await window.NevoaAvatar.currentKey(true);
+     profile.avatar_key=key||'avatar-01';
+     setOnlineProfile(profile,true);
+   }
+   return profile;
+ }catch(e){return null}
+}
 async function initOnlineHall(){
  if(!window.NevoaOnline)return;
- await refreshOnlineRanking();
- if(window.NevoaOnline.getSession()){
-   await syncOnlineProfile(false);
+ const hasSession=!!window.NevoaOnline.getSession();
+ if(hasSession){
+   await restoreHomeIdentity();
+   syncOnlineProfile(false).catch(()=>{});
    beginPortalPresence();
+   refreshOnlineRanking().catch(()=>{});
  }else{
+   refreshOnlineRanking().catch(()=>{});
    const code=window.NevoaOnline.getCode();
    if(code){
      try{
