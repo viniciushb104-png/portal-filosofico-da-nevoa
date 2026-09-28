@@ -932,3 +932,27 @@ body[data-page="professor"] #app{min-height:100vh}
   .oracle-ai-form button{min-height:42px}
 }
 @media print{.oracle-ai-chat,.oracle-ai-status{display:none!important}}
+
+
+/* Memória pedagógica personalizada */
+.oracle-memory-panel{margin:12px 0 8px;padding:12px;border-radius:15px;border:1px solid rgba(255,205,111,.18);background:linear-gradient(135deg,rgba(77,31,111,.28),rgba(15,8,24,.64))}
+.oracle-memory-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.oracle-memory-head>div b{display:block;color:#ffe0a0;font-size:.76rem}
+.oracle-memory-head>div small{display:block;color:#9e8ba9;font-size:.58rem;margin-top:3px}
+.oracle-memory-toggle{display:flex;align-items:center;gap:6px;color:#d7c5e2;font-size:.60rem;cursor:pointer;white-space:nowrap}
+.oracle-memory-toggle input{accent-color:#9c45df}
+.oracle-memory-summary{margin:9px 0 8px;color:#cdbbd6;font-size:.67rem;line-height:1.4}
+.oracle-memory-notes{width:100%;border:1px solid rgba(198,147,232,.18);border-radius:10px;background:#130c1c;color:#f4e9f9;padding:9px 10px;font:inherit;font-size:.68rem;outline:none}
+.oracle-memory-notes:focus{border-color:#b960e4;box-shadow:0 0 0 3px rgba(184,75,255,.08)}
+.oracle-memory-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.oracle-memory-actions button{border:1px solid rgba(231,188,255,.18);background:#21132f;color:#dec9e8;border-radius:999px;padding:6px 8px;cursor:pointer;font-size:.58rem}
+.oracle-memory-actions button:hover{border-color:#c96dff;color:#fff}
+.oracle-memory-actions button:last-child{margin-left:auto;color:#d5b6c2}
+@media(max-width:760px){
+ .oracle-memory-head{align-items:flex-start;flex-direction:column}
+ .oracle-memory-toggle{font-size:.58rem}
+ .oracle-memory-summary{font-size:.63rem}
+ .oracle-memory-actions button{font-size:.56rem}
+ .oracle-memory-actions button:last-child{margin-left:0}
+}
+@media print{.oracle-memory-panel{display:none!important}}
