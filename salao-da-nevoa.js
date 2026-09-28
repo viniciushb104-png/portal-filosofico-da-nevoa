@@ -62,7 +62,7 @@ async function selectRoom(r){
 }
 function messageNode(m){
   const wrap=document.createElement("article");wrap.className="msg"+(m.mine?" mine":"");
-  const av=document.createElement("div");av.className="msgAvatar avatarFrame rank-aprendiz";const avImg=document.createElement("img");avImg.className="nevoaAvatar";window.NevoaAvatar?.paint(avImg,m.avatarKey||"avatar-01",m.mine?"Seu avatar":"Avatar de "+m.author);av.append(avImg);
+  const av=document.createElement("div");av.className="msgAvatar avatarFrame "+(window.NevoaAvatar?.rankClass(Number(m.xp)||0)||"rank-aprendiz");const avImg=document.createElement("img");avImg.className="nevoaAvatar";window.NevoaAvatar?.paint(avImg,m.avatarKey||"avatar-01",m.mine?"Seu avatar":"Avatar de "+m.author);av.append(avImg);
   const bubble=document.createElement("div");bubble.className="msgBubble";
   const meta=document.createElement("div");meta.className="msgMeta";
   const name=document.createElement("b");name.textContent=m.mine?"Você":m.author;
@@ -184,7 +184,7 @@ async function boot(){
     ]);return;
   }
   try{
-    const p=await api("status");state.profile=p.profile;window.NevoaAvatar?.paint(els.userChipAvatar,p.profile.avatarKey||"avatar-01","Seu avatar");els.userChipText.textContent=p.profile.nickname+(p.profile.moderator?" • Professor":"");
+    const p=await api("status");state.profile=p.profile;window.NevoaAvatar?.paint(els.userChipAvatar,p.profile.avatarKey||"avatar-01","Seu avatar");const chipFrame=els.userChipAvatar?.closest(".userChipAvatar");if(chipFrame)chipFrame.className="userChipAvatar avatarFrame "+(window.NevoaAvatar?.rankClass(Number(p.profile.xp)||0)||"rank-aprendiz");els.userChipText.textContent=p.profile.nickname+(p.profile.moderator?" • Professor":"");
     if(p.profile.moderator||p.profile.access==="approved"){
       els.gate.hidden=true;els.shell.hidden=false;
       if(p.profile.owner&&els.adminLink)els.adminLink.hidden=false;
