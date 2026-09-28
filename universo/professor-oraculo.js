@@ -123,12 +123,6 @@
             '</article>',
             '<aside class="oracle-card oracle-saved" id="savedArea"><div class="oracle-saved-head"><h3>📚 Minhas Atividades Salvas</h3><span class="oracle-saved-count" id="savedCount">0 salvas</span></div><div class="oracle-saved-list" id="savedList"><div class="oracle-saved-empty">Quando você salvar uma atividade, ela aparecerá aqui.</div></div></aside>',
           '</section>',
-          '<section class="oracle-card oracle-ai-chat" id="oracleAiChat">',
-            '<div class="oracle-ai-chat-head"><div><div class="oracle-kicker">✨ MODO CONVERSA</div><h2>Converse com a Oráculo sobre esta atividade</h2><p>Peça mudanças em linguagem natural. A IA devolve a ficha completa já revisada.</p></div><span class="oracle-ai-chat-badge">IA</span></div>',
-            '<div class="oracle-ai-suggestions"><button type="button" data-ai-suggest="Simplifique a linguagem e reduza a complexidade sem perder o objetivo.">Mais simples</button><button type="button" data-ai-suggest="Torne a atividade mais desafiadora e exija argumentos mais elaborados.">Mais desafiadora</button><button type="button" data-ai-suggest="Troque a pergunta central por outra mais provocadora e adequada ao mesmo tema.">Trocar pergunta</button><button type="button" data-ai-suggest="Adapte para uma turma com baixa participação e pouca disposição para dinâmica.">Baixa participação</button></div>',
-            '<div class="oracle-ai-messages" id="oracleAiMessages"><div class="oracle-ai-empty">Gere uma atividade e depois diga algo como: “troque a questão 3”, “tenho só 25 minutos” ou “faça sem tecnologia”.</div></div>',
-            '<form class="oracle-ai-form" id="oracleAiForm"><input id="oracleAiInput" maxlength="500" autocomplete="off" placeholder="Ex.: deixe mais reflexiva e faça caber em 30 minutos"><button type="submit">Enviar ✦</button></form>',
-          '</section>',
           '<section class="oracle-shortcuts">',
             '<a class="oracle-shortcut" href="grimorio.html"><i>🧭</i><b>Explorar Temas Mágicos</b><small>Descubra conceitos e filósofos</small></a>',
             '<a class="oracle-shortcut" href="oficina.html"><i>🎃</i><b>Recursos Criativos</b><small>Argumentos, jogos e desafios</small></a>',
@@ -625,9 +619,7 @@
   q("#memoryApply").onclick=function(){if(state.memory&&state.memory.preferences)applyMemoryPreferences(state.memory.preferences,true);else toast("Ainda não há preferências guardadas.")};
   q("#memoryClear").onclick=clearMemory;
   q("#memoryLearning").onchange=function(){setLearningPreference(this.checked)};
-    q("#oracleAiForm").addEventListener("submit",function(e){e.preventDefault();sendOracleChat()});
-  qa("[data-ai-suggest]").forEach(function(b){b.onclick=function(){refineWithAI(b.dataset.aiSuggest,true)}});
     if("speechSynthesis" in window){window.speechSynthesis.onvoiceschanged=updateVoiceStatus;setTimeout(updateVoiceStatus,250)}
-  stars();renderSaved();renderChat();setExpression("idle");refreshAiAccess();loadMemory(true);
+  stars();renderSaved();setExpression("idle");refreshAiAccess();loadMemory(true);
   window.NevoaOracle={say:function(text,expression,withVoice){dialogue(text,expression||"talking",withVoice!==false)},generate:smartGenerate,setExpression:setExpression,chat:function(text){return refineWithAI(text,true)}};
 })();
