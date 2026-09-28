@@ -44,7 +44,7 @@
     mystery:"assets/oraculo/oraculo-misteriosa.png"
   };
 
-  var state={mode:"professor",difficulty:1,seed:0,last:null,voice:true,expression:"idle",aiBusy:false,chatHistory:[]};
+  var state={mode:"professor",difficulty:1,seed:0,last:null,voice:true,expression:"idle",aiBusy:false,chatHistory:[],memory:null,memoryLoaded:false};
 
   app.innerHTML=[
     '<div class="oracle-app">',
@@ -90,6 +90,12 @@
                 '<div class="oracle-field full"><label>✒️ Tema, filósofo, conceito ou problema</label><input id="oracleTopic" maxlength="180" placeholder="Ex.: justiça, David Hume, liberdade, ética e IA..."></div>',
               '</div>',
               '<div class="oracle-presets"><button class="oracle-chip" type="button" data-preset="sem-dinamica">Sem dinâmica</button><button class="oracle-chip" type="button" data-preset="sem-tecnologia">Sem tecnologia</button><button class="oracle-chip" type="button" data-preset="jogo">Transformar em jogo</button><button class="oracle-chip" type="button" data-preset="reflexiva">Mais reflexiva</button></div>',
+              '<div class="oracle-memory-panel" id="oracleMemoryPanel">',
+                '<div class="oracle-memory-head"><div><b>🧠 Memória Pedagógica</b><small id="oracleMemoryState">verificando...</small></div><label class="oracle-memory-toggle"><input id="memoryLearning" type="checkbox" checked><span>Aprender com meu uso</span></label></div>',
+                '<p class="oracle-memory-summary" id="oracleMemorySummary">A Oráculo ainda não conhece seus padrões.</p>',
+                '<input class="oracle-memory-notes" id="memoryNotes" maxlength="240" placeholder="Preferência livre: ex. sem dinâmica, perguntas guiadas, linguagem simples">',
+                '<div class="oracle-memory-actions"><button type="button" id="memorySaveCurrent">Guardar configuração atual</button><button type="button" id="memoryApply">Aplicar meus padrões</button><button type="button" id="memoryClear">Limpar memória</button></div>',
+              '</div>',
               '<button class="oracle-generate" id="generateButton" type="submit">✨ GERAR ATIVIDADE</button>',
             '</form>',
             '<aside class="oracle-card oracle-voice">',
@@ -200,6 +206,142 @@
 
   function portalSession(){
     try{return (localStorage.getItem("nevoaStudentSession")||"").trim()}catch(e){return""}
+  }
+
+
+  function portalRpc(name,body){
+    return fetch("https://gsenhfhmabkjqhybpixm.supabase.co/rest/v1/rpc/"+name,{
+      method:"POST",
+      headers:{"apikey":ORACLE_AI_KEY,"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify(body||{})
+    }).then(async function(res){
+      var data=null;try{data=await res.json()}catch(e){}
+      if(!res.ok){var err=new Error(data&&data.message?data.message:"Falha ao acessar a memória.");err.status=res.status;throw err}
+      return data;
+    });
+  }
+
+  function memoryRow(data){return Array.isArray(data)?(data[0]||null):data}
+
+  function currentPreferenceObject(){
+    var c=config();
+    return {
+      level:c.level,discipline:c.discipline,time:c.time,participation:c.participation,
+      resources:c.resources,format:c.format,objective:c.objective,area:c.area,
+      notes:(q("#memoryNotes")&&q("#memoryNotes").value||"").trim()
+    };
+  }
+
+  function selectIfExists(selector,value){
+    if(!value)return;
+    var el=q(selector);if(!el)return;
+    var ok=Array.prototype.some.call(el.options||[],function(o){return o.value===value||o.text===value});
+    if(ok)el.value=value;
+  }
+
+  function applyMemoryPreferences(prefs,announce){
+    prefs=prefs||{};
+    selectIfExists("#oracleLevel",prefs.level);
+    selectIfExists("#oracleDiscipline",prefs.discipline);
+    selectIfExists("#oracleTime",prefs.time);
+    selectIfExists("#oracleParticipation",prefs.participation);
+    selectIfExists("#oracleResources",prefs.resources);
+    selectIfExists("#oracleFormat",prefs.format);
+    selectIfExists("#oracleObjective",prefs.objective);
+    selectIfExists("#oracleArea",prefs.area);
+    if(q("#memoryNotes")&&typeof prefs.notes==="string")q("#memoryNotes").value=prefs.notes;
+    if(announce){dialogue("Recuperei suas preferências pedagógicas. Você ainda pode mudar qualquer campo antes de gerar.","approve",false);toast("Preferências aplicadas.");}
+  }
+
+  function learnedSummary(recent){
+    var fields=[
+      ["resources","recursos"],["time","duração"],["participation","participação"],
+      ["format","formato"],["objective","objetivo"],["discipline","disciplina"]
+    ];
+    var bits=[];
+    fields.forEach(function(pair){
+      var counts={},best="",bestN=0;
+      (recent||[]).forEach(function(c){var v=String(c&&c[pair[0]]||"").trim();if(v){counts[v]=(counts[v]||0)+1;if(counts[v]>bestN){best=v;bestN=counts[v]}}});
+      if(best&&bestN>=2)bits.push(best);
+    });
+    return bits.slice(0,4);
+  }
+
+  function renderMemory(){
+    var stateEl=q("#oracleMemoryState"),summary=q("#oracleMemorySummary"),toggle=q("#memoryLearning");
+    if(!portalSession()){
+      if(stateEl)stateEl.textContent="entre no Portal para sincronizar";
+      if(summary)summary.textContent="A memória fica vinculada à sua conta. Sem login, a Central continua funcionando normalmente.";
+      if(toggle)toggle.disabled=true;
+      return;
+    }
+    if(toggle)toggle.disabled=false;
+    if(!state.memoryLoaded){
+      if(stateEl)stateEl.textContent="carregando...";
+      return;
+    }
+    var m=state.memory||{preferences:{},recent_configs:[],learning_enabled:true};
+    if(toggle)toggle.checked=m.learning_enabled!==false;
+    if(stateEl)stateEl.textContent=(m.learning_enabled!==false?"aprendizado ligado":"aprendizado pausado")+" • sincronizada";
+    var patterns=learnedSummary(m.recent_configs||[]);
+    var saved=m.preferences||{};
+    var savedBits=[saved.resources,saved.time,saved.participation,saved.format].filter(Boolean);
+    if(summary){
+      if(patterns.length)summary.textContent="A Oráculo percebeu que você costuma preferir: "+patterns.join(" • ")+".";
+      else if(savedBits.length)summary.textContent="Preferências guardadas: "+savedBits.join(" • ")+".";
+      else summary.textContent="Ainda estou aprendendo. Gere algumas atividades ou guarde sua configuração atual como padrão.";
+    }
+  }
+
+  async function loadMemory(applyOnLoad){
+    if(!portalSession()){state.memoryLoaded=true;state.memory=null;renderMemory();return}
+    state.memoryLoaded=false;renderMemory();
+    try{
+      var row=memoryRow(await portalRpc("get_oracle_pedagogical_memory",{p_token:portalSession()}));
+      state.memory=row||{preferences:{},recent_configs:[],learning_enabled:true};
+      state.memoryLoaded=true;
+      if(applyOnLoad&&state.memory.preferences)applyMemoryPreferences(state.memory.preferences,false);
+      if(q("#memoryNotes")&&state.memory.preferences&&typeof state.memory.preferences.notes==="string")q("#memoryNotes").value=state.memory.preferences.notes;
+      renderMemory();
+    }catch(err){
+      state.memoryLoaded=true;renderMemory();toast("Não consegui carregar a memória pedagógica.");
+    }
+  }
+
+  async function saveCurrentMemory(){
+    if(!portalSession()){toast("Entre no Portal para guardar preferências.");return}
+    var learning=q("#memoryLearning")?q("#memoryLearning").checked:true;
+    try{
+      var row=memoryRow(await portalRpc("save_oracle_pedagogical_memory",{p_token:portalSession(),p_preferences:currentPreferenceObject(),p_learning_enabled:learning}));
+      state.memory=row;state.memoryLoaded=true;renderMemory();
+      dialogue("Guardei essas escolhas como seu ponto de partida. Elas nunca substituem o que você escolher no formulário.","approve",false);
+      toast("Preferências pedagógicas guardadas.");
+    }catch(err){toast("Não foi possível salvar suas preferências.")}
+  }
+
+  async function setLearningPreference(enabled){
+    if(!portalSession())return;
+    var prefs=(state.memory&&state.memory.preferences)||currentPreferenceObject();
+    try{
+      var row=memoryRow(await portalRpc("save_oracle_pedagogical_memory",{p_token:portalSession(),p_preferences:prefs,p_learning_enabled:!!enabled}));
+      state.memory=row;state.memoryLoaded=true;renderMemory();
+      toast(enabled?"Aprendizado da Oráculo ativado.":"Aprendizado automático pausado.");
+    }catch(err){toast("Não foi possível alterar a memória.");renderMemory()}
+  }
+
+  async function clearMemory(){
+    if(!portalSession()){toast("Entre no Portal para limpar a memória.");return}
+    try{
+      await portalRpc("clear_oracle_pedagogical_memory",{p_token:portalSession()});
+      state.memory={preferences:{},recent_configs:[],learning_enabled:true};state.memoryLoaded=true;
+      if(q("#memoryNotes"))q("#memoryNotes").value="";
+      renderMemory();dialogue("A memória pedagógica foi limpa. Podemos recomeçar do zero.","mystery",false);toast("Memória pedagógica limpa.");
+    }catch(err){toast("Não foi possível limpar a memória.")}
+  }
+
+  function rememberLocalUse(c){
+    if(!portalSession()||!state.memory||state.memory.learning_enabled===false)return;
+    portalRpc("record_oracle_pedagogical_config",{p_token:portalSession(),p_config:c}).then(function(){return loadMemory(false)}).catch(function(){});
   }
 
   function setAiStatus(kind,text){
@@ -356,7 +498,7 @@
     var noTech=/Nenhum|Giz|Papel|impresso/i.test(c.resources)||c.format==="Analógica";
     var challenge=state.difficulty===0?"Use respostas curtas, exemplos concretos e apenas uma objeção.":state.difficulty>=2?"Exija conceito, justificativa, contraexemplo e revisão da tese inicial.":"Peça sempre uma justificativa e ao menos um exemplo ou objeção.";
     var a={id:"act-"+Date.now(),title:t.name+" — "+topic,icon:t.icon,config:c,question:question,objectiveText:objectives[c.objective]||objectives["Reflexão filosófica"],steps:t.steps.slice(),challenge:challenge,digitalNote:noTech?"A atividade foi planejada para funcionar sem internet ou tela.":"Use a tecnologia apenas quando ela ajudar a investigar, registrar ou comparar ideias.",createdAt:new Date().toISOString()};
-    state.last=a;renderActivity(a);
+    state.last=a;renderActivity(a);rememberLocalUse(c);
     dialogue("A atividade está pronta. Uma boa aula não termina quando surge uma resposta, mas quando nasce uma pergunta melhor.","approve",state.voice);
   }
 
@@ -423,9 +565,13 @@
   qa("[data-mobile]").forEach(function(b){b.onclick=function(){if(b.dataset.mobile==="activities")q("#result").scrollIntoView({behavior:"smooth"});if(b.dataset.mobile==="saved")openSaved()}});
   qa("[data-scroll]").forEach(function(a){a.onclick=function(e){e.preventDefault();q("#"+a.dataset.scroll).scrollIntoView({behavior:"smooth"})}});
 
-  q("#oracleAiForm").addEventListener("submit",function(e){e.preventDefault();sendOracleChat()});
+  q("#memorySaveCurrent").onclick=saveCurrentMemory;
+  q("#memoryApply").onclick=function(){if(state.memory&&state.memory.preferences)applyMemoryPreferences(state.memory.preferences,true);else toast("Ainda não há preferências guardadas.")};
+  q("#memoryClear").onclick=clearMemory;
+  q("#memoryLearning").onchange=function(){setLearningPreference(this.checked)};
+    q("#oracleAiForm").addEventListener("submit",function(e){e.preventDefault();sendOracleChat()});
   qa("[data-ai-suggest]").forEach(function(b){b.onclick=function(){refineWithAI(b.dataset.aiSuggest,true)}});
     if("speechSynthesis" in window){window.speechSynthesis.onvoiceschanged=updateVoiceStatus;setTimeout(updateVoiceStatus,250)}
-  stars();renderSaved();renderChat();setExpression("idle");refreshAiAccess();
+  stars();renderSaved();renderChat();setExpression("idle");refreshAiAccess();loadMemory(true);
   window.NevoaOracle={say:function(text,expression,withVoice){dialogue(text,expression||"talking",withVoice!==false)},generate:smartGenerate,setExpression:setExpression,chat:function(text){return refineWithAI(text,true)}};
 })();
