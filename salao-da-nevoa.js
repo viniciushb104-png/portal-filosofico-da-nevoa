@@ -8,7 +8,7 @@ const els={
   gate:$("#statusGate"),gateTitle:$("#gateTitle"),gateText:$("#gateText"),gateActions:$("#gateActions"),
   shell:$("#chatShell"),roomList:$("#roomList"),roomTitle:$("#roomTitle"),roomKicker:$("#roomKicker"),
   messages:$("#messages"),composer:$("#composer"),input:$("#messageInput"),send:$("#sendBtn"),count:$("#charCount"),
-  notice:$("#guardianNotice"),refresh:$("#refreshChat"),userChip:$("#userChip"),adminLink:$("#adminPanelLink"),
+  notice:$("#guardianNotice"),refresh:$("#refreshChat"),userChip:$("#userChip"),userChipAvatar:$("#userChipAvatar"),userChipText:$("#userChipText"),adminLink:$("#adminPanelLink"),
   mod:$("#moderatorPanel"),refreshMod:$("#refreshMod"),accessQueue:$("#accessQueue"),flaggedQueue:$("#flaggedQueue"),reportQueue:$("#reportQueue"),
   accessCount:$("#accessCount"),flaggedCount:$("#flaggedCount"),reportCount:$("#reportCount"),
   reportDialog:$("#reportDialog"),reportForm:$("#reportForm"),reportReason:$("#reportReason"),reportDetails:$("#reportDetails"),
@@ -62,7 +62,7 @@ async function selectRoom(r){
 }
 function messageNode(m){
   const wrap=document.createElement("article");wrap.className="msg"+(m.mine?" mine":"");
-  const av=document.createElement("div");av.className="msgAvatar";av.textContent=m.mine?"🎃":"🦉";
+  const av=document.createElement("div");av.className="msgAvatar avatarFrame rank-aprendiz";const avImg=document.createElement("img");avImg.className="nevoaAvatar";window.NevoaAvatar?.paint(avImg,m.avatarKey||"avatar-01",m.mine?"Seu avatar":"Avatar de "+m.author);av.append(avImg);
   const bubble=document.createElement("div");bubble.className="msgBubble";
   const meta=document.createElement("div");meta.className="msgMeta";
   const name=document.createElement("b");name.textContent=m.mine?"Você":m.author;
@@ -184,7 +184,7 @@ async function boot(){
     ]);return;
   }
   try{
-    const p=await api("status");state.profile=p.profile;els.userChip.textContent=p.profile.nickname+(p.profile.moderator?" • Professor":"");
+    const p=await api("status");state.profile=p.profile;window.NevoaAvatar?.paint(els.userChipAvatar,p.profile.avatarKey||"avatar-01","Seu avatar");els.userChipText.textContent=p.profile.nickname+(p.profile.moderator?" • Professor":"");
     if(p.profile.moderator||p.profile.access==="approved"){
       els.gate.hidden=true;els.shell.hidden=false;
       if(p.profile.owner&&els.adminLink)els.adminLink.hidden=false;
