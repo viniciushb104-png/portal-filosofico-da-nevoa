@@ -90,3 +90,8 @@ body{overflow-x:hidden}.gamePage{max-width:1240px;margin:auto;padding:16px 18px 
 .winIdentity{display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:8px}.winAvatar{width:68px;height:68px;flex:0 0 68px}.winIdentity .trophy{font-size:38px}.winIdentity small{display:block;margin-top:2px;color:#ffc77a;font-weight:900}
 @media(max-width:800px){.profileHud{grid-column:1/-1}.gameAvatar{width:34px;height:34px;flex-basis:34px}}
 @media(max-height:600px) and (orientation:landscape){.profileHud{grid-column:auto}.gameAvatar{width:28px;height:28px;flex-basis:28px}.profileHud div{min-width:0}.profileHud b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+
+/* V5 — grid de identidade */
+.hud{grid-template-columns:1.22fr 1.45fr repeat(5,minmax(0,1fr))}
+@media(max-width:800px){.hud{grid-template-columns:repeat(3,minmax(0,1fr))}.profileHud{grid-column:1/-1}}
+@media(max-height:600px) and (orientation:landscape){.hud{grid-template-columns:repeat(7,minmax(0,1fr))}.profileHud{grid-column:auto}}
