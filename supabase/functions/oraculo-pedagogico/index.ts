@@ -49,6 +49,69 @@ async function validatePortalSession(token: string) {
   return profile || null;
 }
 
+
+async function portalRpc(name: string, body: Record<string, unknown>) {
+  const key = publishableKey();
+  if (!SUPABASE_URL || !key) throw new Error("Supabase indisponível.");
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data?.message || `Falha em ${name}.`);
+  }
+  return await res.json().catch(() => null);
+}
+
+async function loadPedagogicalMemory(token: string) {
+  try {
+    const data = await portalRpc("get_oracle_pedagogical_memory", { p_token: token });
+    const row = Array.isArray(data) ? data[0] : data;
+    return {
+      preferences: row?.preferences && typeof row.preferences === "object" ? row.preferences : {},
+      recentConfigs: Array.isArray(row?.recent_configs) ? row.recent_configs.slice(0, 12) : [],
+      learningEnabled: row?.learning_enabled !== false,
+    };
+  } catch (error) {
+    console.error("memory_load_failed", error);
+    return { preferences: {}, recentConfigs: [], learningEnabled: true };
+  }
+}
+
+async function recordPedagogicalConfig(token: string, config: Record<string, unknown>) {
+  try {
+    await portalRpc("record_oracle_pedagogical_config", { p_token: token, p_config: config });
+  } catch (error) {
+    console.error("memory_record_failed", error);
+  }
+}
+
+function learnedPatterns(recent: any[]) {
+  const fields = ["level","discipline","time","participation","resources","format","objective","area"];
+  const out: Record<string,string> = {};
+  for (const field of fields) {
+    const counts = new Map<string, number>();
+    for (const item of recent || []) {
+      const value = String(item?.[field] ?? "").trim();
+      if (!value) continue;
+      counts.set(value, (counts.get(value) || 0) + 1);
+    }
+    let best = "";
+    let count = 0;
+    for (const [value, n] of counts) {
+      if (n > count) { best = value; count = n; }
+    }
+    if (best && count >= 2) out[field] = best;
+  }
+  return out;
+}
+
 function cleanText(value: unknown, max = 600) {
   return String(value ?? "").replace(/[\u0000-\u001f]+/g, " ").trim().slice(0, max);
 }
@@ -183,25 +246,37 @@ Deno.serve(async (req: Request) => {
       : [];
 
     const identity = cleanText(profile?.nickname || "explorador", 80);
+    const memory = await loadPedagogicalMemory(sessionToken);
+    const patterns = memory.learningEnabled ? learnedPatterns(memory.recentConfigs) : {};
+    const memoryContext = {
+      explicitPreferences: memory.preferences,
+      learnedPatterns: patterns,
+      learningEnabled: memory.learningEnabled,
+    };
     let prompt = "";
 
     if (action === "generate") {
       prompt = `Crie uma atividade inédita para ${identity}.
-Configuração: ${JSON.stringify(cfg)}
+Configuração atual escolhida pelo usuário: ${JSON.stringify(cfg)}
+Memória pedagógica: ${JSON.stringify(memoryContext)}
 Modo: ${cfg.mode || "professor"}.
+REGRA DE PRIORIDADE: a configuração atual sempre vence a memória. Use a memória apenas para escolhas não especificadas, tom, nível de detalhe e adaptações coerentes.
 A atividade precisa caber realisticamente no tempo indicado e usar apenas os recursos informados.`;
     } else {
       if (!current) return json({ error: "activity_required", message: "Gere uma atividade antes de conversar sobre ela." }, 400);
       if (!userMessage) return json({ error: "message_required", message: "Escreva o que deseja alterar." }, 400);
       prompt = `Revise a atividade atual seguindo o pedido do usuário.
-Configuração: ${JSON.stringify(cfg)}
+Configuração atual escolhida pelo usuário: ${JSON.stringify(cfg)}
+Memória pedagógica: ${JSON.stringify(memoryContext)}
 Atividade atual: ${JSON.stringify(current)}
 Conversa recente: ${JSON.stringify(history)}
 Pedido agora: ${userMessage}
+REGRA DE PRIORIDADE: o pedido atual e a configuração atual sempre vencem a memória.
 Devolva a atividade COMPLETA já revisada, mesmo que a mudança seja pequena.`;
     }
 
     const answer = await askModel(systemBase, prompt);
+    if (memory.learningEnabled) await recordPedagogicalConfig(sessionToken, cfg);
     const activity = safeActivity(answer?.activity);
     if (!activity || !activity.title || !activity.question || activity.steps.length < 2) {
       throw new Error("Resposta da IA veio incompleta.");
