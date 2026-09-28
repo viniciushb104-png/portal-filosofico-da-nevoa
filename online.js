@@ -92,6 +92,19 @@ async function updateProfileName(nickname){
     p_nickname:String(nickname||'')
   }));
 }
+async function profileAvatar(){
+  const token=getSession();
+  if(!token)return 'avatar-01';
+  return first(await rpc('get_profile_avatar',{p_token:token}))||'avatar-01';
+}
+async function updateProfileAvatar(avatarKey){
+  const token=getSession();
+  if(!token)throw new Error('Entre na sua conta para escolher um avatar.');
+  return first(await rpc('update_profile_avatar',{
+    p_token:token,
+    p_avatar_key:String(avatarKey||'')
+  }));
+}
 async function accountSnapshot(){
   const profile=await sessionProfile();
   if(!profile)return null;
@@ -232,7 +245,7 @@ async function syncLocal(state){
 window.NevoaOnline={
   rpc,getCode,setCode,getSession,setSession,
   createExplorer,restoreExplorer,getProgress,loadExplorer,
-  registerStudent,loginStudent,sessionProfile,accountSnapshot,logout,updateProfileName,
+  registerStudent,loginStudent,sessionProfile,accountSnapshot,logout,updateProfileName,profileAvatar,updateProfileAvatar,
   leaderboard,claimProgress,claimDaily,heartbeat,startPresence,saveRpgState,loadRpgState,
   loadParadoxiaTacticalProfile,saveParadoxiaTacticalProfile,
   activeParadoxiaSeason,paradoxiaMissions,startParadoxiaAttempt,recordParadoxiaCheckpoint,
