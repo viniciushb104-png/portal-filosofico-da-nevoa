@@ -216,6 +216,8 @@
       '<div class="activity-block"><b>Fechamento</b><p>Peça uma frase final começando por <em>“Antes eu pensava..., agora eu penso...”</em> ou <em>“A pergunta que ficou foi...”</em>.</p></div>'+
       '<div class="activity-block"><b>Avaliação rápida</b><p>Observe se o participante compreendeu o problema, apresentou ao menos uma razão e conseguiu rever ou sustentar sua posição.</p></div>';
     q("#resultActions").hidden=false;
+    var scrollBody=q("#resultBody");
+    if(scrollBody)scrollBody.scrollTop=0;
     window.setTimeout(function(){q("#result").scrollIntoView({behavior:"smooth",block:"start"})},120);
   }
 
