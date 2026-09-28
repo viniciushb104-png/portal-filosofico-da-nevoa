@@ -44,7 +44,7 @@
     mystery:"assets/oraculo/oraculo-misteriosa.png"
   };
 
-  var state={mode:"professor",difficulty:1,seed:0,last:null,voice:true,expression:"idle"};
+  var state={mode:"professor",difficulty:1,seed:0,last:null,voice:true,expression:"idle",aiBusy:false,chatHistory:[]};
 
   app.innerHTML=[
     '<div class="oracle-app">',
@@ -76,6 +76,7 @@
             '</article>',
             '<form class="oracle-card oracle-builder" id="oracleForm">',
               '<h2 class="oracle-card-title">Gerar Atividade Pedagógica</h2>',
+              '<div class="oracle-ai-status" id="oracleAiStatus"><span></span><b>IA do Oráculo</b><small>verificando acesso...</small></div>',
               '<div class="oracle-mode-tabs"><button class="oracle-mode active" type="button" data-mode="professor">🎓 Modo Professor<small>atividades estruturadas</small></button><button class="oracle-mode" type="button" data-mode="explorador">🧭 Modo Explorador<small>ideias livres e criativas</small></button></div>',
               '<div class="oracle-form-grid">',
                 '<div class="oracle-field"><label>📚 Etapa / público</label><select id="oracleLevel"><option>6º ano</option><option>7º ano</option><option selected>8º ano</option><option>9º ano</option><option>1ª série EM</option><option>2ª série EM</option><option>3ª série EM</option><option>Adultos / livre</option></select></div>',
@@ -89,7 +90,7 @@
                 '<div class="oracle-field full"><label>✒️ Tema, filósofo, conceito ou problema</label><input id="oracleTopic" maxlength="180" placeholder="Ex.: justiça, David Hume, liberdade, ética e IA..."></div>',
               '</div>',
               '<div class="oracle-presets"><button class="oracle-chip" type="button" data-preset="sem-dinamica">Sem dinâmica</button><button class="oracle-chip" type="button" data-preset="sem-tecnologia">Sem tecnologia</button><button class="oracle-chip" type="button" data-preset="jogo">Transformar em jogo</button><button class="oracle-chip" type="button" data-preset="reflexiva">Mais reflexiva</button></div>',
-              '<button class="oracle-generate" type="submit">✨ GERAR ATIVIDADE</button>',
+              '<button class="oracle-generate" id="generateButton" type="submit">✨ GERAR ATIVIDADE</button>',
             '</form>',
             '<aside class="oracle-card oracle-voice">',
               '<h2>🎙️ Voz do Oráculo</h2>',
@@ -103,12 +104,18 @@
           '<section class="oracle-result" id="result">',
             '<article class="oracle-result-main">',
               '<div class="oracle-paper-window">',
-                '<div class="oracle-result-head"><div><div class="oracle-result-kicker">✦ ATIVIDADE GERADA</div><h2 id="resultTitle">A névoa aguarda seu chamado...</h2></div><span class="oracle-result-ready" id="resultReady" hidden>✓ PRONTA PARA USAR</span></div>',
+                '<div class="oracle-result-head"><div><div class="oracle-result-kicker" id="resultKicker">✦ ATIVIDADE GERADA</div><h2 id="resultTitle">A névoa aguarda seu chamado...</h2></div><span class="oracle-result-ready" id="resultReady" hidden>✓ PRONTA PARA USAR</span></div>',
                 '<div class="oracle-result-empty" id="resultBody">Configure a atividade acima e consulte o Oráculo. A ficha completa aparecerá aqui como um pergaminho pedagógico.</div>',
                 '<div class="oracle-result-actions" id="resultActions" hidden><button class="primary" data-action="again">↻ Outra versão</button><button data-action="simple">↓ Simplificar</button><button data-action="hard">↑ Desafiar</button><button data-action="game">🎲 Virar jogo</button><button data-action="notech">✏ Sem tecnologia</button><button data-action="save">💜 Salvar</button><button data-action="print">🖨 Imprimir / PDF</button></div>',
               '</div>',
             '</article>',
             '<aside class="oracle-card oracle-saved" id="savedArea"><div class="oracle-saved-head"><h3>📚 Minhas Atividades Salvas</h3><span class="oracle-saved-count" id="savedCount">0 salvas</span></div><div class="oracle-saved-list" id="savedList"><div class="oracle-saved-empty">Quando você salvar uma atividade, ela aparecerá aqui.</div></div></aside>',
+          '</section>',
+          '<section class="oracle-card oracle-ai-chat" id="oracleAiChat">',
+            '<div class="oracle-ai-chat-head"><div><div class="oracle-kicker">✨ MODO CONVERSA</div><h2>Converse com a Oráculo sobre esta atividade</h2><p>Peça mudanças em linguagem natural. A IA devolve a ficha completa já revisada.</p></div><span class="oracle-ai-chat-badge">IA</span></div>',
+            '<div class="oracle-ai-suggestions"><button type="button" data-ai-suggest="Simplifique a linguagem e reduza a complexidade sem perder o objetivo.">Mais simples</button><button type="button" data-ai-suggest="Torne a atividade mais desafiadora e exija argumentos mais elaborados.">Mais desafiadora</button><button type="button" data-ai-suggest="Troque a pergunta central por outra mais provocadora e adequada ao mesmo tema.">Trocar pergunta</button><button type="button" data-ai-suggest="Adapte para uma turma com baixa participação e pouca disposição para dinâmica.">Baixa participação</button></div>',
+            '<div class="oracle-ai-messages" id="oracleAiMessages"><div class="oracle-ai-empty">Gere uma atividade e depois diga algo como: “troque a questão 3”, “tenho só 25 minutos” ou “faça sem tecnologia”.</div></div>',
+            '<form class="oracle-ai-form" id="oracleAiForm"><input id="oracleAiInput" maxlength="500" autocomplete="off" placeholder="Ex.: deixe mais reflexiva e faça caber em 30 minutos"><button type="submit">Enviar ✦</button></form>',
           '</section>',
           '<section class="oracle-shortcuts">',
             '<a class="oracle-shortcut" href="grimorio.html"><i>🧭</i><b>Explorar Temas Mágicos</b><small>Descubra conceitos e filósofos</small></a>',
@@ -187,6 +194,153 @@
     };
   }
 
+
+  var ORACLE_AI_URL="https://gsenhfhmabkjqhybpixm.supabase.co/functions/v1/oraculo-pedagogico";
+  var ORACLE_AI_KEY="sb_publishable_VZoR4YrEww-o6HTkN6UVJA_0ywIaTgB";
+
+  function portalSession(){
+    try{return (localStorage.getItem("nevoaStudentSession")||"").trim()}catch(e){return""}
+  }
+
+  function setAiStatus(kind,text){
+    var el=q("#oracleAiStatus");if(!el)return;
+    el.dataset.state=kind||"idle";
+    var small=el.querySelector("small");if(small)small.textContent=text||"";
+  }
+
+  function refreshAiAccess(){
+    var logged=!!portalSession();
+    setAiStatus(logged?"ready":"local",logged?"Sessão conectada • IA preparada":"Modo local • entre no Portal para usar IA");
+    var btn=q("#generateButton");
+    if(btn&&!state.aiBusy)btn.textContent=logged?"✨ GERAR COM IA":"✨ GERAR ATIVIDADE";
+  }
+
+  async function callOracleAI(payload){
+    var token=portalSession();
+    if(!token){var e=new Error("Entre no Portal para usar a IA online.");e.code="login_required";throw e}
+    var res=await fetch(ORACLE_AI_URL,{
+      method:"POST",
+      headers:{"apikey":ORACLE_AI_KEY,"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify(Object.assign({sessionToken:token},payload||{}))
+    });
+    var data=null;try{data=await res.json()}catch(e){data={}}
+    if(!res.ok){
+      var err=new Error(data&&data.message?data.message:"Não foi possível consultar a IA.");
+      err.code=data&&data.error?data.error:"oracle_ai_error";err.status=res.status;throw err;
+    }
+    return data;
+  }
+
+  function aiToActivity(data,c){
+    var src=(data&&data.activity)||{};
+    return {
+      id:"ai-"+Date.now(),
+      title:src.title||"Atividade da Névoa",
+      icon:"✨",
+      config:c||config(),
+      question:src.question||"Que pergunta merece ser investigada?",
+      objectiveText:src.objectiveText||objectives[(c||config()).objective]||objectives["Reflexão filosófica"],
+      steps:Array.isArray(src.steps)&&src.steps.length?src.steps:["Apresente o problema.","Registre uma posição inicial.","Peça justificativas e exemplos.","Retome a pergunta central no fechamento."],
+      challenge:src.challenge||"Peça justificativas claras e exemplos concretos.",
+      digitalNote:src.digitalNote||"Use apenas os recursos realmente disponíveis.",
+      closure:src.closure||"Retome a pergunta central e registre o que mudou no pensamento do grupo.",
+      assessment:src.assessment||"Observe compreensão do problema, justificativa e capacidade de revisão.",
+      source:"ai",
+      createdAt:new Date().toISOString()
+    };
+  }
+
+  function addChat(role,text){
+    text=String(text||"").trim();if(!text)return;
+    state.chatHistory.push({role:role==="assistant"?"assistant":"user",content:text});
+    state.chatHistory=state.chatHistory.slice(-10);
+    renderChat();
+  }
+
+  function renderChat(){
+    var wrap=q("#oracleAiMessages");if(!wrap)return;
+    if(!state.chatHistory.length){
+      wrap.innerHTML='<div class="oracle-ai-empty">Gere uma atividade e depois diga algo como: “troque a questão 3”, “tenho só 25 minutos” ou “faça sem tecnologia”.</div>';return;
+    }
+    wrap.innerHTML=state.chatHistory.map(function(m){
+      return '<div class="oracle-ai-msg '+(m.role==="assistant"?"assistant":"user")+'"><b>'+(m.role==="assistant"?"Oráculo":"Você")+'</b><p>'+esc(m.content)+'</p></div>';
+    }).join("");
+    wrap.scrollTop=wrap.scrollHeight;
+  }
+
+  function setAiBusy(on){
+    state.aiBusy=!!on;
+    var btn=q("#generateButton");if(btn){btn.disabled=!!on;btn.textContent=on?"✦ CONSULTANDO A NÉVOA...":(portalSession()?"✨ GERAR COM IA":"✨ GERAR ATIVIDADE")}
+    var send=q("#oracleAiForm button");if(send)send.disabled=!!on;
+  }
+
+  async function smartGenerate(){
+    if(state.aiBusy)return;
+    if(!portalSession()){
+      setAiStatus("local","Modo local • faça login para liberar a IA");
+      makeActivity();
+      toast("Atividade criada no modo local. Entre no Portal para usar a IA.");
+      return;
+    }
+    setAiBusy(true);setAiStatus("thinking","Criando uma atividade inédita...");
+    dialogue("Estou cruzando seu tempo, recursos, turma e objetivo. A névoa está pensando.","thinking",false);
+    try{
+      var c=config();
+      var data=await callOracleAI({action:"generate",config:Object.assign({mode:state.mode},c)});
+      var a=aiToActivity(data,c);
+      state.last=a;state.chatHistory=[];
+      renderActivity(a);renderChat();
+      setAiStatus("online","IA online • "+(data.model||"modelo conectado"));
+      dialogue(data.assistantMessage||"A névoa se abriu. Preparei uma atividade para você.","approve",state.voice);
+    }catch(err){
+      if(err.code==="setup_required"){
+        setAiStatus("setup","IA estruturada • aguardando chave do modelo");
+        toast("IA online ainda não ativada. Usando o gerador local.");
+      }else{
+        setAiStatus("fallback","IA indisponível • modo local ativado");
+        toast("A IA não respondeu; gerei uma opção local para não interromper sua aula.");
+      }
+      makeActivity();
+    }finally{setAiBusy(false)}
+  }
+
+  async function refineWithAI(message,addUser){
+    message=String(message||"").trim();
+    if(!message)return;
+    if(!state.last){toast("Gere uma atividade primeiro.");return}
+    if(!portalSession()){
+      setAiStatus("local","Modo local • faça login para conversar com a IA");
+      toast("Entre no Portal para conversar com a Oráculo.");
+      return;
+    }
+    if(state.aiBusy)return;
+    if(addUser)addChat("user",message);
+    setAiBusy(true);setAiStatus("thinking","Reescrevendo a atividade...");
+    dialogue("Entendi. Vou mexer apenas no que precisa mudar e preservar o restante.","thinking",false);
+    try{
+      var c=config();
+      var data=await callOracleAI({action:"chat",config:Object.assign({mode:state.mode},c),activity:state.last,message:message,history:state.chatHistory.slice(-6)});
+      var a=aiToActivity(data,c);
+      state.last=a;renderActivity(a);
+      var reply=data.assistantMessage||"Pronto. Reescrevi a atividade com o ajuste pedido.";
+      addChat("assistant",reply);
+      setAiStatus("online","IA online • atividade revisada");
+      dialogue(reply,"approve",state.voice);
+    }catch(err){
+      var reply=err.code==="setup_required"?"A estrutura da IA está pronta, mas ainda falta ativar a chave do modelo no Supabase.":"Não consegui revisar pela IA agora. A atividade atual foi preservada.";
+      addChat("assistant",reply);
+      setAiStatus(err.code==="setup_required"?"setup":"fallback",err.code==="setup_required"?"IA aguardando configuração":"Falha temporária • atividade preservada");
+      toast(reply);
+    }finally{setAiBusy(false)}
+  }
+
+  async function sendOracleChat(){
+    var input=q("#oracleAiInput");if(!input)return;
+    var msg=(input.value||"").trim();if(!msg)return;
+    input.value="";
+    await refineWithAI(msg,true);
+  }
+
   function chooseTemplate(c){
     var pool=templates.slice();
     if(state.mode==="explorador")pool=pool.filter(function(t){return t.types.indexOf("explorador")>-1||t.types.indexOf("conversa")>-1||t.types.indexOf("jogo")>-1});
@@ -208,15 +362,15 @@
 
   function renderActivity(a){
     var c=a.config;
-    q("#resultTitle").textContent=a.title;q("#resultReady").hidden=false;q("#resultBody").className="oracle-result-body";
+    q("#resultTitle").textContent=a.title;q("#resultReady").hidden=false;q("#resultBody").className="oracle-result-body";if(q("#resultKicker"))q("#resultKicker").textContent=a.source==="ai"?"✦ ATIVIDADE CRIADA PELA IA":"✦ ATIVIDADE GERADA";
     q("#resultBody").innerHTML=
       '<div class="activity-meta"><span>'+esc(c.level)+'</span><span>'+esc(c.discipline)+'</span><span>'+esc(c.time)+'</span><span>'+esc(c.resources)+'</span></div>'+
       '<div class="activity-block"><b>Objetivo</b><p>'+esc(c.objective)+': '+esc(a.objectiveText)+'.</p></div>'+
       '<div class="activity-question"><small>PERGUNTA CENTRAL</small><strong>'+esc(a.question)+'</strong></div>'+
       '<div class="activity-block"><b>Passo a passo</b><ol>'+a.steps.map(function(s){return "<li>"+esc(s.replace(/tema/g,c.topic||c.area))+"</li>"}).join("")+'</ol></div>'+
       '<div class="activity-block"><b>Mediação do Oráculo</b><p>'+esc(a.challenge)+'</p><p>'+esc(a.digitalNote)+'</p></div>'+
-      '<div class="activity-block"><b>Fechamento</b><p>Peça uma frase final começando por <em>“Antes eu pensava..., agora eu penso...”</em> ou <em>“A pergunta que ficou foi...”</em>.</p></div>'+
-      '<div class="activity-block"><b>Avaliação rápida</b><p>Observe se o participante compreendeu o problema, apresentou ao menos uma razão e conseguiu rever ou sustentar sua posição.</p></div>';
+      '<div class="activity-block"><b>Fechamento</b><p>'+esc(a.closure||'Peça uma frase final começando por “Antes eu pensava..., agora eu penso...” ou “A pergunta que ficou foi...”.')+'</p></div>'+
+      '<div class="activity-block"><b>Avaliação rápida</b><p>'+esc(a.assessment||'Observe se o participante compreendeu o problema, apresentou ao menos uma razão e conseguiu rever ou sustentar sua posição.')+'</p></div>';
     q("#resultActions").hidden=false;
     var scrollBody=q("#resultBody");
     if(scrollBody)scrollBody.scrollTop=0;
@@ -257,19 +411,21 @@
   function openSaved(){q("#savedArea").scrollIntoView({behavior:"smooth",block:"center"})}
   function toggleDrawer(open){q("#oracleDrawer").classList.toggle("open",typeof open==="boolean"?open:!q("#oracleDrawer").classList.contains("open"))}
 
-  q("#oracleForm").addEventListener("submit",function(e){e.preventDefault();dialogue("Hum... vejo perguntas se formando na névoa. Dê-me um instante.","thinking",false);setTimeout(makeActivity,420)});
+  q("#oracleForm").addEventListener("submit",function(e){e.preventDefault();smartGenerate()});
   qa(".oracle-mode").forEach(function(b){b.onclick=function(){setMode(b.dataset.mode)}});
   qa(".oracle-chip").forEach(function(b){b.onclick=function(){preset(b.dataset.preset)}});
   q("#speakOracle").onclick=function(){speak(q("#oracleLine").textContent)};
   q("#voiceToggle").onclick=function(){state.voice=!state.voice;q("#voiceToggle").textContent=state.voice?"🔊":"🔇";if(!state.voice&&"speechSynthesis" in window)window.speechSynthesis.cancel();toast(state.voice?"Voz do Oráculo ativada.":"Voz do Oráculo desligada.")};
-  q("#emergency").onclick=function(){setMode("professor");q("#oracleLevel").value="8º ano";q("#oracleDiscipline").value="Filosofia";q("#oracleTime").value="50 minutos";q("#oracleParticipation").value="Baixa";q("#oracleResources").value="Giz e lousa";q("#oracleFormat").value="Analógica";q("#oracleObjective").value="Reflexão filosófica";dialogue("Sem tempo? Cinquenta minutos, giz e lousa, participação baixa. Eu cuido do restante.","surprise",state.voice);setTimeout(makeActivity,500)};
-  q("#resultActions").onclick=function(e){var a=e.target.dataset.action;if(!a)return;if(a==="again")makeActivity();if(a==="simple"){state.difficulty=0;makeActivity()}if(a==="hard"){state.difficulty=2;makeActivity()}if(a==="game"){q("#oracleObjective").value="Jogo filosófico";makeActivity()}if(a==="notech"){q("#oracleResources").value="Giz e lousa";q("#oracleFormat").value="Analógica";makeActivity()}if(a==="save")saveCurrent();if(a==="print")window.print()};
+  q("#emergency").onclick=function(){setMode("professor");q("#oracleLevel").value="8º ano";q("#oracleDiscipline").value="Filosofia";q("#oracleTime").value="50 minutos";q("#oracleParticipation").value="Baixa";q("#oracleResources").value="Giz e lousa";q("#oracleFormat").value="Analógica";q("#oracleObjective").value="Reflexão filosófica";dialogue("Sem tempo? Cinquenta minutos, giz e lousa, participação baixa. Eu cuido do restante.","surprise",state.voice);smartGenerate()};
+  q("#resultActions").onclick=function(e){var a=e.target.dataset.action;if(!a)return;if(a==="again")smartGenerate();if(a==="simple"){state.difficulty=0;refineWithAI("Simplifique a atividade, use linguagem mais acessível, menos etapas e exemplos concretos.",false)}if(a==="hard"){state.difficulty=2;refineWithAI("Aumente o desafio intelectual: exija conceito, justificativa, objeção e revisão da posição.",false)}if(a==="game"){q("#oracleObjective").value="Jogo filosófico";refineWithAI("Transforme esta atividade em um jogo filosófico viável com os mesmos recursos e tempo.",false)}if(a==="notech"){q("#oracleResources").value="Giz e lousa";q("#oracleFormat").value="Analógica";refineWithAI("Retire toda dependência de tecnologia e adapte para funcionar apenas com giz, lousa e fala.",false)}if(a==="save")saveCurrent();if(a==="print")window.print()};
   q("#showSavedTop").onclick=openSaved;q("#sideSaved").onclick=function(e){e.preventDefault();openSaved()};q("#drawerSaved").onclick=function(e){e.preventDefault();toggleDrawer(false);openSaved()};
   q("#menuButton").onclick=function(){toggleDrawer()};q("#oracleDrawer").onclick=function(e){if(e.target===q("#oracleDrawer"))toggleDrawer(false)};
   qa("[data-mobile]").forEach(function(b){b.onclick=function(){if(b.dataset.mobile==="activities")q("#result").scrollIntoView({behavior:"smooth"});if(b.dataset.mobile==="saved")openSaved()}});
   qa("[data-scroll]").forEach(function(a){a.onclick=function(e){e.preventDefault();q("#"+a.dataset.scroll).scrollIntoView({behavior:"smooth"})}});
 
-  if("speechSynthesis" in window){window.speechSynthesis.onvoiceschanged=updateVoiceStatus;setTimeout(updateVoiceStatus,250)}
-  stars();renderSaved();setExpression("idle");
-  window.NevoaOracle={say:function(text,expression,withVoice){dialogue(text,expression||"talking",withVoice!==false)},generate:makeActivity,setExpression:setExpression};
+  q("#oracleAiForm").addEventListener("submit",function(e){e.preventDefault();sendOracleChat()});
+  qa("[data-ai-suggest]").forEach(function(b){b.onclick=function(){refineWithAI(b.dataset.aiSuggest,true)}});
+    if("speechSynthesis" in window){window.speechSynthesis.onvoiceschanged=updateVoiceStatus;setTimeout(updateVoiceStatus,250)}
+  stars();renderSaved();renderChat();setExpression("idle");refreshAiAccess();
+  window.NevoaOracle={say:function(text,expression,withVoice){dialogue(text,expression||"talking",withVoice!==false)},generate:smartGenerate,setExpression:setExpression,chat:function(text){return refineWithAI(text,true)}};
 })();
