@@ -209,16 +209,21 @@
   }
 
 
-  function portalRpc(name,body){
-    return fetch("https://gsenhfhmabkjqhybpixm.supabase.co/rest/v1/rpc/"+name,{
-      method:"POST",
-      headers:{"apikey":ORACLE_AI_KEY,"Content-Type":"application/json","Accept":"application/json"},
-      body:JSON.stringify(body||{})
-    }).then(async function(res){
-      var data=null;try{data=await res.json()}catch(e){}
-      if(!res.ok){var err=new Error(data&&data.message?data.message:"Falha ao acessar a memória.");err.status=res.status;throw err}
-      return data;
-    });
+  async function portalRpc(name,body){
+    body=body||{};
+    var actionMap={
+      get_oracle_pedagogical_memory:"memory_get",
+      save_oracle_pedagogical_memory:"memory_save",
+      record_oracle_pedagogical_config:"memory_record",
+      clear_oracle_pedagogical_memory:"memory_clear"
+    };
+    var action=actionMap[name];
+    if(!action)throw new Error("Ação de memória inválida.");
+    var payload={action:action};
+    if(action==="memory_save"){payload.preferences=body.p_preferences||{};payload.learningEnabled=body.p_learning_enabled!==false}
+    if(action==="memory_record")payload.config=body.p_config||{};
+    var data=await callOracleAI(payload);
+    return data&&data.memory?data.memory:data;
   }
 
   function memoryRow(data){return Array.isArray(data)?(data[0]||null):data}
