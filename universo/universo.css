@@ -164,3 +164,31 @@ linear-gradient(145deg,#1c0d26,#0a050f 72%);background-size:38px 38px,38px 38px,
 @media(max-width:900px){.journeyAvatar{width:126px;height:126px}.journeyWorldArt{height:auto}.journeyWorldCard::after{inset:5px}}
 @media(max-width:620px){
 body[data-page="perfil"] .hero{padding:42px 0 38px}body[data-page="perfil"] .hero h1{font-size:48px}.journeyHero{padding:23px 16px;border-radius:23px}.journeyAvatar{width:118px;height:118px}.journeySeal{border-radius:14px}.journeyNext{padding:15px}.journeyWorlds{gap:12px}.journeyWorldCard{border-radius:20px}.journeyWorldCard::after{border-radius:15px}.journeyWorldArt{min-height:205px}.journeyWorldCopy{padding:16px 15px}.journeyWorldCopy h3{font-size:21px}.journeyLower{gap:12px}.journeyMemories,.journeyChronicle{border-radius:20px}.journeyStats>div{padding:10px 6px}.journeyStats b{font-size:23px}}
+
+/* V8 — Artes oficiais dos destinos na Minha Jornada */
+body[data-page="perfil"] .journeyWorldArt{background-color:#0c0711;background-repeat:no-repeat;background-size:cover;background-position:center 34%;isolation:isolate}
+body[data-page="perfil"] .journeyWorldCard.mansion .journeyWorldArt{background-image:linear-gradient(180deg,#09050d0a 0,#09050d05 52%,#0b0610 100%),url("assets/jornada-mansao-socrates.png");background-position:center 29%}
+body[data-page="perfil"] .journeyWorldCard.labyrinth .journeyWorldArt{background-image:linear-gradient(180deg,#09050d08 0,#09050d05 52%,#0b0610 100%),url("assets/jornada-labirinto-filosofos.png");background-position:center 29%}
+body[data-page="perfil"] .journeyWorldCard.paradoxia .journeyWorldArt{background-image:linear-gradient(180deg,#09050d08 0,#09050d05 52%,#0b0610 100%),url("assets/jornada-paradoxia.png");background-position:center 29%}
+body[data-page="perfil"] .journeyWorldArt>span{font-size:0;width:100%;height:100%;position:absolute;inset:0;transform:none;filter:none}
+body[data-page="perfil"] .journeyWorldCard:hover .journeyWorldArt>span{transform:none}
+body[data-page="perfil"] .journeyWorldArt::after{height:46%;z-index:2;background:linear-gradient(180deg,transparent,#0b0610e6 78%,#0b0610)}
+body[data-page="perfil"] .journeyWorldCard.mansion .journeyWorldArt::before,
+body[data-page="perfil"] .journeyWorldCard.labyrinth .journeyWorldArt::before,
+body[data-page="perfil"] .journeyWorldCard.paradoxia .journeyWorldArt::before{z-index:3;text-shadow:0 2px 8px #000}
+body[data-page="perfil"] .journeyWorldArt i{z-index:4}
+body[data-page="perfil"] .journeyWorldCard{transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+body[data-page="perfil"] .journeyWorldCard .journeyWorldArt{transition:background-size .35s ease,filter .35s ease}
+body[data-page="perfil"] .journeyWorldCard:hover .journeyWorldArt{background-size:108%;filter:saturate(1.08) brightness(1.04)}
+@media(max-width:900px){
+ body[data-page="perfil"] .journeyWorldCard.mansion .journeyWorldArt,
+ body[data-page="perfil"] .journeyWorldCard.labyrinth .journeyWorldArt,
+ body[data-page="perfil"] .journeyWorldCard.paradoxia .journeyWorldArt{background-position:center 28%;background-size:cover}
+ body[data-page="perfil"] .journeyWorldCard:hover .journeyWorldArt{background-size:cover}
+}
+@media(max-width:620px){
+ body[data-page="perfil"] .journeyWorldArt{min-height:210px}
+ body[data-page="perfil"] .journeyWorldCard.mansion .journeyWorldArt,
+ body[data-page="perfil"] .journeyWorldCard.labyrinth .journeyWorldArt,
+ body[data-page="perfil"] .journeyWorldCard.paradoxia .journeyWorldArt{background-position:center 25%}
+}
