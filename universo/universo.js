@@ -93,6 +93,18 @@ const avatarImg=$("#profileAvatarImage"),avatarOpen=$("#openAvatarGallery"),avat
 let profile=null,currentAvatar="avatar-01",avatarBusy=false;
 
 const avatarByKey=key=>avatars.find(a=>a.key===key)||avatars[0]||null;
+const avatarRankClass=x=>{
+  const xp=Number(x)||0;
+  if(xp>=360)return "rank-guardiao";
+  if(xp>=240)return "rank-mestre";
+  if(xp>=140)return "rank-filosofo";
+  if(xp>=60)return "rank-investigador";
+  return "rank-aprendiz";
+};
+const applyAvatarRank=()=>{
+  avatarOpen.classList.remove("rank-aprendiz","rank-investigador","rank-filosofo","rank-mestre","rank-guardiao");
+  avatarOpen.classList.add(avatarRankClass(profile?.xp||0));
+};
 const paintAvatar=key=>{
   const a=avatarByKey(key);
   if(!a)return;
@@ -100,6 +112,7 @@ const paintAvatar=key=>{
   avatarImg.src=a.src;
   avatarImg.alt="Avatar "+a.name;
   avatarOpen.title="Avatar atual: "+a.name;
+  applyAvatarRank();
 };
 const showAvatarStatus=(msg,type="")=>{avatarStatus.textContent=msg;avatarStatus.className="profileNameStatus "+type};
 const drawAvatarGallery=()=>{
@@ -120,6 +133,7 @@ async function chooseAvatar(key){
   showAvatarStatus("Salvando "+a.name+"...","info");
   try{
     const saved=await window.NevoaOnline.updateProfileAvatar(a.key);
+    if(profile)profile.avatar_key=saved||a.key;
     paintAvatar(saved||a.key);
     drawAvatarGallery();
     showAvatarStatus("✓ "+a.name+" agora é seu avatar.","ok");
@@ -152,7 +166,8 @@ async function loadProfile(){
     hint.textContent="Sua sessão expirou. Entre novamente para editar o perfil.";
     login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return;
   }
-  try{paintAvatar(await window.NevoaOnline.profileAvatar())}catch(e){paintAvatar("avatar-01")}
+  try{paintAvatar(profile.avatar_key||await window.NevoaOnline.profileAvatar())}catch(e){paintAvatar("avatar-01")}
+  applyAvatarRank();
   nameEl.textContent=profile.nickname||"Explorador da Névoa";
   hint.textContent=(profile.class_name?profile.class_name+" • ":"")+profile.title+" • identidade salva na sua conta";
   login.hidden=true;edit.hidden=false;avatarOpenAction.hidden=false;
