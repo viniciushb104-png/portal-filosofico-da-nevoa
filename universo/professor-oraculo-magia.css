@@ -619,3 +619,58 @@
 @keyframes oracleAudioNudge{
   50%{transform:translateX(2px)}
 }
+
+
+/* Player nativo de segurança */
+.oracle-theme-strip{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin:-2px 0 14px;
+  padding:9px 11px;
+  border:1px solid rgba(211,164,241,.12);
+  border-radius:14px;
+  background:linear-gradient(90deg,rgba(45,22,60,.52),rgba(14,8,21,.46));
+}
+.oracle-theme-strip-copy{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+.oracle-theme-strip-copy>span{
+  font-size:1.1rem;
+  filter:drop-shadow(0 0 7px rgba(204,129,244,.28));
+}
+.oracle-theme-strip-copy b,
+.oracle-theme-strip-copy small{
+  display:block;
+}
+.oracle-theme-strip-copy b{
+  color:#dec7e8;
+  font-size:.66rem;
+}
+.oracle-theme-strip-copy small{
+  margin-top:2px;
+  color:#8e7c98;
+  font-size:.52rem;
+}
+.oracle-theme-strip audio{
+  width:min(360px,48vw);
+  height:34px;
+  opacity:.92;
+  accent-color:#9a48c7;
+}
+@media(max-width:760px){
+  .oracle-theme-strip{
+    display:block;
+  }
+  .oracle-theme-strip audio{
+    width:100%;
+    margin-top:8px;
+  }
+}
+@media print{
+  .oracle-theme-strip{display:none!important}
+}
