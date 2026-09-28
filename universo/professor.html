@@ -1,1 +1,41 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#09050d"><meta name="description" content="Professor — Portal Filosófico da Névoa"><title>Professor</title><link rel="stylesheet" href="universo.css?v=1"><link rel="stylesheet" href="professor-oraculo.css?v=11"><link rel="stylesheet" href="professor-oraculo-magia.css?v=9"></head><body data-page="professor"><main id="app"></main><script src="data.js?v=1"></script><script src="universo.js?v=1"></script><script src="professor-oraculo.js?v=11"></script><script src="professor-oraculo-magia.js?v=8"></script></body></html>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#09050d"><meta name="description" content="Professor — Portal Filosófico da Névoa"><title>Professor</title><link rel="stylesheet" href="universo.css?v=1"><link rel="stylesheet" href="professor-oraculo.css?v=11"><link rel="stylesheet" href="professor-oraculo-magia.css?v=9"></head><body data-page="professor"><div class="oracle-entrance" id="oracleEntrance" aria-label="Entrada da Central da Oráculo">
+  <div class="oracle-entrance-mist oracle-entrance-mist-a"></div>
+  <div class="oracle-entrance-mist oracle-entrance-mist-b"></div>
+  <div class="oracle-entrance-stars" aria-hidden="true">✦　·　✧　·　✦　·　✧</div>
+  <div class="oracle-entrance-panel">
+    <div class="oracle-entrance-orb"><span>🔮</span></div>
+    <small>PORTAL FILOSÓFICO DA NÉVOA</small>
+    <h1>O Oráculo da Névoa</h1>
+    <p>Entre na biblioteca encantada e prepare sua próxima aula.</p>
+    <button type="button" id="oracleEnterButton">✦ Adentrar a Névoa</button>
+    <em>com trilha instrumental original</em>
+  </div>
+</div>
+<audio id="oracleThemeAudio" loop preload="metadata" playsinline aria-hidden="true" style="display:none">
+  <source src="https://viniciushb104-png.github.io/portal-filosofico-da-nevoa/universo/assets/audio/oraculo/oraculo-da-nevoa-theme.mp3" type="audio/mpeg">
+  <source src="https://raw.githubusercontent.com/viniciushb104-png/portal-filosofico-da-nevoa/main/universo/assets/audio/oraculo/oraculo-da-nevoa-theme.mp3" type="audio/mpeg">
+</audio>
+<main id="app"></main>
+<script>
+(function(){
+  var gate=document.getElementById("oracleEntrance");
+  var btn=document.getElementById("oracleEnterButton");
+  var audio=document.getElementById("oracleThemeAudio");
+  if(!gate||!btn)return;
+  btn.addEventListener("click",function(){
+    btn.disabled=true;
+    btn.textContent="✦ Abrindo o portal...";
+    if(audio){
+      audio.muted=false;
+      audio.volume=.55;
+      try{audio.currentTime=0;}catch(e){}
+      var p=audio.play();
+      if(p&&typeof p.catch==="function"){p.catch(function(){})}
+    }
+    gate.classList.add("leaving");
+    window.setTimeout(function(){
+      if(gate&&gate.parentNode)gate.parentNode.removeChild(gate);
+    },850);
+  },{once:true});
+})();
+</script><script src="data.js?v=1"></script><script src="universo.js?v=1"></script><script src="professor-oraculo.js?v=11"></script><script src="professor-oraculo-magia.js?v=9"></script></body></html>
