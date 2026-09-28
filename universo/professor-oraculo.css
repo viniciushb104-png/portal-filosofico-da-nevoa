@@ -366,3 +366,181 @@ body[data-page="professor"] #app{min-height:100vh}
     max-height:230px;
   }
 }
+
+
+/* Override final — conteúdo confinado à área clara do pergaminho */
+.oracle-result-main{
+  padding:96px 108px 88px;
+  min-height:610px;
+  display:flex;
+  flex-direction:column;
+}
+.oracle-result-head{
+  flex:0 0 auto;
+  gap:7px;
+  padding:0 12px 5px;
+}
+.oracle-result-head h2{
+  margin:2px 0 0;
+  max-width:72%;
+  font-size:1.16rem;
+  line-height:1.12;
+}
+.oracle-result-kicker{
+  font-size:.54rem;
+  letter-spacing:.10em;
+}
+.oracle-result-ready{
+  padding:5px 8px;
+  font-size:.54rem;
+}
+.oracle-result-body{
+  flex:1 1 auto;
+  width:100%;
+  max-width:100%;
+  min-height:0;
+  max-height:275px;
+  margin-top:5px;
+  padding:0 16px 0 12px;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+.activity-meta{
+  gap:4px;
+  margin:4px 0 7px;
+}
+.activity-meta span{
+  padding:3px 6px;
+  font-size:.56rem;
+}
+.activity-question{
+  margin:5px 0 6px;
+  padding:8px 9px;
+}
+.activity-question small{
+  font-size:.52rem;
+  margin-bottom:2px;
+}
+.activity-question strong{
+  font-size:.80rem;
+  line-height:1.26;
+}
+.activity-block{
+  padding:5px 0;
+}
+.activity-block b{
+  font-size:.70rem;
+}
+.activity-block p,
+.activity-block li{
+  font-size:.66rem;
+  line-height:1.26;
+}
+.activity-block p{
+  margin:2px 0;
+}
+.activity-block ol{
+  margin:3px 0;
+  padding-left:16px;
+}
+.oracle-result-actions{
+  flex:0 0 auto;
+  gap:4px;
+  margin-top:7px;
+  padding:0 12px;
+}
+.oracle-result-actions button{
+  padding:5px 7px;
+  font-size:.56rem;
+}
+@media(max-width:1180px){
+  .oracle-result-main{
+    padding:82px 82px 72px;
+  }
+  .oracle-result-body{
+    max-height:290px;
+    padding:0 12px 0 8px;
+  }
+  .oracle-result-head h2{
+    max-width:100%;
+  }
+}
+@media(max-width:760px){
+  .oracle-result-main{
+    padding:58px 34px 52px;
+    min-height:0;
+    background-size:100% 100%;
+  }
+  .oracle-result-head{
+    display:block;
+    padding:0 6px 3px;
+  }
+  .oracle-result-head h2{
+    max-width:100%;
+    font-size:.98rem;
+    line-height:1.12;
+  }
+  .oracle-result-kicker{
+    font-size:.50rem;
+  }
+  .oracle-result-ready{
+    display:inline-block;
+    margin-top:7px;
+    padding:4px 7px;
+    font-size:.50rem;
+  }
+  .oracle-result-body{
+    max-height:215px;
+    padding:0 9px 0 5px;
+  }
+  .activity-meta span{
+    font-size:.52rem;
+  }
+  .activity-question{
+    padding:7px 8px;
+  }
+  .activity-question strong{
+    font-size:.74rem;
+  }
+  .activity-block b{
+    font-size:.65rem;
+  }
+  .activity-block p,
+  .activity-block li{
+    font-size:.60rem;
+    line-height:1.22;
+  }
+  .oracle-result-actions{
+    padding:0 6px;
+  }
+  .oracle-result-actions button{
+    padding:5px 6px;
+    font-size:.53rem;
+  }
+}
+@media(max-width:390px){
+  .oracle-result-main{
+    padding:50px 27px 45px;
+  }
+  .oracle-result-body{
+    max-height:195px;
+    padding-right:7px;
+  }
+  .activity-block p,
+  .activity-block li{
+    font-size:.58rem;
+  }
+}
+@media print{
+  .oracle-result-main{
+    display:block;
+    min-height:0;
+    padding:18px !important;
+    background:#fff !important;
+  }
+  .oracle-result-body{
+    max-height:none !important;
+    overflow:visible !important;
+    padding:0 !important;
+  }
+}
