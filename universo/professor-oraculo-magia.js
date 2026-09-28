@@ -8,7 +8,8 @@ root.dataset.magicV2='1';
 
 const STORE='nevoaOracleMagicV2';
 const soundDefault=true;
-const THEME_SRC="assets/audio/oraculo/oraculo-da-nevoa-theme.mp3";
+const THEME_SRC="https://viniciushb104-png.github.io/portal-filosofico-da-nevoa/universo/assets/audio/oraculo/oraculo-da-nevoa-theme.mp3";
+const THEME_FALLBACK_SRC="https://raw.githubusercontent.com/viniciushb104-png/portal-filosofico-da-nevoa/main/universo/assets/audio/oraculo/oraculo-da-nevoa-theme.mp3";
 let themeAudio=null;
 let themeWanted=false;
 let classroomTimer=null;
@@ -68,16 +69,24 @@ function playChime(type='soft'){
 
 function ensureThemeAudio(){
   if(themeAudio)return themeAudio;
-  themeAudio=document.createElement("audio");
-  themeAudio.id="oracleThemeAudio";
-  themeAudio.src=new URL(THEME_SRC,window.location.href).href;
+  themeAudio=document.getElementById("oracleThemeAudio");
+  if(!themeAudio){
+    themeAudio=document.createElement("audio");
+    themeAudio.id="oracleThemeAudio";
+    themeAudio.controls=true;
+    themeAudio.loop=true;
+    themeAudio.preload="metadata";
+    const primary=document.createElement("source");
+    primary.src=THEME_SRC;primary.type="audio/mpeg";
+    const fallback=document.createElement("source");
+    fallback.src=THEME_FALLBACK_SRC;fallback.type="audio/mpeg";
+    themeAudio.appendChild(primary);themeAudio.appendChild(fallback);
+    document.body.appendChild(themeAudio);
+  }
   themeAudio.loop=true;
-  themeAudio.preload="auto";
+  themeAudio.preload="metadata";
   themeAudio.playsInline=true;
-  themeAudio.volume=.38;
-  themeAudio.setAttribute("aria-hidden","true");
-  themeAudio.style.display="none";
-  document.body.appendChild(themeAudio);
+  themeAudio.volume=.55;
   themeAudio.addEventListener("loadstart",function(){
     const btn=$("#magicThemeBtn");
     if(btn&&!themeWanted)btn.dataset.audioState="loading";
@@ -98,7 +107,7 @@ function ensureThemeAudio(){
     const btn=$("#magicThemeBtn");
     if(btn)btn.dataset.audioState="error";
     updateThemeButton();
-    toast("O arquivo da trilha não pôde ser reproduzido neste navegador.");
+    toast("A trilha não pôde ser carregada. Use o player abaixo para testar a fonte alternativa.");
   });
   themeAudio.load();
   return themeAudio;
@@ -157,6 +166,20 @@ if(welcomeActions){
     '<button class="oracle-btn oracle-sound-btn" id="magicSoundBtn" type="button" aria-pressed="'+profile.sound+'">'+(profile.sound?'🔔 Efeitos':'🔕 Efeitos')+'</button>'
   );
 }
+const welcomeSection=$('.oracle-welcome');
+if(welcomeSection){
+  welcomeSection.insertAdjacentHTML('afterend',
+    '<div class="oracle-theme-strip" id="oracleThemeStrip">'+
+      '<div class="oracle-theme-strip-copy"><span>🎵</span><div><b>O Oráculo da Névoa</b><small>tema instrumental da Central</small></div></div>'+
+      '<audio id="oracleThemeAudio" controls loop preload="metadata" playsinline>'+
+        '<source src="'+THEME_SRC+'" type="audio/mpeg">'+
+        '<source src="'+THEME_FALLBACK_SRC+'" type="audio/mpeg">'+
+        'Seu navegador não conseguiu reproduzir a trilha.'+
+      '</audio>'+
+    '</div>'
+  );
+}
+
 
 const stage=$('#oracleStage');
 if(stage){
@@ -651,5 +674,6 @@ if(titleNode){
 }
 
 /* Init */
+ensureThemeAudio();updateThemeButton();
 updateCauldron();renderConstellation();renderMirror();renderCards();renderAchievements();renderAffinity();
 })();
