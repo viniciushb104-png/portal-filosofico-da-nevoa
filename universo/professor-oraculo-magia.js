@@ -192,7 +192,7 @@ if(moon){moon.dataset.phase=phase[0];moon.title=phase[2];moon.setAttribute('aria
 
 const weather=['mist','rain','stars'][todayHash%3];
 root.dataset.weather=weather;
-if(weather==='rain')root.insertAdjacentHTML('afterbegin','<div class="oracle-rain" aria-hidden="true">'+Array.from({length:22},(_,i)=>'<i style="--x:'+(i*4.7%100)+'%;--d:'+(1.5+(i%7)*.19)+'s;--delay:-'+((i%11)*.23)+'s"></i>').join('')+'</div>');
+root.insertAdjacentHTML('afterbegin','<div class="oracle-rain" aria-hidden="true">'+Array.from({length:22},(_,i)=>'<i style="--x:'+(i*4.7%100)+'%;--d:'+(1.5+(i%7)*.19)+'s;--delay:-'+((i%11)*.23)+'s"></i>').join('')+'</div>');
 
 function updatePortrait(){
   const topic=(config().topic+' '+config().area).toLowerCase();
@@ -438,7 +438,7 @@ function onGenerated(){
   profile.uses++;
   Object.keys(c).forEach(k=>{if(k!=='topic')bump(k,c[k])});
   if(c.topic){profile.topics.push(c.topic);profile.topics=profile.topics.slice(-20)}
-  bump('area',c.area);save();unlockAchievements();renderAffinity();renderConstellation();renderMirror();renderCards();renderReason();showDiscovery();playChime('success');
+  save();unlockAchievements();renderAffinity();renderConstellation();renderMirror();renderCards();renderReason();showDiscovery();playChime('success');
 }
 
 /* Interactive objects */
