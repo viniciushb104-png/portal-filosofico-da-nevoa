@@ -8,7 +8,7 @@ const els={
   gate:$("#statusGate"),gateTitle:$("#gateTitle"),gateText:$("#gateText"),gateActions:$("#gateActions"),
   shell:$("#chatShell"),roomList:$("#roomList"),roomTitle:$("#roomTitle"),roomKicker:$("#roomKicker"),
   messages:$("#messages"),composer:$("#composer"),input:$("#messageInput"),send:$("#sendBtn"),count:$("#charCount"),
-  notice:$("#guardianNotice"),refresh:$("#refreshChat"),userChip:$("#userChip"),
+  notice:$("#guardianNotice"),refresh:$("#refreshChat"),userChip:$("#userChip"),adminLink:$("#adminPanelLink"),
   mod:$("#moderatorPanel"),refreshMod:$("#refreshMod"),accessQueue:$("#accessQueue"),flaggedQueue:$("#flaggedQueue"),reportQueue:$("#reportQueue"),
   accessCount:$("#accessCount"),flaggedCount:$("#flaggedCount"),reportCount:$("#reportCount"),
   reportDialog:$("#reportDialog"),reportForm:$("#reportForm"),reportReason:$("#reportReason"),reportDetails:$("#reportDetails"),
@@ -186,7 +186,8 @@ async function boot(){
   try{
     const p=await api("status");state.profile=p.profile;els.userChip.textContent=p.profile.nickname+(p.profile.moderator?" • Professor":"");
     if(p.profile.moderator||p.profile.access==="approved"){
-      els.gate.hidden=true;els.shell.hidden=false;if(p.profile.moderator){els.mod.hidden=false;loadModerator()}
+      els.gate.hidden=true;els.shell.hidden=false;
+      if(p.profile.owner&&els.adminLink)els.adminLink.hidden=false;
       await loadRooms();startPoll();return;
     }
     if(p.profile.access==="pending"){
