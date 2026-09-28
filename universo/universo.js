@@ -19,7 +19,55 @@ function cartas(){shell("Cartas da Névoa","Coleção sem compra e sem vantagem 
 function perfil(){const diary=readJSON("nevoaDiaryV1",[]),args=readJSON("nevoaArgumentsV1",[]),xp=p.xp||0,rank=xp>=360?"Guardião":xp>=240?"Mestre":xp>=140?"Filósofo":xp>=60?"Investigador":"Aprendiz";shell("Perfil do Explorador","A ficha centraliza tudo o que o visitante conquistou dentro do universo.",`<section class="section"><div class="wrap"><div class="panel"><div class="eyebrow">Título atual</div><h2>${rank} da Névoa</h2><div class="progress"><i style="width:${Math.min(100,xp/360*100)}%"></i></div></div><div class="statGrid" style="margin-top:14px"><div class="stat"><b>${xp}</b><small>XP</small></div><div class="stat"><b>${u.unlocks.length}</b><small>Grimório</small></div><div class="stat"><b>${u.cards.length}</b><small>Cartas</small></div><div class="stat"><b>${u.secrets.length}</b><small>Segredos</small></div><div class="stat"><b>${diary.length}</b><small>Reflexões</small></div><div class="stat"><b>${args.length}</b><small>Argumentos</small></div></div></div></section>`)}
 function teatro(){let stage=0;const scenes=[{who:"Sócrates",text:"Você afirma ter certeza. O que sustenta essa certeza?",choices:["Porque todo mundo concorda comigo.","Porque consigo apresentar razões e aceitar que sejam examinadas."]},{who:"Sócrates",text:"E se alguém mostrar uma objeção forte?",choices:["Ataco a pessoa que discordou.","Examino a objeção e reviso minha posição se necessário."]},{who:"Narrador",text:"O diálogo termina sem vencedor automático. O que mudou foi a qualidade das razões.",choices:[]}];shell("Teatro Filosófico","Pequenas cenas interativas em que o foco não é vencer uma luta, mas sustentar uma posição e lidar com objeções.",`<section class="section"><div class="wrap panel"><div class="eyebrow" id="speaker"></div><div class="dialogue" id="line"></div><div class="choices" id="choices"></div></div></section>`);const draw=()=>{const s=scenes[stage];$("#speaker").textContent=s.who;$("#line").textContent=s.text;$("#choices").innerHTML="";s.choices.forEach((c,i)=>{const b=document.createElement("button");b.textContent=c;b.onclick=()=>{if(i===1)NevoaUniverse.unlock("dialogo");stage=Math.min(stage+1,scenes.length-1);draw()};$("#choices").appendChild(b)});if(!s.choices.length)$("#choices").innerHTML='<a class="btn" href="teatro.html">Recomeçar cena</a>'};draw()}
 function fonografo(){shell("Fonógrafo da Névoa","A estrutura musical já está separada do jogo. Depois podemos conectar arquivos, capas, desbloqueios e playlists sem mexer na arquitetura.",`<section class="section"><div class="wrap grid">${D.tracks.map(x=>card("🎵",x.title,x.where,"",x.status)).join("")}</div></section>`)}
-function mapa(){shell("Grande Mapa do Portal","Um mapa funcional de navegação. A versão visual poderá virar um cenário ilustrado com portais, caminhos e animações.",`<section class="section"><div class="wrap mapGrid"><a class="mapNode" href="../index.html#jogos"><span>🏚️</span><b>Mansão Filosófica</b></a><a class="mapNode" href="../jogos/plataforma-filosofica/"><span>🎮</span><b>Labirinto dos Filósofos</b></a><a class="mapNode" href="../jogos/paradoxia/"><span>🏰</span><b>Paradoxia</b></a><a class="mapNode" href="museu.html"><span>🏛️</span><b>Museu</b></a><a class="mapNode" href="grimorio.html"><span>📖</span><b>Grimório</b></a><a class="mapNode" href="teatro.html"><span>🎭</span><b>Teatro</b></a><a class="mapNode" href="fonografo.html"><span>🎵</span><b>Fonógrafo</b></a><a class="mapNode" href="../grimorio-de-colorir/"><span>🎨</span><b>Grimório de Colorir</b></a><a class="mapNode" href="segredos.html"><span>🔐</span><b>Passagens Secretas</b></a></div></section>`)}
+function mapa(){
+const discovered=(u.secrets||[]).length>0?" discovered":"";
+shell("Grande Mapa do Portal","Agora o universo inteiro pode ser explorado como um único mundo. Toque em um marco iluminado para atravessar a névoa.",`
+<section class="mapSection"><div class="wrap mapStage">
+  <div class="mapToolbar">
+    <p>🗺️ <b>Explore livremente.</b> No celular, arraste o mapa para os lados. Os círculos iluminados são portais clicáveis.</p>
+    <div class="mapActions"><button class="btn subtle" id="centerMap">✦ Centralizar</button><button class="btn" id="fullMap">⛶ Tela do mapa</button></div>
+  </div>
+  <div class="mapViewport" id="mapViewport" tabindex="0" aria-label="Grande Mapa navegável do Portal Filosófico da Névoa">
+    <div class="mapCanvas" id="mapCanvas">
+      <div class="mapFallbackScene" aria-hidden="true"></div>
+      <img class="mapArtwork" id="mapArtwork" src="assets/grande-mapa-portal.png" alt="Grande Mapa ilustrado do Portal Filosófico da Névoa" draggable="false">
+      <div class="mapLoading">A névoa está revelando o mapa...</div>
+      <div class="mapVignette"></div><div class="mapFog"></div>
+
+      <a class="mapHotspot" style="--x:15%;--y:21%" href="../index.html#jogos" aria-label="Mansão Filosófica"><span class="pinIcon">🏚️</span><span class="pinLabel">Mansão Filosófica</span></a>
+      <a class="mapHotspot" style="--x:48%;--y:27%" href="../jogos/plataforma-filosofica/" aria-label="Labirinto dos Filósofos"><span class="pinIcon">🎮</span><span class="pinLabel">Labirinto dos Filósofos</span></a>
+      <a class="mapHotspot paradoxia" style="--x:80%;--y:18%" href="../jogos/paradoxia/" aria-label="Paradoxia"><span class="pinIcon">🏰</span><span class="pinLabel">Paradoxia</span></a>
+      <a class="mapHotspot central" style="--x:49%;--y:46%" href="index.html" aria-label="Praça Central da Névoa"><span class="pinIcon">✦</span><span class="pinLabel">Praça Central da Névoa</span></a>
+      <a class="mapHotspot" style="--x:12%;--y:51%" href="museu.html" aria-label="Museu dos Filósofos"><span class="pinIcon">🏛️</span><span class="pinLabel">Museu dos Filósofos</span></a>
+      <a class="mapHotspot" style="--x:90%;--y:48%" href="grimorio.html" aria-label="Grimório do Explorador"><span class="pinIcon">📖</span><span class="pinLabel">Grimório do Explorador</span></a>
+      <a class="mapHotspot" style="--x:14%;--y:72%" href="teatro.html" aria-label="Teatro Filosófico"><span class="pinIcon">🎭</span><span class="pinLabel">Teatro Filosófico</span></a>
+      <a class="mapHotspot" style="--x:38%;--y:84%" href="fonografo.html" aria-label="Fonógrafo da Névoa"><span class="pinIcon">🎵</span><span class="pinLabel">Fonógrafo da Névoa</span></a>
+      <a class="mapHotspot teacher" style="--x:62%;--y:79%" href="professor.html" aria-label="Torre do Professor"><span class="pinIcon">🧙</span><span class="pinLabel">Torre do Professor</span></a>
+      <a class="mapHotspot secret${discovered}" style="--x:88%;--y:72%" href="segredos.html" aria-label="Cemitério dos Segredos"><span class="pinIcon">🔐</span><span class="pinLabel">Cemitério dos Segredos</span></a>
+    </div>
+  </div>
+  <div class="mapLegend" aria-label="Atalhos do mapa">
+    <a href="../index.html#jogos"><span>🏚️</span>Mansão</a>
+    <a href="../jogos/plataforma-filosofica/"><span>🎮</span>Labirinto</a>
+    <a href="../jogos/paradoxia/"><span>🏰</span>Paradoxia</a>
+    <a href="grimorio.html"><span>📖</span>Grimório</a>
+    <a href="museu.html"><span>🏛️</span>Museu</a>
+    <a href="teatro.html"><span>🎭</span>Teatro</a>
+    <a href="fonografo.html"><span>🎵</span>Fonógrafo</a>
+    <a href="professor.html"><span>🧙</span>Professor</a>
+    <a href="segredos.html"><span>🔐</span>Segredos</a>
+    <a href="../grimorio-de-colorir/"><span>🎨</span>Colorir</a>
+  </div>
+</div></section>`);
+
+const vp=$("#mapViewport"),canvas=$("#mapCanvas"),art=$("#mapArtwork");
+const center=()=>{vp.scrollLeft=Math.max(0,(vp.scrollWidth-vp.clientWidth)/2);vp.scrollTop=Math.max(0,(vp.scrollHeight-vp.clientHeight)/2)};
+art.addEventListener("load",()=>canvas.classList.add("artReady"));
+art.addEventListener("error",()=>canvas.classList.add("noArt"));
+$("#centerMap").onclick=center;
+$("#fullMap").onclick=async()=>{try{if(!document.fullscreenElement)await vp.requestFullscreen();else await document.exitFullscreen()}catch(e){}};
+requestAnimationFrame(()=>{if(innerWidth<760)center()});
+}
 function segredos(){shell("Segredos da Mansão","Área opcional para easter eggs e enigmas que não precisam aparecer no percurso principal.",`<section class="section"><div class="wrap two"><div class="panel"><div class="eyebrow">Porta que não existe</div><h2>“Quanto mais perguntas recebe, mais caminhos oferece. O que é?”</h2><div class="field"><input class="input" id="secretAnswer" placeholder="Digite sua resposta"></div><button class="btn" id="openSecret">Tentar abrir</button></div><div class="panel" id="secretResult"><div class="empty">A porta permanece silenciosa.</div></div></div></section>`);$("#openSecret").onclick=()=>{const a=$("#secretAnswer").value.toLowerCase().trim();if(a.includes("filosofia")||a.includes("pergunta")){NevoaUniverse.addSecret("porta-pergunta");$("#secretResult").innerHTML='<div class="note success"><b>🔓 Passagem encontrada</b><small>Segredo registrado no Perfil do Explorador.</small></div>'}else $("#secretResult").innerHTML='<div class="note warning"><b>A fechadura range...</b><small>Talvez a resposta não seja uma coisa, mas uma forma de investigar.</small></div>'}}
 function professor(){shell("Central do Professor","A estrutura docente está separada da experiência do aluno. Nesta primeira camada, o planejamento funciona localmente; turmas online entram depois da validação visual.",`<section class="section"><div class="wrap two"><div class="panel"><h2>Montar uma sessão</h2><div class="field"><label>Nível</label><select id="level"><option>Fundamental II</option><option>Ensino Médio</option></select></div><div class="field"><label>Tema</label><select id="theme"><option>Ética</option><option>Lógica</option><option>Conhecimento</option><option>Argumentação</option><option>História da Filosofia</option></select></div><div class="field"><label>Tempo</label><select id="time"><option>10 minutos</option><option>20 minutos</option><option>50 minutos</option></select></div><button class="btn" id="plan">Gerar percurso</button></div><div class="panel"><h2>Percurso sugerido</h2><div id="planOut" class="empty">Escolha os parâmetros.</div><div class="note warning"><b>Turmas online</b><small>A área está reservada na arquitetura. A conexão de códigos de turma e painel coletivo ficará para a etapa de backend/testes, sem afetar os jogos atuais.</small></div></div></div></section>`);$("#plan").onclick=()=>{const t=$("#theme").value,map={Ética:["Tribunal das Sombras","Dilemas da Meia-Noite"],Lógica:["Sala da Lógica","Paradoxia — Circo das Falácias"],Conhecimento:["Espelho de Descartes","Caverna de Platão"],Argumentação:["Dilemas da Meia-Noite","Oficina de Argumentos"],"História da Filosofia":["Corredor dos Filósofos","Museu dos Filósofos"]};$("#planOut").className="";$("#planOut").innerHTML=(map[t]||[]).map((x,i)=>`<div class="note success"><b>${i+1}. ${x}</b><small>${i?"Aprofundamento":"Disparador inicial"}</small></div>`).join("")}}
 const page=document.body.dataset.page;({hub,grimorio,diario,museu,oficina,bestiario,cartas,perfil,teatro,fonografo,mapa,segredos,professor}[page]||hub)();
