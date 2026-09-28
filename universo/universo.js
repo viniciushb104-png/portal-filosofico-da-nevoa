@@ -27,9 +27,11 @@ const rankInfo=x=>x>=360?{name:"Guardião da Névoa",next:null,min:360,max:360}:
 const journeyData=xp=>{
  const r=rankInfo(xp),span=Math.max(1,r.max-r.min),pct=r.next?Math.max(0,Math.min(100,(xp-r.min)/span*100)):100;
  const mansionPct=Math.round(mansionRooms/7*100);
- const labPct=Math.max(Number(localCompleted.plataforma||0)>0?20:0,Math.min(100,(platformPhase-1)*20));
- const paraDone=Number(localCompleted.rpgParadoxia||0)>0||!!ach.paradoxia||!!paradoxiaSave.completed;
- const paraPct=paraDone?100:(paradoxiaSave.sceneIndex?Math.min(95,Math.round(Number(paradoxiaSave.sceneIndex)/7*100)):0);
+ const labDone=localCompleted.plataforma===true||Number(localCompleted.plataforma||0)>=1||platformPhase>5;
+ const labPct=labDone?100:Math.max(0,Math.min(95,(platformPhase-1)*20));
+ const paraDone=localCompleted.rpgParadoxia===true||Number(localCompleted.rpgParadoxia||0)>=1||paradoxiaSave.completed===true;
+ const paraScene=Math.max(0,Number(paradoxiaSave.sceneIndex||0));
+ const paraPct=paraDone?100:(paraScene>0?Math.min(95,Math.round(paraScene/7*100)):0);
  let next={icon:"🏚️",title:"Entre na Mansão de Sócrates",text:"A primeira porta da jornada espera por perguntas melhores.",href:"../index.html#jogos"};
  if(mansionRooms>=7&&labPct<100)next={icon:"🎮",title:"Atravesse o Labirinto",text:"Continue pelas cinco fases e transforme conceitos em caminho.",href:"../jogos/plataforma-filosofica/"};
  if(labPct>=100&&!paraDone)next={icon:"🎭",title:"Viaje para Paradoxia",text:"O Reino das Escolhas aguarda suas decisões e argumentos.",href:"../jogos/paradoxia/"};
