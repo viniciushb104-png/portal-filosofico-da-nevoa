@@ -30,7 +30,7 @@ const items=C.items.map((label,i)=>({x:itemXs[i],y:[405,300,260,255,345,250,285,
 const gates=C.gates.map((g,i)=>Object.assign({x:[1080,2980,4360][i],y:350,w:38,h:120,opened:false,checkpoint:[1175,3075,4460][i]},g));
 const checkpoints=[{x:1190,y:412,active:false},{x:3095,y:362,active:false},{x:4480,y:362,active:false}];
 const boss={x:5230,y:350,active:true,step:0,questions:C.boss.questions};
-const specialGate=C.passwordGate?{x:C.passwordGate.x||3650,y:350,w:45,h:120,opened:false}:null;
+const specialGate=C.passwordGate?{x:C.passwordGate.x||3650,y:180,w:45,h:290,opened:false}:null;
 
 function portalState(){
  const raw=localStorage.getItem('nevoaProgressV4')||localStorage.getItem('nevoaProgressV3');
