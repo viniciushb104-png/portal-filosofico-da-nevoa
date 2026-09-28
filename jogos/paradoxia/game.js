@@ -197,6 +197,13 @@ function updatePortalScore(){
 function scene(){
  return scenes[Math.max(0,Math.min(state.sceneIndex,scenes.length-1))];
 }
+function sceneDone(sc){
+ if(!sc)return false;
+ if(sc.type==='dilemma')return !!state.flags?.[sc.id];
+ if(sc.type==='battle')return !!state.awards?.[sc.id];
+ if(sc.type==='boss')return !!state.completed;
+ return false;
+}
 function saveLocal(){
  localStorage.setItem(SAVE_KEY,JSON.stringify(state));updatePortalScore();setSaveState(false);
  clearTimeout(cloudTimer);
@@ -224,7 +231,7 @@ async function loadInitial(){
    try{
      const cloud=await window.NevoaOnline.loadRpgState();
      const remote=cloud?.save_data?normalize(cloud.save_data):null;
-     const rank=s=>(s.sceneIndex*1000)+(s.bossStep*100)+s.score;
+     const rank=s=>((s.completed?1:0)*100000)+(Object.keys(s.flags||{}).length*2000)+(Object.keys(s.awards||{}).length*250)+(Number(s.score)||0);
      state=remote&&rank(remote)>=rank(local)?remote:local;
      if(!remote&&local.classKey)await saveCloud();
    }catch(e){state=local}
@@ -273,7 +280,7 @@ function resolveDilemma(choice){
  const sc=scene();if(state.flags[sc.id])return;
  state.flags[sc.id]=choice.key;applyEffects(choice.effects);addConcept(sc.concept);awardOnce(sc.id,10);
  showFeedback(choice.feedback,'neutral');
- $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Conceito desbloqueado:</b> '+sc.concept;
+ $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Conceito registrado:</b> '+sc.concept;
  saveLocal();updateHUD();renderLog();addContinue();
 }
 function loseHeart(){
@@ -295,7 +302,7 @@ function resolveBattle(index){
  if(opt.correct){
    awardOnce(sc.id,15);addConcept(sc.concept);
    showFeedback('✓ '+opt.feedback,'good');
-   $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Conceito desbloqueado:</b> '+sc.concept;
+   $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Conceito registrado:</b> '+sc.concept;
    saveLocal();updateHUD();renderLog();
    setTimeout(()=>addContinue('Atravessar a área →'),650);
  }else{
@@ -322,9 +329,9 @@ function resolveBoss(index){
 }
 function nextScene(){
  closeScene();
- state.sceneIndex=Math.min(scenes.length-1,state.sceneIndex+1);state.hearts=3;state.shield=false;
+ state.hearts=3;state.shield=false;
  saveLocal();render();
- toast('🗺️ Nova região filosófica desbloqueada no mapa.');
+ toast('🗺️ Desafio registrado. Explore qualquer região de Paradoxia.');
 }
 
 function useAbility(){
@@ -366,19 +373,20 @@ function renderHUD(){
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
 function renderMap(){
  const ids=scenes.map(s=>s.id);
- $$('.mapNode').forEach(n=>{
-   const idx=ids.indexOf(n.dataset.node);
-   n.classList.toggle('done',idx<state.sceneIndex||state.completed);
-   n.classList.toggle('active',idx===state.sceneIndex&&!state.completed);
+ $('.mapNode').forEach(n=>{
+   const idx=ids.indexOf(n.dataset.node),sc=scenes[idx];
+   n.classList.toggle('done',sceneDone(sc));
+   n.classList.toggle('active',idx===state.sceneIndex&&!sceneDone(sc));
+   n.classList.remove('locked');
  });
- $$('.worldPoi').forEach(n=>{
-   const idx=ids.indexOf(n.dataset.scene);
-   n.classList.toggle('done',idx<state.sceneIndex||state.completed);
-   n.classList.toggle('current',idx===state.sceneIndex&&!state.completed);
-   n.classList.toggle('locked',idx>state.sceneIndex&&!state.completed);
+ $('.worldPoi').forEach(n=>{
+   const idx=ids.indexOf(n.dataset.scene),sc=scenes[idx];
+   n.classList.toggle('done',sceneDone(sc));
+   n.classList.toggle('current',idx===state.sceneIndex&&!sceneDone(sc));
+   n.classList.remove('locked');
  });
  const q=$('#questNow');
- if(q)q.textContent=state.completed?'Paradoxia reconheceu sua jornada. Explore livremente.':'Vá até '+scene().location+' e investigue o desafio.';
+ if(q)q.textContent='Explore livremente: todos os desafios e regiões de Paradoxia estão disponíveis.';
 }
 function renderLog(){
  const box=$('#logList');
@@ -399,8 +407,13 @@ function renderScene(){
  }
  if(sc.type==='battle'&&state.awards[sc.id]){
    $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Conceito registrado:</b> '+sc.concept;
-   showFeedback('Este confronto já foi resolvido. O caminho à frente está aberto.','good');
-   addContinue('Atravessar a área →');renderHUD();renderMap();return;
+   showFeedback('Este confronto já foi resolvido. Você pode revisitá-lo ou continuar explorando livremente.','good');
+   addContinue('Continuar explorando →');renderHUD();renderMap();return;
+ }
+ if(sc.type==='boss'&&state.completed){
+   $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Capítulo registrado:</b> '+sc.concept;
+   showFeedback('O confronto final já foi concluído. Todas as regiões continuam abertas para exploração.','good');
+   addContinue('Continuar explorando →');renderHUD();renderMap();return;
  }
  if(sc.type==='dilemma'){
    sc.choices.forEach(ch=>{
@@ -430,7 +443,6 @@ function render(){renderHUD();renderMap();renderLog();renderScene();renderWorld(
 
 
 function openScene(){
- if(state.completed)return toast('🏆 Você já concluiu este capítulo. Continue explorando ou jogue outro caminho.');
  const card=$('#sceneCard');if(!card)return;
  renderScene();card.classList.add('open');document.body.classList.add('sceneOpen');
  walkFrame=2;state.world.dir='action';renderWorld();
@@ -468,11 +480,12 @@ function interactWorld(){
  if(document.body.classList.contains('sceneOpen'))return;
  if(!$('#worldDialogue')?.hidden){closeWorldDialogue();return}
  if(nearbyExtra){interactAmbient(nearbyExtra);return}
- if(!nearbyPoi){toast('Explore o mapa. Objetos, personagens e lugares reagem quando você se aproxima.');return}
+ if(!nearbyPoi){toast('Explore o mapa. Todos os lugares estão disponíveis desde o início.');return}
  const ids=scenes.map(s=>s.id),idx=ids.indexOf(nearbyPoi);
- if(idx<state.sceneIndex||state.completed){toast('📜 Você já investigou esta região. Pode continuar explorando.');return}
- if(idx>state.sceneIndex){toast('🌫️ Você encontrou o lugar, mas o desafio principal ainda está envolto em névoa.');return}
- openScene();
+ if(idx<0)return;
+ state.sceneIndex=idx;state.hearts=3;state.shield=false;
+ if(scenes[idx]?.type==='boss'&&!state.completed)state.bossStep=0;
+ saveLocal();renderMap();openScene();
 }
 function nearestPlace(){
  let best=null,dist=Infinity;
