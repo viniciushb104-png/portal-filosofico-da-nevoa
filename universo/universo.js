@@ -20,23 +20,45 @@ function perfil(){
 const diary=readJSON("nevoaDiaryV1",[]),args=readJSON("nevoaArgumentsV1",[]),localXp=Number(p.xp||0);
 const avatars=Array.isArray(window.NEVOA_AVATARS)?window.NEVOA_AVATARS:[];
 const localCompleted=p.completed||{},ach=p.achievements||{};
-const platformPhase=Math.max(1,Number(p.platformPhase||1));
 const mansionRooms=Math.min(7,Number(p.socrates||0));
-const paradoxiaSave=readJSON("paradoxiaSaveV1",readJSON("paradoxiaSave",{}))||{};
+const localParadoxiaSave=readJSON("paradoxiaSaveV1",null)||readJSON("paradoxiaSave",null);
 const rankInfo=x=>x>=360?{name:"Guardião da Névoa",next:null,min:360,max:360}:x>=240?{name:"Mestre da Névoa",next:"Guardião",min:240,max:360}:x>=140?{name:"Filósofo da Névoa",next:"Mestre",min:140,max:240}:x>=60?{name:"Investigador da Névoa",next:"Filósofo",min:60,max:140}:{name:"Aprendiz da Névoa",next:"Investigador",min:0,max:60};
-const journeyData=xp=>{
+const journeyData=(xp,progressRows=[],cloudRpg=null)=>{
  const r=rankInfo(xp),span=Math.max(1,r.max-r.min),pct=r.next?Math.max(0,Math.min(100,(xp-r.min)/span*100)):100;
- const mansionPct=Math.round(mansionRooms/7*100);
- const labDone=localCompleted.plataforma===true||Number(localCompleted.plataforma||0)>=1||platformPhase>5;
- const labPct=labDone?100:Math.max(0,Math.min(95,(platformPhase-1)*20));
- const paraDone=localCompleted.rpgParadoxia===true||Number(localCompleted.rpgParadoxia||0)>=1||paradoxiaSave.completed===true;
- const paraScene=Math.max(0,Number(paradoxiaSave.sceneIndex||0));
- const paraPct=paraDone?100:(paraScene>0?Math.min(95,Math.round(paraScene/7*100)):0);
+ const claims={};(Array.isArray(progressRows)?progressRows:[]).forEach(row=>{const k=String(row?.event_key||"");if(k)claims[k]=Math.max(Number(claims[k]||0),Number(row?.best_score||0))});
+ const remoteMansionScore=Number(claims.socrates_mansion||0);
+ const remoteMansionRooms=remoteMansionScore>=130?7:Math.min(6,Math.floor(remoteMansionScore/15));
+ const effectiveMansionRooms=Math.max(mansionRooms,remoteMansionRooms);
+ const mansionPct=Math.round(effectiveMansionRooms/7*100);
+
+ const localLabComplete=Number(localCompleted.labirintoCompleto||0)>=1||!!ach.labyrinthMaster;
+ const labPhases=[
+   localLabComplete||Number(localCompleted.plataforma||0)>=60||Number(claims.platform_socrates||0)>=60,
+   localLabComplete||Number(localCompleted.plataoPlataforma||0)>=70||Number(claims.platform_plato||0)>=70,
+   localLabComplete||Number(localCompleted.descartesPlataforma||0)>=80||Number(claims.platform_descartes||0)>=80,
+   localLabComplete||Number(localCompleted.humePlataforma||0)>=90||Number(claims.platform_hume||0)>=90,
+   localLabComplete||Number(localCompleted.eticaPlataforma||0)>=100||Number(claims.platform_ethics||0)>=100
+ ];
+ const labDoneCount=labPhases.filter(Boolean).length;
+ const labPct=labDoneCount*20;
+
+ const cloudSave=cloudRpg&&typeof cloudRpg.save_data==="object"?cloudRpg.save_data:null;
+ const currentSaves=[localParadoxiaSave,cloudSave].filter(x=>x&&typeof x==="object");
+ const claimPara=Number(claims.rpg_paradoxia||0);
+ let paraDone=claimPara>=120;
+ let paraScore=0;
+ if(currentSaves.length){
+   currentSaves.forEach(save=>{paraScore=Math.max(paraScore,Math.max(0,Number(save.score||0)));if(save.completed===true)paraDone=true});
+ }else{
+   paraScore=Math.max(0,claimPara);
+ }
+ const paraPct=paraDone?100:Math.min(95,Math.round(Math.min(120,paraScore)/120*100));
+
  let next={icon:"🏚️",title:"Entre na Mansão de Sócrates",text:"A primeira porta da jornada espera por perguntas melhores.",href:"../index.html#jogos"};
- if(mansionRooms>=7&&labPct<100)next={icon:"🎮",title:"Atravesse o Labirinto",text:"Continue pelas cinco fases e transforme conceitos em caminho.",href:"../jogos/plataforma-filosofica/"};
+ if(effectiveMansionRooms>=7&&labPct<100)next={icon:"🎮",title:"Atravesse o Labirinto",text:"Continue pelas cinco fases e transforme conceitos em caminho.",href:"../jogos/plataforma-filosofica/"};
  if(labPct>=100&&!paraDone)next={icon:"🎭",title:"Viaje para Paradoxia",text:"O Reino das Escolhas aguarda suas decisões e argumentos.",href:"../jogos/paradoxia/"};
  if(paraDone)next={icon:"🏆",title:"Explore as Memórias",text:"Sua jornada já deixou marcas. Reveja descobertas e procure os segredos restantes.",href:"grimorio.html"};
- return {r,pct,mansionPct,labPct,paraPct,next};
+ return {r,pct,mansionPct,labPct,labDoneCount,paraPct,paraDone,effectiveMansionRooms,next};
 };
 const jd=journeyData(localXp);
 const worldCard=(cls,icon,kicker,title,pct,desc,href)=>`<a class="journeyWorldCard ${cls}" href="${href}"><div class="journeyWorldArt"><span>${icon}</span><i style="--world-progress:${pct}%"></i></div><div class="journeyWorldCopy"><small>${kicker}</small><h3>${title}</h3><p>${desc}</p><div class="journeyWorldProgress"><i style="width:${pct}%"></i></div><b>${pct}% explorado <span>→</span></b></div></a>`;
@@ -69,7 +91,7 @@ shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro 
 
   <div class="journeyLower">
     <div class="panel journeyMemories"><div class="eyebrow">Memórias da jornada</div><h3>O que você já levou da Névoa</h3><div class="journeyStats"><div><b id="journeyXpStat">${localXp}</b><small>XP</small></div><div><b>${u.unlocks.length}</b><small>Registros</small></div><div><b>${u.cards.length}</b><small>Cartas</small></div><div><b>${u.secrets.length}</b><small>Segredos</small></div><div><b>${diary.length}</b><small>Reflexões</small></div><div><b>${args.length}</b><small>Argumentos</small></div></div><a class="btn subtle" href="grimorio.html">📖 Abrir Grimório</a></div>
-    <div class="panel journeyChronicle"><div class="eyebrow">Crônica do explorador</div><h3>Marcas no mundo</h3><div class="chronicleLine ${mansionRooms?"done":""}"><span>🏚️</span><div><b>Mansão</b><small>${mansionRooms?mansionRooms+"/7 cômodos atravessados":"Ainda não explorada"}</small></div></div><div class="chronicleLine ${jd.labPct?"done":""}"><span>🎮</span><div><b>Labirinto</b><small>${jd.labPct?jd.labPct+"% da jornada registrada":"As portas aguardam"}</small></div></div><div class="chronicleLine ${jd.paraPct?"done":""}"><span>🎭</span><div><b>Paradoxia</b><small>${jd.paraPct?jd.paraPct+"% registrado":"O reino ainda chama"}</small></div></div></div>
+    <div class="panel journeyChronicle"><div class="eyebrow">Crônica do explorador</div><h3>Marcas no mundo</h3><div class="chronicleLine ${mansionRooms?"done":""}"><span>🏚️</span><div><b>Mansão</b><small id="journeyMansionChronicle">${jd.effectiveMansionRooms?jd.effectiveMansionRooms+"/7 cômodos atravessados":"Ainda não explorada"}</small></div></div><div class="chronicleLine ${jd.labPct?"done":""}"><span>🎮</span><div><b>Labirinto</b><small id="journeyLabChronicle">${jd.labPct?jd.labDoneCount+"/5 fases concluídas":"As portas aguardam"}</small></div></div><div class="chronicleLine ${jd.paraPct?"done":""}"><span>🎭</span><div><b>Paradoxia</b><small id="journeyParaChronicle">${jd.paraPct?jd.paraPct+"% registrado":"O reino ainda chama"}</small></div></div></div>
   </div>
 
   <div class="panel profileAvatarEditor" id="profileAvatarEditor" hidden><div class="eyebrow">Galeria de Avatares da Névoa</div><h3>Escolha sua aparência no Portal</h3><p>Os dez avatares são artes oficiais do Portal. Você pode usar qualquer um deles e trocar quando quiser.</p><div class="avatarGallery" id="avatarGallery"></div><div class="avatarGalleryFooter"><div class="profileNameStatus" id="avatarStatus" role="status" aria-live="polite"></div><button class="btn subtle" id="closeAvatarGallery" type="button">Fechar galeria</button></div></div>
@@ -93,20 +115,26 @@ async function chooseAvatar(key){if(!profile||avatarBusy)return;const a=avatarBy
 const showStatus=(msg,type="")=>{status.textContent=msg;status.className="profileNameStatus "+type};
 const closeEditor=()=>{editor.hidden=true;showStatus("");input.value=profile?.nickname||""};
 const openEditor=()=>{if(!profile)return;input.value=profile.nickname||"";editor.hidden=false;showStatus("");requestAnimationFrame(()=>input.focus())};
-const repaintJourney=xp=>{
- const d=journeyData(Number(xp)||0);
- const ids={journeyRankName:d.r.name,journeyXpText:(Number(xp)||0)+" XP",journeyXpNext:d.r.next?"Próximo título: "+d.r.next:"Título máximo alcançado",journeySealXp:Number(xp)||0,journeyXpStat:Number(xp)||0,journeyNextIcon:d.next.icon,journeyNextTitle:d.next.title,journeyNextText:d.next.text};
+const repaintJourney=(xp,progressRows=[],cloudRpg=null)=>{
+ const d=journeyData(Number(xp)||0,progressRows,cloudRpg);
+ const ids={journeyRankName:d.r.name,journeyXpText:(Number(xp)||0)+" XP",journeyXpNext:d.r.next?"Próximo título: "+d.r.next:"Título máximo alcançado",journeySealXp:Number(xp)||0,journeyXpStat:Number(xp)||0,journeyNextIcon:d.next.icon,journeyNextTitle:d.next.title,journeyNextText:d.next.text,journeyMansionChronicle:d.effectiveMansionRooms?d.effectiveMansionRooms+"/7 cômodos atravessados":"Ainda não explorada",journeyLabChronicle:d.labDoneCount?d.labDoneCount+"/5 fases concluídas":"As portas aguardam",journeyParaChronicle:d.paraPct?d.paraPct+"% registrado":"O reino ainda chama"};
  Object.entries(ids).forEach(([id,val])=>{const el=$("#"+id);if(el)el.textContent=val});
- const bar=$("#journeyXpBar");if(bar)bar.style.width=d.pct+"%";const link=$("#journeyNextLink");if(link)link.href=d.next.href;
+ const bar=$("#journeyXpBar");if(bar)bar.style.width=d.pct+"%";
+ const link=$("#journeyNextLink");if(link)link.href=d.next.href;
+ [["mansion",d.mansionPct],["labyrinth",d.labPct],["paradoxia",d.paraPct]].forEach(([cls,val])=>{const card=document.querySelector(".journeyWorldCard."+cls);if(!card)return;const fill=card.querySelector(".journeyWorldProgress i");if(fill)fill.style.width=val+"%";const label=card.querySelector(".journeyWorldCopy>b");if(label)label.innerHTML=val+'% explorado <span>→</span>'});
+ return d;
 };
 async function loadProfile(){
  paintAvatar("avatar-01");
  if(!window.NevoaOnline){hint.textContent="O serviço de conta não carregou. Reabra a página para tentar novamente.";login.hidden=false;return}
  if(!window.NevoaOnline.getSession()){nameEl.textContent="Explorador da Névoa";hint.textContent="Entre na sua conta para sincronizar sua Jornada, nome e avatar.";login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return}
- profile=await window.NevoaOnline.sessionProfile();
+ let snapshot=null,cloudRpg=null;
+ try{snapshot=await window.NevoaOnline.syncLocal(progress())}catch(e){}
+ try{cloudRpg=await window.NevoaOnline.loadRpgState()}catch(e){}
+ profile=snapshot?.profile||await window.NevoaOnline.sessionProfile();
  if(!profile){nameEl.textContent="Explorador da Névoa";hint.textContent="Sua sessão expirou. Entre novamente para sincronizar a Jornada.";login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return}
  try{paintAvatar(profile.avatar_key||await window.NevoaOnline.profileAvatar())}catch(e){paintAvatar("avatar-01")}
- applyAvatarRank();nameEl.textContent=profile.nickname||"Explorador da Névoa";hint.textContent=(profile.class_name?profile.class_name+" • ":"")+(profile.title||rankInfo(profile.xp).name)+" • jornada sincronizada";repaintJourney(profile.xp);login.hidden=true;edit.hidden=false;avatarOpenAction.hidden=false;
+ applyAvatarRank();nameEl.textContent=profile.nickname||"Explorador da Névoa";hint.textContent=(profile.class_name?profile.class_name+" • ":"")+(profile.title||rankInfo(profile.xp).name)+" • jornada sincronizada";repaintJourney(profile.xp,snapshot?.progress||[],cloudRpg);login.hidden=true;edit.hidden=false;avatarOpenAction.hidden=false;
 }
 avatarOpen.onclick=openAvatarEditor;avatarOpenAction.onclick=openAvatarEditor;avatarClose.onclick=closeAvatarEditor;edit.onclick=openEditor;cancel.onclick=closeEditor;
 form.onsubmit=async e=>{e.preventDefault();if(!profile)return;const proposed=(input.value||"").replace(/\s+/g," ").trim();if(proposed.length<2||proposed.length>24){showStatus("Escolha um nome entre 2 e 24 caracteres.","bad");return}save.disabled=true;save.textContent="Salvando...";showStatus("A Névoa está verificando o novo nome...","info");try{const updated=await window.NevoaOnline.updateProfileName(proposed);profile=updated||await window.NevoaOnline.sessionProfile();nameEl.textContent=profile?.nickname||proposed;hint.textContent=(profile?.class_name?profile.class_name+" • ":"")+(profile?.title||rankInfo(profile?.xp||localXp).name)+" • jornada sincronizada";showStatus("✓ Nome atualizado com segurança.","ok");setTimeout(()=>{editor.hidden=true;showStatus("")},900)}catch(err){showStatus(err?.message||"Não foi possível alterar o nome agora.","bad")}finally{save.disabled=false;save.textContent="Salvar nome"}};
