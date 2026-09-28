@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09060f">
+<meta name="description" content="Salão da Névoa — espaço moderado de convivência filosófica do Portal Filosófico da Névoa.">
+<title>Salão da Névoa • Portal Filosófico da Névoa</title>
+<link rel="stylesheet" href="styles.css?v=7.5">
+<link rel="stylesheet" href="salao-da-nevoa.css?v=1">
+</head>
+<body class="salaoPage">
+<header class="salaoTop">
+  <div class="wrap salaoTopIn">
+    <a class="salaoBrand" href="index.html"><span>🦉</span><span><b>Portal Filosófico da Névoa</b><small>Salão da Névoa</small></span></a>
+    <div class="salaoTopActions">
+      <span id="userChip" class="userChip">Visitante</span>
+      <a class="backPortal" href="index.html">← Portal</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="salaoHero">
+  <div class="wrap salaoHeroGrid">
+    <div>
+      <div class="eyebrow">CONVIVÊNCIA • FILOSOFIA • SEGURANÇA</div>
+      <h1>Salão <span>da Névoa</span></h1>
+      <p>Um espaço coletivo para conversar sobre filosofia, atividades e o Portal. Sem mensagens privadas, sem imagens e sem exposição de dados pessoais.</p>
+      <div class="safetyPills">
+        <span>🛡️ Moderação antes de publicar</span>
+        <span>🚫 Sem mensagens privadas</span>
+        <span>🔗 Sem links ou contatos</span>
+        <span>🚩 Denúncia em cada mensagem</span>
+      </div>
+    </div>
+    <aside class="guardianCard">
+      <div class="guardianOrb">🦉</div>
+      <div>
+        <small>GUARDIÃO DA NÉVOA</small>
+        <b>Proteção ativa</b>
+        <p>Mensagens podem ser bloqueadas ou enviadas para revisão do professor quando houver risco.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="wrap salaoStatus" id="statusGate">
+  <div class="gateCard" id="gateCard">
+    <div class="gateIcon">🔐</div>
+    <div>
+      <div class="eyebrow">Acesso protegido</div>
+      <h2 id="gateTitle">Verificando sua conta...</h2>
+      <p id="gateText">Aguarde enquanto o Guardião confere sua passagem.</p>
+      <div class="gateActions" id="gateActions"></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap salaoShell" id="chatShell" hidden>
+  <aside class="roomsPanel">
+    <div class="panelHead"><div><small>SALAS COLETIVAS</small><b>Escolha um corredor</b></div></div>
+    <div id="roomList" class="roomList"></div>
+    <div class="rulesMini">
+      <b>Regras do Salão</b>
+      <p>Respeite as pessoas. Não publique nome completo, telefone, endereço, redes sociais, links ou conteúdo ofensivo.</p>
+    </div>
+  </aside>
+
+  <section class="chatPanel">
+    <header class="chatHead">
+      <div><small id="roomKicker">SALÃO</small><h2 id="roomTitle">Salão da Névoa</h2></div>
+      <button class="refreshBtn" id="refreshChat" type="button">↻ Atualizar</button>
+    </header>
+    <div id="guardianNotice" class="guardianNotice" hidden></div>
+    <div id="messages" class="messages" aria-live="polite"></div>
+    <form id="composer" class="composer">
+      <textarea id="messageInput" maxlength="320" rows="2" placeholder="Escreva uma ideia, pergunta ou comentário..." aria-label="Mensagem"></textarea>
+      <div class="composerBottom">
+        <span><b id="charCount">0</b>/320 • não compartilhe dados pessoais</span>
+        <button id="sendBtn" type="submit">Enviar pela névoa →</button>
+      </div>
+    </form>
+  </section>
+</section>
+
+<section class="wrap moderatorPanel" id="moderatorPanel" hidden>
+  <div class="moderatorHead">
+    <div><div class="eyebrow">PAINEL DO PROFESSOR</div><h2>Moderação do Salão</h2><p>Aprove acessos, revise mensagens retidas e trate denúncias.</p></div>
+    <button id="refreshMod" class="refreshBtn" type="button">↻ Atualizar painel</button>
+  </div>
+  <div class="modGrid">
+    <article class="modColumn"><div class="modTitle"><span>🔑</span><b>Pedidos de acesso</b><em id="accessCount">0</em></div><div id="accessQueue" class="modList"></div></article>
+    <article class="modColumn"><div class="modTitle"><span>🛡️</span><b>Mensagens retidas</b><em id="flaggedCount">0</em></div><div id="flaggedQueue" class="modList"></div></article>
+    <article class="modColumn"><div class="modTitle"><span>🚩</span><b>Denúncias</b><em id="reportCount">0</em></div><div id="reportQueue" class="modList"></div></article>
+  </div>
+</section>
+
+<section class="wrap privacyCard">
+  <div>
+    <div class="eyebrow">PRIVACIDADE POR PADRÃO</div>
+    <h2>O Salão guarda somente o necessário</h2>
+  </div>
+  <p>O chat usa o apelido da conta. Mensagens comuns têm retenção limitada; conteúdo denunciado pode ser preservado por mais tempo para revisão. O acesso pode ser suspenso pelo professor a qualquer momento.</p>
+</section>
+</main>
+
+<dialog id="reportDialog" class="reportDialog">
+  <form method="dialog" class="reportShell" id="reportForm">
+    <button class="reportClose" value="cancel" aria-label="Fechar">×</button>
+    <div class="eyebrow">DENUNCIAR MENSAGEM</div>
+    <h2>Chamar o professor</h2>
+    <p>Escolha o motivo. A pessoa denunciada não recebe seu nome.</p>
+    <label>Motivo
+      <select id="reportReason" required>
+        <option value="bullying">Bullying / perseguição</option>
+        <option value="ofensa">Ofensa</option>
+        <option value="odio">Discriminação ou ódio</option>
+        <option value="sexual">Conteúdo sexual</option>
+        <option value="ameaca">Ameaça</option>
+        <option value="dados_pessoais">Dados pessoais</option>
+        <option value="spam">Spam</option>
+        <option value="outro">Outro</option>
+      </select>
+    </label>
+    <label>Observação <small>opcional</small>
+      <textarea id="reportDetails" maxlength="240" rows="3" placeholder="Explique brevemente o problema."></textarea>
+    </label>
+    <button class="reportSubmit" id="reportSubmit" value="default">Enviar denúncia</button>
+  </form>
+</dialog>
+
+<div id="toast" class="salaoToast" aria-live="polite"></div>
+
+<script src="online.js?v=7.5"></script>
+<script src="salao-da-nevoa.js?v=1"></script>
+</body>
+</html>
