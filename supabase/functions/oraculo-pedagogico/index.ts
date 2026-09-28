@@ -1,0 +1,223 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") || "";
+const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-6-luna";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "content-type, apikey, authorization, x-client-info",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
+  });
+}
+
+function publishableKey() {
+  const modern = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
+  if (modern) {
+    try {
+      const parsed = JSON.parse(modern);
+      if (parsed?.default) return String(parsed.default);
+    } catch (_) {}
+  }
+  return Deno.env.get("SUPABASE_ANON_KEY") || "";
+}
+
+async function validatePortalSession(token: string) {
+  if (!token || token.length < 16) return null;
+  const key = publishableKey();
+  if (!SUPABASE_URL || !key) return null;
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/session_profile`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ p_token: token }),
+  });
+
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null);
+  const profile = Array.isArray(data) ? data[0] : data;
+  return profile || null;
+}
+
+function cleanText(value: unknown, max = 600) {
+  return String(value ?? "").replace(/[\u0000-\u001f]+/g, " ").trim().slice(0, max);
+}
+
+function safeConfig(input: any) {
+  return {
+    level: cleanText(input?.level, 80),
+    discipline: cleanText(input?.discipline, 80),
+    time: cleanText(input?.time, 60),
+    participation: cleanText(input?.participation, 60),
+    resources: cleanText(input?.resources, 120),
+    format: cleanText(input?.format, 60),
+    objective: cleanText(input?.objective, 100),
+    area: cleanText(input?.area, 100),
+    topic: cleanText(input?.topic, 180),
+    mode: cleanText(input?.mode, 40),
+  };
+}
+
+function safeActivity(input: any) {
+  if (!input || typeof input !== "object") return null;
+  return {
+    title: cleanText(input.title, 180),
+    question: cleanText(input.question, 500),
+    objectiveText: cleanText(input.objectiveText, 700),
+    steps: Array.isArray(input.steps) ? input.steps.slice(0, 9).map((s: unknown) => cleanText(s, 700)) : [],
+    challenge: cleanText(input.challenge, 700),
+    digitalNote: cleanText(input.digitalNote, 500),
+    closure: cleanText(input.closure, 600),
+    assessment: cleanText(input.assessment, 600),
+  };
+}
+
+function extractOutputText(data: any) {
+  if (typeof data?.output_text === "string") return data.output_text;
+  const chunks: string[] = [];
+  for (const item of data?.output || []) {
+    for (const part of item?.content || []) {
+      if (typeof part?.text === "string") chunks.push(part.text);
+      if (typeof part?.output_text === "string") chunks.push(part.output_text);
+    }
+  }
+  return chunks.join("\n");
+}
+
+function parseJsonText(text: string) {
+  const cleaned = text.trim().replace(/^\`\`\`(?:json)?\s*/i, "").replace(/\s*\`\`\`$/i, "");
+  return JSON.parse(cleaned);
+}
+
+async function askModel(instructions: string, prompt: string) {
+  if (!OPENAI_API_KEY) {
+    throw Object.assign(new Error("OPENAI_API_KEY ausente."), { code: "setup_required" });
+  }
+
+  const res = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      instructions,
+      input: prompt,
+      reasoning: { effort: "low" },
+      max_output_tokens: 2200,
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    console.error("OpenAI error", res.status, data?.error?.type || "", data?.error?.code || "");
+    throw new Error(data?.error?.message || `Falha no modelo (${res.status}).`);
+  }
+
+  const text = extractOutputText(data);
+  if (!text) throw new Error("O modelo não devolveu texto.");
+  return parseJsonText(text);
+}
+
+const systemBase = `
+Você é o Oráculo Pedagógico da Névoa, uma assistente pedagógica brasileira.
+Sua função é criar e revisar atividades aplicáveis de verdade, adequadas ao público, tempo, recursos e nível de participação informados.
+Priorize clareza, viabilidade, reflexão, argumentação, investigação e autonomia.
+Não invente citações, habilidades curriculares ou fatos específicos quando não tiver certeza.
+Evite atividades que dependam de tecnologia quando os recursos não a incluem.
+Para baixa participação, prefira condução simples, perguntas guiadas e produção individual curta antes de exposição oral.
+Responda SEMPRE em português do Brasil e SOMENTE com JSON válido, sem markdown.
+O JSON deve ter exatamente:
+{
+  "assistantMessage": "uma fala curta da Oráculo",
+  "activity": {
+    "title": "título curto",
+    "question": "pergunta central",
+    "objectiveText": "objetivo pedagógico em frase clara",
+    "steps": ["4 a 7 passos práticos"],
+    "challenge": "orientação de mediação/adaptação",
+    "digitalNote": "observação sobre uso ou ausência de tecnologia",
+    "closure": "fechamento aplicável",
+    "assessment": "avaliação rápida e observável"
+  }
+}
+`;
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+
+  try {
+    const body = await req.json().catch(() => ({}));
+    const sessionToken = cleanText(body?.sessionToken, 300);
+    const profile = await validatePortalSession(sessionToken);
+    if (!profile) return json({ error: "login_required", message: "Entre no Portal para usar a IA online." }, 401);
+
+    if (!OPENAI_API_KEY) {
+      return json({
+        error: "setup_required",
+        message: "A IA online está estruturada, mas a chave OPENAI_API_KEY ainda não foi configurada no Supabase.",
+      }, 503);
+    }
+
+    const action = body?.action === "chat" ? "chat" : "generate";
+    const cfg = safeConfig(body?.config || {});
+    const current = safeActivity(body?.activity);
+    const userMessage = cleanText(body?.message, 800);
+    const history = Array.isArray(body?.history)
+      ? body.history.slice(-6).map((m: any) => ({
+          role: m?.role === "assistant" ? "assistant" : "user",
+          content: cleanText(m?.content, 600),
+        }))
+      : [];
+
+    const identity = cleanText(profile?.nickname || "explorador", 80);
+    let prompt = "";
+
+    if (action === "generate") {
+      prompt = `Crie uma atividade inédita para ${identity}.
+Configuração: ${JSON.stringify(cfg)}
+Modo: ${cfg.mode || "professor"}.
+A atividade precisa caber realisticamente no tempo indicado e usar apenas os recursos informados.`;
+    } else {
+      if (!current) return json({ error: "activity_required", message: "Gere uma atividade antes de conversar sobre ela." }, 400);
+      if (!userMessage) return json({ error: "message_required", message: "Escreva o que deseja alterar." }, 400);
+      prompt = `Revise a atividade atual seguindo o pedido do usuário.
+Configuração: ${JSON.stringify(cfg)}
+Atividade atual: ${JSON.stringify(current)}
+Conversa recente: ${JSON.stringify(history)}
+Pedido agora: ${userMessage}
+Devolva a atividade COMPLETA já revisada, mesmo que a mudança seja pequena.`;
+    }
+
+    const answer = await askModel(systemBase, prompt);
+    const activity = safeActivity(answer?.activity);
+    if (!activity || !activity.title || !activity.question || activity.steps.length < 2) {
+      throw new Error("Resposta da IA veio incompleta.");
+    }
+
+    return json({
+      ok: true,
+      source: "ai",
+      model: OPENAI_MODEL,
+      assistantMessage: cleanText(answer?.assistantMessage || "A névoa se abriu. Ajustei a atividade.", 320),
+      activity,
+    });
+  } catch (error: any) {
+    const code = error?.code || "oracle_ai_error";
+    const status = code === "setup_required" ? 503 : 500;
+    console.error("oraculo-pedagogico", code, error?.message || error);
+    return json({ error: code, message: error?.message || "Não foi possível consultar a IA." }, status);
+  }
+});
