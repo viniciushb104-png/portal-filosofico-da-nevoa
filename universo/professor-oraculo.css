@@ -730,3 +730,158 @@ body[data-page="professor"] #app{min-height:100vh}
     max-height:none !important;
   }
 }
+
+
+/* Refino final — janela centralizada e leitura confortável */
+.oracle-result-main{
+  min-height:670px;
+}
+.oracle-paper-window{
+  top:15.5%;
+  right:20.5%;
+  bottom:16%;
+  left:20.5%;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.oracle-paper-window .oracle-result-head{
+  flex:0 0 auto;
+  padding:0 0 8px;
+}
+.oracle-paper-window .oracle-result-head h2{
+  font-size:1.22rem;
+  line-height:1.16;
+}
+.oracle-paper-window .oracle-result-kicker{
+  font-size:.57rem;
+}
+.oracle-paper-window .oracle-result-ready{
+  font-size:.54rem;
+  padding:5px 8px;
+}
+.oracle-paper-window .oracle-result-body{
+  flex:1 1 auto;
+  min-height:0;
+  max-height:none;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:6px 12px 6px 2px;
+  margin:0;
+  scrollbar-width:thin;
+  scrollbar-color:#8d4da9 rgba(94,54,72,.12);
+}
+.oracle-paper-window .oracle-result-body::-webkit-scrollbar{
+  width:9px;
+}
+.oracle-paper-window .oracle-result-body::-webkit-scrollbar-track{
+  background:rgba(94,54,72,.10);
+  border-radius:999px;
+}
+.oracle-paper-window .oracle-result-body::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,#a55ac2,#714181);
+  border-radius:999px;
+  border:2px solid rgba(255,239,213,.72);
+}
+.oracle-paper-window .activity-meta span{
+  font-size:.60rem;
+  padding:4px 6px;
+}
+.oracle-paper-window .activity-question{
+  margin:6px 0 7px;
+  padding:9px 10px;
+}
+.oracle-paper-window .activity-question small{
+  font-size:.54rem;
+}
+.oracle-paper-window .activity-question strong{
+  font-size:.86rem;
+  line-height:1.32;
+}
+.oracle-paper-window .activity-block{
+  padding:6px 0;
+}
+.oracle-paper-window .activity-block b{
+  font-size:.75rem;
+}
+.oracle-paper-window .activity-block p,
+.oracle-paper-window .activity-block li{
+  font-size:.72rem;
+  line-height:1.34;
+}
+.oracle-paper-window .activity-block p{
+  margin:3px 0;
+}
+.oracle-paper-window .oracle-result-actions{
+  flex:0 0 auto;
+  margin-top:8px;
+  padding-top:7px;
+}
+.oracle-paper-window .oracle-result-actions button{
+  font-size:.58rem;
+  padding:6px 8px;
+}
+
+@media(max-width:1180px){
+  .oracle-result-main{
+    min-height:650px;
+  }
+  .oracle-paper-window{
+    top:15%;
+    right:18.5%;
+    bottom:15.5%;
+    left:18.5%;
+  }
+}
+
+@media(max-width:760px){
+  .oracle-result-main{
+    min-height:570px;
+  }
+  .oracle-paper-window{
+    top:14.5%;
+    right:15.5%;
+    bottom:14.5%;
+    left:15.5%;
+  }
+  .oracle-paper-window .oracle-result-head h2{
+    font-size:1.02rem;
+  }
+  .oracle-paper-window .oracle-result-body{
+    padding-right:9px;
+  }
+  .oracle-paper-window .activity-meta span{
+    font-size:.55rem;
+  }
+  .oracle-paper-window .activity-question strong{
+    font-size:.78rem;
+  }
+  .oracle-paper-window .activity-block b{
+    font-size:.68rem;
+  }
+  .oracle-paper-window .activity-block p,
+  .oracle-paper-window .activity-block li{
+    font-size:.65rem;
+    line-height:1.28;
+  }
+  .oracle-paper-window .oracle-result-actions button{
+    font-size:.54rem;
+    padding:5px 7px;
+  }
+}
+
+@media(max-width:390px){
+  .oracle-result-main{
+    min-height:550px;
+  }
+  .oracle-paper-window{
+    top:14%;
+    right:14%;
+    bottom:14%;
+    left:14%;
+  }
+  .oracle-paper-window .activity-block p,
+  .oracle-paper-window .activity-block li{
+    font-size:.62rem;
+  }
+}
