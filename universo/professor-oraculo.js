@@ -488,8 +488,8 @@
       dialogue(data.assistantMessage||"A névoa se abriu. Preparei uma atividade para você.","approve",state.voice);
     }catch(err){
       if(err.code==="setup_required"){
-        setAiStatus("setup","IA estruturada • aguardando chave do modelo");
-        toast("IA online ainda não ativada. Usando o gerador local.");
+        setAiStatus("setup","IA online indisponível • modo local ativo");
+        toast("A IA online ainda não está disponível. Usando o gerador local.");
       }else{
         setAiStatus("fallback","IA indisponível • modo local ativado");
         toast("A IA não respondeu; gerei uma opção local para não interromper sua aula.");
@@ -521,9 +521,9 @@
       setAiStatus("online","IA online • atividade revisada");
       dialogue(reply,"approve",state.voice);
     }catch(err){
-      var reply=err.code==="setup_required"?"A estrutura da IA está pronta, mas ainda falta ativar a chave do modelo no Supabase.":"Não consegui revisar pela IA agora. A atividade atual foi preservada.";
+      var reply=err.code==="setup_required"?"A IA online ainda não está disponível. Sua atividade atual foi preservada e o modo local continua funcionando.":"Não consegui revisar pela IA agora. A atividade atual foi preservada.";
       addChat("assistant",reply);
-      setAiStatus(err.code==="setup_required"?"setup":"fallback",err.code==="setup_required"?"IA aguardando configuração":"Falha temporária • atividade preservada");
+      setAiStatus(err.code==="setup_required"?"setup":"fallback",err.code==="setup_required"?"IA online indisponível • modo local ativo":"Falha temporária • atividade preservada");
       toast(reply);
     }finally{setAiBusy(false)}
   }
