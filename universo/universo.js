@@ -18,20 +18,36 @@ function bestiario(){const discovered=(p.completed?.logica||0)>0||u.unlocks.incl
 function cartas(){shell("Cartas da Névoa","Coleção sem compra e sem vantagem paga: as cartas registram progresso e conhecimento conquistado nos jogos.",`<section class="section"><div class="wrap collection">${D.cards.map(x=>{const on=u.cards.includes(x.id);return `<article class="miniCard ${on?"":"locked"}"><div class="icon">${on?x.icon:"❔"}</div><b>${on?x.name:"Carta selada"}</b><small>${on?x.type:`Desbloqueia em ${x.xp} XP`}</small>${on?`<p>${x.skill}</p>`:""}</article>`}).join("")}</div></section>`)}
 function perfil(){
 const diary=readJSON("nevoaDiaryV1",[]),args=readJSON("nevoaArgumentsV1",[]),xp=p.xp||0,rank=xp>=360?"Guardião":xp>=240?"Mestre":xp>=140?"Filósofo":xp>=60?"Investigador":"Aprendiz";
+const avatars=Array.isArray(window.NEVOA_AVATARS)?window.NEVOA_AVATARS:[];
 shell("Perfil do Explorador","Sua identidade, progresso e coleções dentro do Portal — com privacidade pensada para estudantes.",`
 <section class="section"><div class="wrap">
   <div class="profileIdentity panel">
-    <div class="profileAvatarPlaceholder" id="profileAvatarPreview" aria-hidden="true">🎃</div>
+    <button class="profileAvatarButton" id="openAvatarGallery" type="button" aria-label="Escolher avatar">
+      <img id="profileAvatarImage" alt="Avatar do Explorador">
+      <span>Trocar avatar</span>
+    </button>
     <div class="profileIdentityMain">
       <div class="eyebrow">Identidade do explorador</div>
       <h2 id="profileDisplayName">Explorador da Névoa</h2>
       <p class="profileAccountHint" id="profileAccountHint">Conectando à sua conta...</p>
       <div class="profileIdentityActions">
         <button class="btn" id="editProfileName" type="button" hidden>✏️ Alterar nome do perfil</button>
+        <button class="btn subtle" id="openAvatarGalleryAction" type="button" hidden>🖼️ Escolher avatar</button>
         <a class="btn subtle" id="profileLoginLink" href="../login.html" hidden>🔐 Entrar para editar</a>
       </div>
     </div>
     <div class="profileRankSeal"><small>Título atual</small><b>${rank} da Névoa</b><span>${xp} XP</span></div>
+  </div>
+
+  <div class="panel profileAvatarEditor" id="profileAvatarEditor" hidden>
+    <div class="eyebrow">Galeria de Avatares da Névoa</div>
+    <h3>Escolha sua aparência no Portal</h3>
+    <p>Os dez avatares são artes oficiais do Portal. Você pode usar qualquer um deles e trocar quando quiser.</p>
+    <div class="avatarGallery" id="avatarGallery"></div>
+    <div class="avatarGalleryFooter">
+      <div class="profileNameStatus" id="avatarStatus" role="status" aria-live="polite"></div>
+      <button class="btn subtle" id="closeAvatarGallery" type="button">Fechar galeria</button>
+    </div>
   </div>
 
   <div class="panel profileNameEditor" id="profileNameEditor" hidden>
@@ -66,39 +82,84 @@ shell("Perfil do Explorador","Sua identidade, progresso e coleções dentro do P
   </div>
 
   <div class="note profileNextStep">
-    <b>🖼️ Próxima expansão: Galeria de Avatares da Névoa</b>
-    <small>O espaço do avatar já ficou preparado para receber a galeria segura que vamos montar em seguida.</small>
+    <b>🛡️ Galeria oficial e segura</b>
+    <small>Nesta etapa o perfil usa somente os dez avatares aprovados do Portal. Não há envio livre de foto pessoal.</small>
   </div>
 </div></section>`);
 
 const nameEl=$("#profileDisplayName"),hint=$("#profileAccountHint"),edit=$("#editProfileName"),login=$("#profileLoginLink");
 const editor=$("#profileNameEditor"),form=$("#profileNameForm"),input=$("#profileNameInput"),cancel=$("#cancelProfileName"),save=$("#saveProfileName"),status=$("#profileNameStatus");
-let profile=null;
+const avatarImg=$("#profileAvatarImage"),avatarOpen=$("#openAvatarGallery"),avatarOpenAction=$("#openAvatarGalleryAction"),avatarEditor=$("#profileAvatarEditor"),avatarGrid=$("#avatarGallery"),avatarStatus=$("#avatarStatus"),avatarClose=$("#closeAvatarGallery");
+let profile=null,currentAvatar="avatar-01",avatarBusy=false;
+
+const avatarByKey=key=>avatars.find(a=>a.key===key)||avatars[0]||null;
+const paintAvatar=key=>{
+  const a=avatarByKey(key);
+  if(!a)return;
+  currentAvatar=a.key;
+  avatarImg.src=a.src;
+  avatarImg.alt="Avatar "+a.name;
+  avatarOpen.title="Avatar atual: "+a.name;
+};
+const showAvatarStatus=(msg,type="")=>{avatarStatus.textContent=msg;avatarStatus.className="profileNameStatus "+type};
+const drawAvatarGallery=()=>{
+  avatarGrid.innerHTML=avatars.map(a=>`<button class="avatarChoice ${a.key===currentAvatar?"selected":""}" type="button" data-avatar="${a.key}" aria-pressed="${a.key===currentAvatar?"true":"false"}"><img src="${a.src}" alt="Avatar ${a.name}"><span>${a.name}</span><small>${a.key===currentAvatar?"Em uso":"Escolher"}</small></button>`).join("");
+  avatarGrid.querySelectorAll(".avatarChoice").forEach(btn=>btn.onclick=()=>chooseAvatar(btn.dataset.avatar));
+};
+const openAvatarEditor=()=>{
+  if(!profile){location.href="../login.html";return}
+  drawAvatarGallery();showAvatarStatus("");avatarEditor.hidden=false;avatarEditor.scrollIntoView({behavior:"smooth",block:"nearest"});
+};
+const closeAvatarEditor=()=>{avatarEditor.hidden=true;showAvatarStatus("")};
+
+async function chooseAvatar(key){
+  if(!profile||avatarBusy)return;
+  const a=avatarByKey(key);if(!a)return;
+  avatarBusy=true;
+  avatarGrid.querySelectorAll("button").forEach(b=>b.disabled=true);
+  showAvatarStatus("Salvando "+a.name+"...","info");
+  try{
+    const saved=await window.NevoaOnline.updateProfileAvatar(a.key);
+    paintAvatar(saved||a.key);
+    drawAvatarGallery();
+    showAvatarStatus("✓ "+a.name+" agora é seu avatar.","ok");
+  }catch(err){
+    showAvatarStatus(err?.message||"Não foi possível salvar o avatar agora.","bad");
+  }finally{
+    avatarBusy=false;
+    avatarGrid.querySelectorAll("button").forEach(b=>b.disabled=false);
+  }
+}
 
 const showStatus=(msg,type="")=>{status.textContent=msg;status.className="profileNameStatus "+type};
 const closeEditor=()=>{editor.hidden=true;showStatus("");input.value=profile?.nickname||""};
 const openEditor=()=>{if(!profile)return;input.value=profile.nickname||"";editor.hidden=false;showStatus("");requestAnimationFrame(()=>input.focus())};
 
 async function loadProfile(){
+  paintAvatar("avatar-01");
   if(!window.NevoaOnline){
     hint.textContent="O serviço de conta não carregou. Reabra a página para tentar novamente.";
     login.hidden=false;return;
   }
   if(!window.NevoaOnline.getSession()){
     nameEl.textContent="Explorador da Névoa";
-    hint.textContent="Entre na sua conta para editar o nome visível e, depois, escolher seu avatar.";
-    login.hidden=false;edit.hidden=true;return;
+    hint.textContent="Entre na sua conta para editar o nome e escolher seu avatar.";
+    login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return;
   }
   profile=await window.NevoaOnline.sessionProfile();
   if(!profile){
     nameEl.textContent="Explorador da Névoa";
     hint.textContent="Sua sessão expirou. Entre novamente para editar o perfil.";
-    login.hidden=false;edit.hidden=true;return;
+    login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return;
   }
+  try{paintAvatar(await window.NevoaOnline.profileAvatar())}catch(e){paintAvatar("avatar-01")}
   nameEl.textContent=profile.nickname||"Explorador da Névoa";
-  hint.textContent=(profile.class_name?profile.class_name+" • ":"")+profile.title+" • nome visível no ranking e no certificado";
-  login.hidden=true;edit.hidden=false;
+  hint.textContent=(profile.class_name?profile.class_name+" • ":"")+profile.title+" • identidade salva na sua conta";
+  login.hidden=true;edit.hidden=false;avatarOpenAction.hidden=false;
 }
+avatarOpen.onclick=openAvatarEditor;
+avatarOpenAction.onclick=openAvatarEditor;
+avatarClose.onclick=closeAvatarEditor;
 edit.onclick=openEditor;
 cancel.onclick=closeEditor;
 form.onsubmit=async e=>{
@@ -112,7 +173,7 @@ form.onsubmit=async e=>{
     const updated=await window.NevoaOnline.updateProfileName(proposed);
     profile=updated||await window.NevoaOnline.sessionProfile();
     nameEl.textContent=profile?.nickname||proposed;
-    hint.textContent=(profile?.class_name?profile.class_name+" • ":"")+(profile?.title||(rank+" da Névoa"))+" • nome atualizado";
+    hint.textContent=(profile?.class_name?profile.class_name+" • ":"")+(profile?.title||(rank+" da Névoa"))+" • identidade salva na sua conta";
     showStatus("✓ Nome atualizado com segurança.","ok");
     setTimeout(()=>{editor.hidden=true;showStatus("")},900);
   }catch(err){
