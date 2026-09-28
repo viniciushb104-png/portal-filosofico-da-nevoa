@@ -569,3 +569,37 @@
   .oracle-refine-zone-solo .oracle-adapt-card small{display:block}
   .oracle-refine-zone-solo .oracle-adapt-card i{display:block;margin-top:10px}
 }
+
+
+/* Tema musical da Oráculo */
+.oracle-theme-btn{
+  position:relative;
+  overflow:hidden;
+  border-color:rgba(207,155,246,.25);
+}
+.oracle-theme-btn:before{
+  content:"";
+  position:absolute;
+  inset:auto 12px 5px;
+  height:2px;
+  border-radius:999px;
+  background:linear-gradient(90deg,transparent,#ce8df0,transparent);
+  opacity:0;
+  transform:scaleX(.25);
+}
+.oracle-theme-btn.is-playing{
+  border-color:rgba(225,178,249,.48);
+  background:linear-gradient(180deg,rgba(93,40,122,.98),rgba(39,17,54,.98));
+  box-shadow:0 0 20px rgba(169,78,209,.18);
+}
+.oracle-theme-btn.is-playing:before{
+  opacity:.85;
+  animation:oracleThemePulse 1.9s ease-in-out infinite;
+}
+@keyframes oracleThemePulse{
+  0%,100%{transform:scaleX(.28);opacity:.38}
+  50%{transform:scaleX(1);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  .oracle-theme-btn.is-playing:before{animation:none;transform:scaleX(1)}
+}
