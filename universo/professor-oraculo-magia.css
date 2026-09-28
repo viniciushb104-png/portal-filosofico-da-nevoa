@@ -674,3 +674,18 @@
 @media print{
   .oracle-theme-strip{display:none!important}
 }
+
+
+/* Autoplay assistido */
+.oracle-audio-awaiting .oracle-theme-btn{
+  border-color:rgba(232,185,111,.38);
+  box-shadow:0 0 18px rgba(217,159,79,.12);
+}
+.oracle-audio-awaiting .oracle-theme-btn:after{
+  content:"toque na página para ouvir";
+  display:block;
+  margin-top:2px;
+  font-size:.46rem;
+  color:#bba77d;
+  font-weight:500;
+}
