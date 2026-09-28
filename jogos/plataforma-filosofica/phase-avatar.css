@@ -1,0 +1,8 @@
+/* Identidade compartilhada — fases 2 a 5 */
+.hud{grid-template-columns:1.22fr 1.35fr repeat(5,minmax(0,1fr))!important}
+.phaseProfileHud{border-color:#744887!important;background:linear-gradient(145deg,#1a0c24,#100817)!important;min-width:0}
+.phaseAvatar{width:38px;height:38px;flex:0 0 38px}.phaseAvatar img,.phaseWinAvatar img{width:100%;height:100%;object-fit:cover}
+.phaseProfileHud>div{min-width:0}.phaseProfileHud b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phaseWinIdentity{display:flex;justify-content:center;align-items:center;gap:10px;margin:0 auto 9px}.phaseWinAvatar{width:64px;height:64px;flex:0 0 64px}.phaseWinIdentity>b{font-family:Georgia,serif;color:#ffd29a;font-size:17px}
+@media(max-width:800px){.hud{grid-template-columns:repeat(3,minmax(0,1fr))!important}.phaseProfileHud{grid-column:1/-1}.phaseAvatar{width:34px;height:34px;flex-basis:34px}}
+@media(max-height:600px) and (orientation:landscape){.hud{grid-template-columns:repeat(7,minmax(0,1fr))!important}.phaseProfileHud{grid-column:auto}.phaseAvatar{width:28px;height:28px;flex-basis:28px}.phaseProfileHud b{font-size:8px!important}.phaseProfileHud small{font-size:6px!important}}
