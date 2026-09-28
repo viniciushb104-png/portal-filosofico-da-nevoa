@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#09050d"><meta name="description" content="Professor — Portal Filosófico da Névoa"><title>Professor</title><link rel="stylesheet" href="universo.css?v=1"><link rel="stylesheet" href="professor-oraculo.css?v=11"><link rel="stylesheet" href="professor-oraculo-magia.css?v=10"><style id="oracle-entry-critical">
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#09050d"><meta name="description" content="Professor — Portal Filosófico da Névoa"><title>Professor</title><link rel="stylesheet" href="universo.css?v=1"><link rel="stylesheet" href="professor-oraculo.css?v=11"><link rel="stylesheet" href="professor-oraculo-magia.css?v=10"><link rel="stylesheet" href="professor-oraculo-rituais.css?v=1"><style id="oracle-entry-critical">
 #oracleEntrance{position:fixed;z-index:2147483647;inset:0;display:grid!important;place-items:center!important;visibility:visible!important;opacity:1;background:radial-gradient(circle at 50% 38%,#341545 0,#130a1d 34%,#07040b 76%);padding:18px;color:#fff;font-family:Georgia,serif}
 #oracleEntrance.leaving{opacity:0!important;pointer-events:none;transition:opacity .7s ease}
 #oracleEntrance .oracle-entrance-panel{position:relative;z-index:2;width:min(520px,92vw);padding:32px 22px;text-align:center;border:1px solid rgba(234,193,255,.35);border-radius:26px;background:rgba(17,8,25,.92);box-shadow:0 28px 80px rgba(0,0,0,.55),0 0 55px rgba(159,75,206,.18)}
@@ -39,17 +39,24 @@
   btn.addEventListener("click",function(){
     btn.disabled=true;
     btn.textContent="✦ Abrindo o portal...";
+    gate.classList.add("portal-opening");
     if(audio){
       audio.muted=false;
-      audio.volume=.55;
+      audio.volume=.10;
       try{audio.currentTime=0;}catch(e){}
       var p=audio.play();
       if(p&&typeof p.catch==="function"){p.catch(function(){})}
+      var steps=0;
+      var rise=window.setInterval(function(){
+        steps++;
+        try{audio.volume=Math.min(.52,.10+steps*.06)}catch(e){}
+        if(steps>=7)window.clearInterval(rise);
+      },85);
     }
-    gate.classList.add("leaving");
+    window.setTimeout(function(){gate.classList.add("leaving")},360);
     window.setTimeout(function(){
       if(gate&&gate.parentNode)gate.parentNode.removeChild(gate);
-    },850);
+    },1120);
   },{once:true});
 })();
-</script><script src="professor-oraculo.js?v=12"></script><script src="professor-oraculo-magia.js?v=10"></script></body></html>
+</script><script src="professor-oraculo.js?v=12"></script><script src="professor-oraculo-magia.js?v=10"></script><script src="professor-oraculo-rituais.js?v=1"></script></body></html>
