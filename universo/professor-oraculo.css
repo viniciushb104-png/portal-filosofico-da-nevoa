@@ -317,3 +317,52 @@ body[data-page="professor"] #app{min-height:100vh}
     line-height:1.24;
   }
 }
+
+
+/* Rolagem interna do pergaminho */
+.oracle-result-main{
+  display:flex;
+  flex-direction:column;
+}
+.oracle-result-head{
+  flex:0 0 auto;
+}
+.oracle-result-body{
+  flex:1 1 auto;
+  min-height:0;
+  max-height:350px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(115,58,134,.5) rgba(120,84,74,.12);
+  padding-right:10px;
+}
+.oracle-result-body::-webkit-scrollbar{
+  width:8px;
+}
+.oracle-result-body::-webkit-scrollbar-track{
+  background:rgba(120,84,74,.12);
+  border-radius:999px;
+}
+.oracle-result-body::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,rgba(139,68,165,.62),rgba(92,45,112,.48));
+  border-radius:999px;
+}
+.oracle-result-body::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,rgba(154,78,181,.78),rgba(105,53,127,.66));
+}
+.oracle-result-actions{
+  flex:0 0 auto;
+}
+@media(max-width:760px){
+  .oracle-result-body{
+    max-height:260px;
+    padding-right:6px;
+  }
+}
+@media(max-width:390px){
+  .oracle-result-body{
+    max-height:230px;
+  }
+}
