@@ -146,6 +146,16 @@ function setOnlineProfile(profile,logged=!!window.NevoaOnline?.getSession?.()){
  const box=$('#onlineProfile'),codeBox=$('#explorerCodeBox'),codeText=$('#explorerCodeText');
  const logoutBtn=$('#logoutOnline'),loginBtn=$('#loginBtn');
  if(!box)return;
+ const paintIdentity=(key,xp=0)=>{
+   if(!window.NevoaAvatar)return;
+   currentAvatarKey=key||'avatar-01';
+   window.NevoaAvatar.paint($('#topAvatarImage'),currentAvatarKey,'Seu avatar');
+   window.NevoaAvatar.paint($('#certificateAvatarImage'),currentAvatarKey,'Seu avatar');
+   const rank=window.NevoaAvatar.rankClass(Number(xp)||0);
+   const frame=$('#topAvatarFrame'),certFrame=$('#certificateAvatarFrame');
+   if(frame)frame.className='profileOrb avatarFrame '+rank;
+   if(certFrame)certFrame.className='certificateAvatar avatarFrame '+rank;
+ };
  if(profile){
    box.classList.add('connected');
    box.innerHTML=`<span class="onlineDot"></span><div><b>${escapeHTML(profile.nickname)} • ${Number(profile.xp)||0} XP</b><small>${escapeHTML(profile.title)}${profile.class_name?' • '+escapeHTML(profile.class_name):''}${logged?' • sessão ativa':' • recuperado por código'}</small></div>`;
@@ -158,7 +168,10 @@ function setOnlineProfile(profile,logged=!!window.NevoaOnline?.getSession?.()){
      loginBtn.innerHTML=logged?'<span>🟢</span><b>'+escapeHTML(profile.nickname)+'</b>':'<span>🔐</span><b>Entrar</b>';
    }
    const registerBtn=$('#registerBtn');if(registerBtn)registerBtn.hidden=logged;
-   if(logged&&window.NevoaAvatar){window.NevoaAvatar.currentKey().then(key=>{currentAvatarKey=key||'avatar-01';const img=$('#topAvatarImage'),frame=$('#topAvatarFrame'),certImg=$('#certificateAvatarImage'),certFrame=$('#certificateAvatarFrame');window.NevoaAvatar.paint(img,currentAvatarKey,'Seu avatar');window.NevoaAvatar.paint(certImg,currentAvatarKey,'Seu avatar');if(frame)frame.className='profileOrb avatarFrame '+window.NevoaAvatar.rankClass(Number(profile.xp)||0);if(certFrame)certFrame.className='certificateAvatar avatarFrame '+window.NevoaAvatar.rankClass(Number(profile.xp)||0)}).catch(()=>{})}
+   paintIdentity(profile.avatar_key||'avatar-01',profile.xp);
+   if(logged&&!profile.avatar_key&&window.NevoaAvatar){
+     window.NevoaAvatar.currentKey(true).then(key=>paintIdentity(key,profile.xp)).catch(()=>{});
+   }
  }else{
    box.classList.remove('connected');
    box.innerHTML='<span class="onlineDot"></span><div><b>Você ainda não entrou</b><small>Entre para salvar automaticamente e aparecer na competição.</small></div>';
@@ -166,6 +179,7 @@ function setOnlineProfile(profile,logged=!!window.NevoaOnline?.getSession?.()){
    if(logoutBtn)logoutBtn.hidden=true;
    if(loginBtn){loginBtn.classList.remove('logged');loginBtn.href='login.html';loginBtn.innerHTML='<span>🔐</span><b>Entrar</b>';}
    const registerBtn=$('#registerBtn');if(registerBtn)registerBtn.hidden=false;
+   paintIdentity('avatar-01',0);
  }
 }
 function applyServerProgress(snapshot){
@@ -278,6 +292,11 @@ $('#openCertificate').onclick=()=>{
  $('#certificateRank').textContent=rank;
  $('#certificateXP').textContent=state.xp+' XP';
  $('#certificateDate').textContent=new Date().toLocaleDateString('pt-BR');
+ if(window.NevoaAvatar){
+   const key=onlineProfileData?.avatar_key||currentAvatarKey||'avatar-01';
+   window.NevoaAvatar.paint($('#certificateAvatarImage'),key,'Seu avatar');
+   const cf=$('#certificateAvatarFrame');if(cf)cf.className='certificateAvatar avatarFrame '+window.NevoaAvatar.rankClass(state.xp);
+ }
  $('#certificateDialog').showModal();
 };
 
