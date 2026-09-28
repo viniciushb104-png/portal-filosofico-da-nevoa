@@ -26,7 +26,7 @@ function renderMissionCards(){
 function renderRanks(rows){
  const host=$('#competitionRanks');if(!host)return;
  if(!rows?.length){host.innerHTML='<div class="emptyRank">A temporada está aberta. O ranking aparecerá quando as primeiras fases competitivas forem concluídas.</div>';return}
- host.innerHTML=rows.map(r=>{const av=window.NevoaAvatar?.src(r.avatar_key||'avatar-01')||'';return '<div class="rankRow '+(r.is_me?'me':'')+'"><span class="rankPos">#'+esc(r.rank_position)+'</span><span class="rankAvatar avatarFrame rank-aprendiz"><img class="nevoaAvatar" src="'+av+'" alt="Avatar de '+esc(r.nickname)+'"></span><div class="rankName"><b>'+esc(r.nickname)+'</b><small>'+esc(r.class_name||'Sem turma')+' • '+esc(r.missions_completed)+' missões</small></div><div class="rankPts">'+esc(r.total_points)+'<small>pontos</small></div></div>'}).join('');
+ host.innerHTML=rows.map(r=>{const av=window.NevoaAvatar?.src(r.avatar_key||'avatar-01')||'';const frame=window.NevoaAvatar?.rankClass(Number(r.xp)||0)||'rank-aprendiz';return '<div class="rankRow '+(r.is_me?'me':'')+'"><span class="rankPos">#'+esc(r.rank_position)+'</span><span class="rankAvatar avatarFrame '+frame+'"><img class="nevoaAvatar" src="'+av+'" alt="Avatar de '+esc(r.nickname)+'"></span><div class="rankName"><b>'+esc(r.nickname)+'</b><small>'+esc(r.class_name||'Sem turma')+' • '+esc(r.missions_completed)+' missões</small></div><div class="rankPts">'+esc(r.total_points)+'<small>pontos</small></div></div>'}).join('');
 }
 async function loadStatic(){
  const api=window.NevoaOnline;if(!api)return;
