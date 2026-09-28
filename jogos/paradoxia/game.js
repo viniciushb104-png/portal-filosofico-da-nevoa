@@ -637,6 +637,14 @@ function dominantEnding(){
  };
  return endings[key];
 }
+function continueExploring(){
+ $('#endOverlay')?.classList.remove('show');
+ document.body.classList.remove('sceneOpen');
+ state.hearts=3;state.shield=false;
+ saveLocal();render();
+ setTimeout(()=>$('#worldViewport')?.focus(),80);
+ toast('🗺️ Paradoxia continua aberta. Explore qualquer região.');
+}
 async function finishGame(){
  closeScene();renderHUD();
  const [title,text]=dominantEnding();
@@ -687,12 +695,14 @@ async function init(){
  $('#guestWarning').hidden=!!window.NevoaOnline?.getSession();
  $('#abilityBtn').onclick=useAbility;
  $('#replayBtn').onclick=replay;
+ $('#continueExploreBtn')?.addEventListener('click',continueExploring);
  setupWorldControls();
  if(state.classKey){
    $('#startOverlay').classList.remove('show');
    render();
+   $('#endOverlay')?.classList.remove('show');
    setTimeout(()=>$('#worldViewport')?.focus(),160);
-   if(state.completed)finishGame();
+   if(state.completed)toast('🏆 Capítulo concluído anteriormente. O mundo continua totalmente aberto.');
  }else{
    state=fresh();renderHUD();renderMap();renderLog();
  }
