@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09060f">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Painel administrativo do Salão da Névoa.">
+<title>Painel do Administrador • Salão da Névoa</title>
+<link rel="stylesheet" href="styles.css?v=7.5">
+<link rel="stylesheet" href="painel-salao.css?v=1">
+</head>
+<body class="adminPage">
+<header class="adminTop">
+  <div class="wrap adminTopIn">
+    <a class="adminBrand" href="index.html"><span>🦉</span><span><b>Portal Filosófico da Névoa</b><small>Painel administrativo</small></span></a>
+    <div class="adminTopActions">
+      <span id="adminIdentity" class="adminIdentity">Verificando...</span>
+      <a href="salao-da-nevoa.html" class="adminBack">← Salão</a>
+      <a href="index.html" class="adminBack">Portal</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="wrap adminGate" id="adminGate">
+  <div class="sealedCard">
+    <div class="sealedSigil">🔐</div>
+    <div>
+      <div class="eyebrow">ALA ADMINISTRATIVA</div>
+      <h1 id="gateTitle">Verificando a chave...</h1>
+      <p id="gateText">O Guardião está conferindo sua conta.</p>
+      <div id="gateActions" class="gateActions"></div>
+    </div>
+  </div>
+</section>
+
+<section id="adminApp" hidden>
+  <section class="adminHero">
+    <div class="wrap adminHeroGrid">
+      <div>
+        <div class="eyebrow">SOMENTE ADMINISTRADOR • DINIZ-VINI</div>
+        <h1>Painel do <span>Salão da Névoa</span></h1>
+        <p>Autorize participantes, filtre mensagens, revise bloqueios, acompanhe denúncias e suspenda acessos sem entrar diretamente no banco.</p>
+      </div>
+      <div class="adminSeal">
+        <span>☠</span>
+        <div><small>CHAVE MESTRA</small><b>Diniz‑VINI</b><em>Administrador do Portal</em></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap statsGrid">
+    <article class="statCard"><span>🔑</span><div><small>PEDIDOS PENDENTES</small><strong id="statPendingAccess">0</strong></div></article>
+    <article class="statCard"><span>🛡️</span><div><small>MENSAGENS RETIDAS</small><strong id="statHeldMessages">0</strong></div></article>
+    <article class="statCard"><span>🚩</span><div><small>DENÚNCIAS PENDENTES</small><strong id="statPendingReports">0</strong></div></article>
+    <article class="statCard"><span>💬</span><div><small>MENSAGENS CARREGADAS</small><strong id="statMessages">0</strong></div></article>
+  </section>
+
+  <section class="wrap controlBar">
+    <div class="adminTabs" role="tablist">
+      <button class="adminTab active" data-tab="access" type="button">🔑 Acessos</button>
+      <button class="adminTab" data-tab="messages" type="button">💬 Mensagens</button>
+      <button class="adminTab" data-tab="reports" type="button">🚩 Denúncias</button>
+    </div>
+    <button id="refreshAdmin" class="refreshAdmin" type="button">↻ Atualizar dados</button>
+  </section>
+
+  <section class="wrap adminPanel active" id="panel-access" data-panel="access">
+    <div class="panelHeader">
+      <div><div class="eyebrow">CONTROLE DE ENTRADA</div><h2>Autorizações do chat</h2><p>Quem está pendente, aprovado, suspenso ou negado.</p></div>
+    </div>
+    <div class="filterBar">
+      <label>Buscar jogador<input id="accessSearch" type="search" placeholder="Apelido ou turma..."></label>
+      <label>Status<select id="accessStatus">
+        <option value="all">Todos</option>
+        <option value="pending">Pendentes</option>
+        <option value="approved">Aprovados</option>
+        <option value="suspended">Suspensos</option>
+        <option value="denied">Negados</option>
+      </select></label>
+      <span class="filterCount"><b id="accessVisible">0</b> resultados</span>
+    </div>
+    <div id="accessTable" class="adminList"></div>
+  </section>
+
+  <section class="wrap adminPanel" id="panel-messages" data-panel="messages" hidden>
+    <div class="panelHeader">
+      <div><div class="eyebrow">MODERAÇÃO E PESQUISA</div><h2>Mensagens do Salão</h2><p>Filtre por texto, autor, turma, sala ou estado da moderação.</p></div>
+    </div>
+    <div class="filterBar messageFilters">
+      <label>Pesquisar<input id="messageSearch" type="search" placeholder="Texto, jogador ou turma..."></label>
+      <label>Sala<select id="messageRoom"><option value="all">Todas as salas</option></select></label>
+      <label>Status<select id="messageStatus">
+        <option value="all">Todos</option>
+        <option value="approved">Publicadas</option>
+        <option value="pending">Aguardando revisão</option>
+        <option value="blocked">Bloqueadas</option>
+        <option value="removed">Removidas</option>
+      </select></label>
+      <span class="filterCount"><b id="messageVisible">0</b> resultados</span>
+    </div>
+    <div id="messageTable" class="adminList messagesAdminList"></div>
+  </section>
+
+  <section class="wrap adminPanel" id="panel-reports" data-panel="reports" hidden>
+    <div class="panelHeader">
+      <div><div class="eyebrow">DENÚNCIAS DOS JOGADORES</div><h2>Fila de ocorrências</h2><p>Analise o contexto, remova conteúdo e suspenda participantes quando necessário.</p></div>
+    </div>
+    <div class="filterBar">
+      <label>Pesquisar<input id="reportSearch" type="search" placeholder="Autor, denunciante ou motivo..."></label>
+      <label>Status<select id="reportStatus">
+        <option value="all">Todos</option>
+        <option value="pending">Pendentes</option>
+        <option value="dismissed">Encerradas</option>
+        <option value="reviewed">Revisadas</option>
+        <option value="actioned">Com ação</option>
+      </select></label>
+      <span class="filterCount"><b id="reportVisible">0</b> resultados</span>
+    </div>
+    <div id="reportTable" class="adminList"></div>
+  </section>
+
+  <section class="wrap adminFootNote">
+    <span>🛡️</span>
+    <p>Esta interface é apenas uma camada visual. A autorização verdadeira é conferida novamente no servidor em cada consulta e em cada ação administrativa.</p>
+  </section>
+</section>
+</main>
+
+<div id="adminToast" class="adminToast" aria-live="polite"></div>
+<script src="online.js?v=7.5"></script>
+<script src="painel-salao.js?v=1"></script>
+</body>
+</html>
