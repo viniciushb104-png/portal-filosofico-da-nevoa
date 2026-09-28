@@ -90,6 +90,21 @@ function savePortalWin(){
   if(window.NevoaOnline?.getCode()) window.NevoaOnline.claimProgress('platform_socrates',60).catch(()=>{});
   return gained;
 }
+async function loadGameIdentity(){
+  const key=await window.NevoaAvatar?.currentKey?.()||'avatar-01';
+  let profile=null;
+  try{profile=await window.NevoaOnline?.sessionProfile?.()}catch(e){}
+  const name=profile?.nickname||'Explorador';
+  const xp=Number(profile?.xp||portalState().xp||0);
+  $('#gameProfileName').textContent=name;
+  $('#winProfileName').textContent=name;
+  window.NevoaAvatar?.paint($('#gameProfileAvatar'),key,'Seu avatar');
+  window.NevoaAvatar?.paint($('#winProfileAvatar'),key,'Seu avatar');
+  const rank=window.NevoaAvatar?.rankClass(xp)||'rank-aprendiz';
+  const gf=$('#gameAvatarFrame'),wf=$('#winAvatarFrame');
+  if(gf)gf.className='gameAvatar avatarFrame '+rank;
+  if(wf)wf.className='winAvatar avatarFrame '+rank;
+}
 
 function setHud(){
   $('#scrollCount').textContent=scrolls.filter(s=>s.got).length;
@@ -456,7 +471,7 @@ document.querySelectorAll('.mobileControls button').forEach(b=>{
 $('#startBtn').onclick=()=>{$('#introOverlay').classList.remove('show');started=true;paused=false;tone(330,.1,'triangle');setTimeout(()=>showHint('Etapa 1/4 — Comece explorando. A/D ou setas movem, Espaço pula. No celular, deite a tela para controles maiores.'),350)};
 $('#replayBtn').onclick=()=>location.reload();
 
-setHud();render();
+setHud();render();loadGameIdentity();
 async function enterGameMode(){
   try{if(document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen()}catch(e){}
   try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(e){}
