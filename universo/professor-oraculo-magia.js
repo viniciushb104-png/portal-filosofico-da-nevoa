@@ -68,27 +68,50 @@ function playChime(type='soft'){
 
 function ensureThemeAudio(){
   if(themeAudio)return themeAudio;
-  themeAudio=new Audio(THEME_SRC);
+  themeAudio=document.createElement("audio");
+  themeAudio.id="oracleThemeAudio";
+  themeAudio.src=new URL(THEME_SRC,window.location.href).href;
   themeAudio.loop=true;
-  themeAudio.preload="none";
-  themeAudio.volume=.18;
-  themeAudio.addEventListener("play",updateThemeButton);
+  themeAudio.preload="auto";
+  themeAudio.playsInline=true;
+  themeAudio.volume=.38;
+  themeAudio.setAttribute("aria-hidden","true");
+  themeAudio.style.display="none";
+  document.body.appendChild(themeAudio);
+  themeAudio.addEventListener("loadstart",function(){
+    const btn=$("#magicThemeBtn");
+    if(btn&&!themeWanted)btn.dataset.audioState="loading";
+  });
+  themeAudio.addEventListener("canplay",function(){
+    const btn=$("#magicThemeBtn");
+    if(btn)btn.dataset.audioState="ready";
+    updateThemeButton();
+  });
+  themeAudio.addEventListener("playing",function(){
+    const btn=$("#magicThemeBtn");
+    if(btn)btn.dataset.audioState="playing";
+    updateThemeButton();
+  });
   themeAudio.addEventListener("pause",updateThemeButton);
   themeAudio.addEventListener("error",function(){
     themeWanted=false;
+    const btn=$("#magicThemeBtn");
+    if(btn)btn.dataset.audioState="error";
     updateThemeButton();
-    toast("Não consegui carregar o tema da Oráculo.");
+    toast("O arquivo da trilha não pôde ser reproduzido neste navegador.");
   });
+  themeAudio.load();
   return themeAudio;
 }
 function updateThemeButton(){
   const btn=$("#magicThemeBtn");if(!btn)return;
-  const playing=!!(themeAudio&&!themeAudio.paused);
+  const playing=!!(themeAudio&&!themeAudio.paused&&!themeAudio.ended);
   btn.setAttribute("aria-pressed",String(playing));
   btn.classList.toggle("is-playing",playing);
-  btn.textContent=playing?"⏸ Pausar tema":"🎵 Tocar tema";
+  if(btn.dataset.audioState==="error")btn.textContent="⚠️ Tema indisponível";
+  else btn.textContent=playing?"⏸ Pausar tema":"🎵 Tocar tema";
 }
-async function toggleTheme(){
+function toggleTheme(){
   const audio=ensureThemeAudio();
   if(!audio.paused){
     themeWanted=false;
@@ -96,13 +119,19 @@ async function toggleTheme(){
     return;
   }
   themeWanted=true;
-  try{
-    await audio.play();
-    toast("🎵 O tema da Oráculo começou a tocar.");
-  }catch(e){
-    themeWanted=false;
-    updateThemeButton();
-    toast("Clique novamente para liberar a música neste navegador.");
+  const attempt=audio.play();
+  if(attempt&&typeof attempt.then==="function"){
+    attempt.then(function(){
+      const btn=$("#magicThemeBtn");if(btn)btn.dataset.audioState="playing";
+      updateThemeButton();
+      toast("🎵 O tema da Oráculo começou a tocar.");
+    }).catch(function(){
+      themeWanted=false;
+      const btn=$("#magicThemeBtn");
+      if(btn&&btn.dataset.audioState!=="error")btn.dataset.audioState="blocked";
+      updateThemeButton();
+      toast("O navegador bloqueou o áudio. Toque novamente no botão da música.");
+    });
   }
 }
 document.addEventListener("visibilitychange",function(){
