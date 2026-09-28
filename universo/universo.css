@@ -87,3 +87,9 @@
 .profileAvatarButton.rank-filosofo{border-color:#b95cdd;box-shadow:0 0 0 3px #09050d66,0 0 30px #c65bf05c,inset 0 0 24px #0008}
 .profileAvatarButton.rank-mestre{border-color:#f0c36a;box-shadow:0 0 0 3px #09050d66,0 0 32px #f0c36a61,inset 0 0 24px #0008}
 .profileAvatarButton.rank-guardiao{border-color:#67dfc2;box-shadow:0 0 0 3px #09050d66,0 0 34px #67dfc266,inset 0 0 24px #0008}
+
+
+/* V5 — Universo conectado: o Grande Mapa como HUB */
+.worldMapBtn{display:none;text-decoration:none;border:1px solid #8d50a2;background:linear-gradient(#351743,#170a20);border-radius:999px;padding:9px 12px;font-size:12px;font-weight:950;white-space:nowrap;box-shadow:0 0 22px #bd58e52e}
+.worldMapBtn:hover{border-color:#ffc184;transform:translateY(-1px)}
+@media(max-width:620px){.worldMapBtn{display:inline-flex;align-items:center;gap:6px;margin-left:auto}.topIn{align-items:center}.brand{max-width:190px}.hero{padding-top:38px}}
