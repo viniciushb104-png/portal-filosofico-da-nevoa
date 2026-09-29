@@ -38,6 +38,7 @@ cards:[
 {id:"c8",xp:360,icon:"👑",name:"Guardião da Névoa",type:"Lendária",skill:"Pensamento Crítico"}],
 tracks:[
 {title:"O Oráculo da Névoa",where:"Central da Oráculo",status:"Trilha instrumental original",src:"assets/audio/oraculo/oraculo-da-nevoa-theme.mp3"},
+{title:"Conversas Entre Lápides",where:"Amigo da Névoa • Segredos da Mansão",status:"Trilha instrumental original",src:"assets/audio/amigo-da-nevoa/conversas-entre-lapides.mp3"},
 {title:"Atenas da Névoa",where:"Labirinto dos Filósofos",status:"Trilha do jogo"},
 {title:"Sombras da Caverna",where:"Fase de Platão",status:"Trilha conectável"},
 {title:"Ecos de Paradoxia",where:"Paradoxia",status:"Trilha conectável"},
