@@ -254,6 +254,7 @@ function segredos(){
        <p>Converse, pergunte, discorde e pense em voz alta. Eu gosto de filosofia, história, literatura, sociologia e educação financeira.</p>
        <div class="secretFriendControls">
          <button class="btn subtle" id="secretVoiceToggle" type="button">🔊 Voz ligada</button>
+         <button class="btn subtle" id="secretMusicToggle" type="button" title="Conversas Entre Lápides">🎵 Trilha ligada</button>
          <button class="btn subtle" id="secretClearChat" type="button">↻ Nova conversa</button>
        </div>
        <small class="secretFriendTransparency">Sou uma IA em forma de personagem. O histórico não é salvo no seu perfil; ele fica nesta sessão apenas para dar continuidade à conversa.</small>
@@ -298,8 +299,13 @@ function segredos(){
  };
  const {idle:idleSrc,talk:talkSrc,blink:blinkSrc,explain:explainSrc,eureka:eurekaSrc,lantern:lanternSrc}=secretSprites;
  Object.values(secretSprites).forEach(src=>{const img=new Image();img.src=src});
- let speakingTimer=null,poseTimer=null,blinkTimer=null,busy=false,voiceOn=true,history=[];
+ let speakingTimer=null,poseTimer=null,blinkTimer=null,busy=false,voiceOn=true,musicOn=true,history=[];
+ const friendMusic=new Audio("assets/audio/amigo-da-nevoa/conversas-entre-lapides.mp3");
+ friendMusic.loop=true;
+ friendMusic.preload="auto";
+ friendMusic.volume=.18;
  try{voiceOn=localStorage.getItem("nevoaFriendVoice")!=="off"}catch(e){}
+ try{musicOn=localStorage.getItem("nevoaFriendMusic")!=="off"}catch(e){}
  try{const saved=JSON.parse(sessionStorage.getItem("nevoaFriendHistory")||"[]");if(Array.isArray(saved))history=saved.slice(-12)}catch(e){}
 
  function portalSession(){try{return(localStorage.getItem("nevoaStudentSession")||"").trim()}catch(e){return""}}
@@ -351,6 +357,21 @@ function segredos(){
    const clean=String(text||"").replace(/\s+/g," ").trim();
    bubble.textContent=clean.length>190?clean.slice(0,187)+"…":clean;
  }
+ function setMusicVolume(value){
+   friendMusic.volume=Math.max(0,Math.min(1,value));
+ }
+ function updateMusicToggle(){
+   const btn=$("#secretMusicToggle");if(!btn)return;
+   btn.textContent=musicOn?"🎵 Trilha ligada":"🎵 Trilha desligada";
+   btn.setAttribute("aria-pressed",musicOn?"true":"false");
+ }
+ async function tryPlayMusic(){
+   if(!musicOn||!friendMusic.paused)return;
+   try{await friendMusic.play()}catch(e){}
+ }
+ function restoreMusic(){
+   if(musicOn)setMusicVolume(.18);
+ }
  function preferredVoice(){
    if(!("speechSynthesis" in window))return null;
    const voices=window.speechSynthesis.getVoices()||[];
@@ -363,7 +384,8 @@ function segredos(){
  }
  function speak(text,leadSrc=explainSrc){
    bubbleText(text);
-   if(!voiceOn||!("speechSynthesis" in window)){showGhostPose(leadSrc,1150);return}
+   if(musicOn)setMusicVolume(.065);
+   if(!voiceOn||!("speechSynthesis" in window)){showGhostPose(leadSrc,1150);restoreMusic();return}
    window.speechSynthesis.cancel();
    clearGhostTimers();
    setGhostSprite(leadSrc,true);
@@ -372,8 +394,8 @@ function segredos(){
    const v=preferredVoice();if(v)u.voice=v;
    u.onstart=animateTalking;
    u.onboundary=()=>{if(!speakingTimer)animateTalking()};
-   u.onend=()=>stopTalking();
-   u.onerror=()=>stopTalking();
+   u.onend=()=>{stopTalking();restoreMusic()};
+   u.onerror=()=>{stopTalking();restoreMusic()};
    poseTimer=setTimeout(()=>{poseTimer=null;window.speechSynthesis.speak(u)},360);
  }
  function addMessage(role,text,save=true){
@@ -440,6 +462,14 @@ function segredos(){
    if(!voiceOn)stopTalking();
  };
  $("#secretVoiceToggle").textContent=voiceOn?"🔊 Voz ligada":"🔇 Voz desligada";
+ updateMusicToggle();
+ $("#secretMusicToggle").onclick=()=>{
+   musicOn=!musicOn;
+   try{localStorage.setItem("nevoaFriendMusic",musicOn?"on":"off")}catch(e){}
+   updateMusicToggle();
+   if(musicOn){setMusicVolume(.18);tryPlayMusic()}
+   else{friendMusic.pause();friendMusic.currentTime=0}
+ };
  $("#secretClearChat").onclick=()=>{
    if("speechSynthesis" in window)window.speechSynthesis.cancel();
    history=[];saveHistory();renderHistory();stopTalking();
@@ -459,6 +489,12 @@ function segredos(){
  renderHistory();
  setStatus(portalSession()?"IA conectada":"entre no Portal",portalSession()?"ready":"offline");
  scheduleBlink();
+ if(musicOn){
+   tryPlayMusic();
+   const unlockMusic=()=>tryPlayMusic();
+   window.addEventListener("pointerdown",unlockMusic,{once:true});
+   window.addEventListener("keydown",unlockMusic,{once:true});
+ }
  setTimeout(()=>{if(!history.length)speak("Pode chegar. Eu gosto de conversar sobre ideias. O que anda passando pela sua cabeça?",lanternSrc);else bubbleText(history[history.length-1].content)},450);
 }
 function professor(){shell("Central do Professor","A estrutura docente está separada da experiência do aluno. Nesta primeira camada, o planejamento funciona localmente; turmas online entram depois da validação visual.",`<section class="section"><div class="wrap two"><div class="panel"><h2>Montar uma sessão</h2><div class="field"><label>Nível</label><select id="level"><option>Fundamental II</option><option>Ensino Médio</option></select></div><div class="field"><label>Tema</label><select id="theme"><option>Ética</option><option>Lógica</option><option>Conhecimento</option><option>Argumentação</option><option>História da Filosofia</option></select></div><div class="field"><label>Tempo</label><select id="time"><option>10 minutos</option><option>20 minutos</option><option>50 minutos</option></select></div><button class="btn" id="plan">Gerar percurso</button></div><div class="panel"><h2>Percurso sugerido</h2><div id="planOut" class="empty">Escolha os parâmetros.</div><div class="note warning"><b>Turmas online</b><small>A área está reservada na arquitetura. A conexão de códigos de turma e painel coletivo ficará para a etapa de backend/testes, sem afetar os jogos atuais.</small></div></div></div></section>`);$("#plan").onclick=()=>{const t=$("#theme").value,map={Ética:["Tribunal das Sombras","Dilemas da Meia-Noite"],Lógica:["Sala da Lógica","Paradoxia — Circo das Falácias"],Conhecimento:["Espelho de Descartes","Caverna de Platão"],Argumentação:["Dilemas da Meia-Noite","Oficina de Argumentos"],"História da Filosofia":["Corredor dos Filósofos","Museu dos Filósofos"]};$("#planOut").className="";$("#planOut").innerHTML=(map[t]||[]).map((x,i)=>`<div class="note success"><b>${i+1}. ${x}</b><small>${i?"Aprofundamento":"Disparador inicial"}</small></div>`).join("")}}
