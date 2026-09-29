@@ -281,7 +281,7 @@ function segredos(){
      <form class="secretComposer" id="secretComposer">
        <button class="secretMic" id="secretMic" type="button" title="Falar com o Amigo da Névoa" aria-label="Falar com o Amigo da Névoa">🎙️</button>
        <textarea id="secretMessage" rows="2" maxlength="1200" placeholder="Sussurre alguma coisa à Névoa..."></textarea>
-       <button class="btn secretSend" id="secretSend" type="submit">Enviar</button>
+       <button class="btn secretSend" id="secretSend" type="submit" aria-label="Enviar mensagem" title="Enviar">➤</button>
      </form>
      <div class="secretChatHint" id="secretChatHint">Escreva ou fale. O Amigo da Névoa acompanha o fio da conversa.</div>
    </section>
@@ -416,7 +416,7 @@ function segredos(){
  }
  function setBusy(on){
    busy=on;send.disabled=on;mic.disabled=on;
-   send.textContent=on?"Pensando...":"Enviar";
+   send.textContent=on?"…":"➤";
    if(on){setStatus("pensando na névoa...","busy");showGhostPose(lanternSrc,2600)}
    else{setStatus(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta","ready");stopTalking()}
  }
