@@ -465,3 +465,249 @@ body[data-page="segredos"] .secretPuzzleCard{
   body[data-page="segredos"] .secretGhostScene{min-height:390px}
   body[data-page="segredos"] .secretGhost{width:min(100%,390px);max-height:390px}
 }
+
+
+/* V13 — Amigo da Névoa: conversa, não jogo */
+body[data-page="segredos"] .secretFriendLayout{
+  display:grid;
+  grid-template-columns:minmax(300px,.86fr) minmax(390px,1.14fr);
+  gap:clamp(16px,3vw,34px);
+  align-items:stretch;
+}
+body[data-page="segredos"] .secretFriendStage{
+  min-height:680px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;
+}
+body[data-page="segredos"] .secretFriendStage .secretGhostScene{
+  min-height:455px;
+}
+body[data-page="segredos"] .secretFriendIdentity{
+  position:relative;
+  z-index:3;
+  padding:18px 20px 22px;
+  margin-top:-8px;
+  border-top:1px solid rgba(214,168,236,.18);
+  background:linear-gradient(180deg,rgba(9,5,15,.08),rgba(9,5,15,.52));
+}
+body[data-page="segredos"] .secretFriendIdentity h2{
+  margin:.35rem 0 .55rem;
+  font-size:clamp(1.45rem,2.6vw,2.05rem);
+}
+body[data-page="segredos"] .secretFriendIdentity p{
+  color:#dfd5e7;
+  line-height:1.55;
+  margin:0 0 14px;
+}
+body[data-page="segredos"] .secretFriendControls{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+body[data-page="segredos"] .secretFriendTransparency{
+  display:block;
+  margin-top:12px;
+  color:#aa9db3;
+  line-height:1.45;
+}
+body[data-page="segredos"] .secretChatPanel{
+  min-height:680px;
+  display:flex;
+  flex-direction:column;
+  padding:clamp(15px,2.3vw,26px);
+  overflow:hidden;
+}
+body[data-page="segredos"] .secretChatHead{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:12px;
+}
+body[data-page="segredos"] .secretChatHead h2{
+  margin:.25rem 0 0;
+  font-size:clamp(1.4rem,2.5vw,2.1rem);
+}
+body[data-page="segredos"] .secretAiStatus{
+  flex:0 0 auto;
+  border:1px solid rgba(147,235,255,.26);
+  background:rgba(27,50,61,.44);
+  color:#bdeef5;
+  border-radius:999px;
+  padding:7px 10px;
+  font-size:.76rem;
+  letter-spacing:.02em;
+}
+body[data-page="segredos"] .secretAiStatus[data-state="offline"]{
+  color:#d6c4de;
+  border-color:rgba(214,196,222,.2);
+  background:rgba(37,27,42,.45);
+}
+body[data-page="segredos"] .secretAiStatus[data-state="busy"]{
+  animation:secretStatusPulse 1.15s ease-in-out infinite;
+}
+body[data-page="segredos"] .secretTopics{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  padding-bottom:13px;
+  border-bottom:1px solid rgba(217,174,236,.14);
+}
+body[data-page="segredos"] .secretTopics button{
+  appearance:none;
+  border:1px solid rgba(207,155,232,.27);
+  background:rgba(34,17,45,.62);
+  color:#eee4f3;
+  border-radius:999px;
+  padding:8px 11px;
+  font:inherit;
+  font-size:.82rem;
+  cursor:pointer;
+  transition:.18s ease;
+}
+body[data-page="segredos"] .secretTopics button:hover{
+  transform:translateY(-1px);
+  border-color:rgba(116,230,250,.48);
+  background:rgba(42,24,55,.82);
+}
+body[data-page="segredos"] .secretChatLog{
+  flex:1 1 auto;
+  min-height:330px;
+  max-height:480px;
+  overflow:auto;
+  padding:16px 3px 10px;
+  scroll-behavior:smooth;
+}
+body[data-page="segredos"] .secretMsg{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  margin:0 0 14px;
+}
+body[data-page="segredos"] .secretMsgAvatar{
+  flex:0 0 34px;
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:rgba(74,48,91,.74);
+  border:1px solid rgba(207,155,232,.28);
+  box-shadow:0 5px 16px rgba(0,0,0,.25);
+}
+body[data-page="segredos"] .secretMsgBody{
+  max-width:min(88%,680px);
+  padding:11px 13px;
+  border-radius:16px 16px 16px 5px;
+  background:rgba(25,13,34,.76);
+  border:1px solid rgba(202,151,225,.18);
+  box-shadow:0 9px 24px rgba(0,0,0,.18);
+}
+body[data-page="segredos"] .secretMsgBody b{
+  display:block;
+  margin-bottom:4px;
+  color:#c9f5ff;
+  font-size:.78rem;
+  letter-spacing:.03em;
+}
+body[data-page="segredos"] .secretMsgBody p{
+  margin:0;
+  color:#f0eaf3;
+  line-height:1.55;
+  white-space:normal;
+}
+body[data-page="segredos"] .secretMsg.fromUser{
+  flex-direction:row-reverse;
+}
+body[data-page="segredos"] .secretMsg.fromUser .secretMsgAvatar{
+  background:rgba(42,68,79,.72);
+  border-color:rgba(113,227,246,.28);
+}
+body[data-page="segredos"] .secretMsg.fromUser .secretMsgBody{
+  border-radius:16px 16px 5px 16px;
+  background:rgba(24,49,58,.68);
+  border-color:rgba(118,229,247,.20);
+}
+body[data-page="segredos"] .secretMsg.fromUser .secretMsgBody b{
+  color:#e4d2f3;
+}
+body[data-page="segredos"] .secretComposer{
+  display:grid;
+  grid-template-columns:46px 1fr auto;
+  gap:9px;
+  align-items:end;
+  padding-top:12px;
+  border-top:1px solid rgba(217,174,236,.14);
+}
+body[data-page="segredos"] .secretComposer textarea{
+  width:100%;
+  resize:none;
+  min-height:48px;
+  max-height:130px;
+  border:1px solid rgba(208,157,230,.28);
+  background:rgba(8,5,13,.70);
+  color:#f7eff9;
+  border-radius:16px;
+  padding:12px 13px;
+  font:inherit;
+  line-height:1.4;
+  outline:none;
+}
+body[data-page="segredos"] .secretComposer textarea:focus{
+  border-color:rgba(109,230,250,.55);
+  box-shadow:0 0 0 3px rgba(109,230,250,.08);
+}
+body[data-page="segredos"] .secretMic{
+  width:46px;height:46px;
+  border-radius:50%;
+  border:1px solid rgba(210,164,231,.32);
+  background:rgba(35,18,47,.84);
+  color:#fff;
+  cursor:pointer;
+  font-size:1.05rem;
+}
+body[data-page="segredos"] .secretMic.listening{
+  border-color:rgba(255,157,185,.65);
+  box-shadow:0 0 0 5px rgba(255,125,160,.10),0 0 22px rgba(255,125,160,.18);
+  animation:secretMicPulse 1s ease-in-out infinite;
+}
+body[data-page="segredos"] .secretSend{
+  min-height:46px;
+}
+body[data-page="segredos"] .secretChatHint{
+  min-height:20px;
+  padding:7px 4px 0 56px;
+  color:#a99aae;
+  font-size:.78rem;
+}
+@keyframes secretMicPulse{50%{transform:scale(1.06)}}
+@keyframes secretStatusPulse{50%{opacity:.58}}
+@media(max-width:900px){
+  body[data-page="segredos"] .secretFriendLayout{grid-template-columns:1fr}
+  body[data-page="segredos"] .secretFriendStage,
+  body[data-page="segredos"] .secretChatPanel{min-height:0}
+  body[data-page="segredos"] .secretFriendStage .secretGhostScene{min-height:420px}
+}
+@media(max-width:600px){
+  body[data-page="segredos"] .secretSection{padding-top:8px}
+  body[data-page="segredos"] .secretFriendLayout{gap:12px}
+  body[data-page="segredos"] .secretFriendStage .secretGhostScene{min-height:360px}
+  body[data-page="segredos"] .secretFriendIdentity{padding:15px 15px 18px}
+  body[data-page="segredos"] .secretChatPanel{padding:14px}
+  body[data-page="segredos"] .secretChatHead{display:block}
+  body[data-page="segredos"] .secretAiStatus{display:inline-block;margin-top:8px}
+  body[data-page="segredos"] .secretTopics{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:12px;
+    scrollbar-width:none;
+  }
+  body[data-page="segredos"] .secretTopics::-webkit-scrollbar{display:none}
+  body[data-page="segredos"] .secretTopics button{white-space:nowrap}
+  body[data-page="segredos"] .secretChatLog{min-height:300px;max-height:55vh}
+  body[data-page="segredos"] .secretMsgBody{max-width:84%}
+  body[data-page="segredos"] .secretComposer{grid-template-columns:43px 1fr}
+  body[data-page="segredos"] .secretMic{width:43px;height:43px}
+  body[data-page="segredos"] .secretSend{grid-column:2;justify-self:end;min-height:40px;padding:.55rem 1rem}
+  body[data-page="segredos"] .secretChatHint{padding-left:0}
+}
