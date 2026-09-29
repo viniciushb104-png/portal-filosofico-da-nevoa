@@ -89,3 +89,41 @@ body.sceneOpen::before{content:"";position:fixed;inset:0;z-index:88;background:#
 .paradoxiaEndIdentity{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:9px}.endProfileAvatar{width:66px;height:66px;flex:0 0 66px}.paradoxiaEndIdentity>b{font-family:Georgia,serif;color:#ffd19b;font-size:18px}
 @media(max-width:900px){.hud{grid-template-columns:repeat(2,1fr)}.profileHud{grid-column:1/-1}}
 @media(max-width:620px){.account{width:auto;max-width:48px;padding:3px;border-radius:50%}.account>span:last-child{display:none}.accountAvatar{width:34px;height:34px;flex-basis:34px}.profileHud{grid-column:1/-1}.paradoxiaHudAvatar{width:34px;height:34px;flex-basis:34px}.endProfileAvatar{width:58px;height:58px;flex-basis:58px}}
+
+
+/* V13 — Diário de Missões + controles móveis reforçados */
+.missionJournal{margin:16px 0 18px;border:1px solid #5a3268;border-radius:22px;background:linear-gradient(145deg,#120919,#09050d);box-shadow:0 24px 70px #0007;overflow:hidden}
+.journalHead{display:flex;justify-content:space-between;gap:18px;align-items:end;padding:18px 20px;border-bottom:1px solid #3e2449;background:radial-gradient(circle at 12% 0,#682b7a2b,transparent 35%),linear-gradient(90deg,#170a21,#25100d)}
+.journalHead small{font-size:8px;letter-spacing:.15em;color:#b79ac3}.journalHead h2{font-family:Georgia,serif;margin:4px 0 5px;font-size:clamp(24px,3vw,34px)}.journalHead p{margin:0;color:#bba9c4;font-size:11px}
+.journalJourneyLink{white-space:nowrap;border:1px solid #8b4da0;border-radius:999px;padding:9px 12px;color:#f4e7fa;text-decoration:none;font-size:10px;font-weight:950;background:#1b0d24}
+.journalColumns{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}
+.journalBlock{min-width:0;border:1px solid #3d2447;border-radius:16px;background:#0d0713;padding:12px}
+.journalTitle{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.journalTitle b{font-family:Georgia,serif}.journalTitle span{font-size:9px;border:1px solid #6c3d7c;border-radius:999px;padding:5px 8px;color:#ffce92}
+.journalList{display:grid;gap:7px}
+.journalMission{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:9px;align-items:center;border:1px solid #392243;border-radius:12px;padding:9px;background:#120919;color:#efe5f4;text-decoration:none;min-width:0}
+.journalMission>span{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#0a0610;border:1px solid #51305e;font-size:17px}
+.journalMission b,.journalMission small{display:block}.journalMission b{font-size:10px}.journalMission small{font-size:8px;color:#a995b2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.journalMission em{font-size:8px;font-style:normal;color:#96889d;white-space:nowrap}
+.journalMission.active{border-color:#c561e1;background:#1a0d22;box-shadow:inset 0 0 18px #a14dc817}.journalMission.active em{color:#eec4ff}
+.journalMission.done{border-color:#36795f;background:#0d1b16}.journalMission.done>span{border-color:#46a77e;background:#0a241b}.journalMission.done em{color:#8ce1bd}
+.journalMission.realm:hover{border-color:#8e4da4;transform:translateY(-1px)}.journalMission.locked{opacity:.5;pointer-events:none}
+.worldViewport{touch-action:none}
+.mobileWorldControls{position:relative;z-index:60}
+.dpad button,.interactMobile{min-width:44px;min-height:44px}
+@media(max-width:900px){
+ .journalColumns{grid-template-columns:1fr}
+ .journalHead{align-items:flex-start}
+ .worldViewport{height:60dvh;min-height:440px}
+}
+@media(max-width:620px){
+ .journalHead{flex-direction:column;padding:15px 13px}
+ .journalJourneyLink{width:100%;text-align:center;box-sizing:border-box}
+ .journalColumns{padding:10px;gap:10px}
+ .journalMission{grid-template-columns:36px minmax(0,1fr);padding:9px 8px}
+ .journalMission em{grid-column:2;white-space:normal}
+ .mobileWorldControls{position:sticky;bottom:0}
+ .dpad{grid-template-columns:48px 48px 48px;grid-template-rows:44px 44px}
+ .interactMobile{width:68px;height:68px}
+ .worldTopline{flex-wrap:wrap}
+ .worldLoot{order:3;width:100%;justify-content:flex-start}
+}
