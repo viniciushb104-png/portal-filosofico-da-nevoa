@@ -237,7 +237,63 @@ $("#centerMap").onclick=center;
 $("#fullMap").onclick=async()=>{try{if(!document.fullscreenElement)await vp.requestFullscreen();else await document.exitFullscreen()}catch(e){}};
 requestAnimationFrame(()=>{if(innerWidth<760)center()});
 }
-function segredos(){shell("Segredos da Mansão","Área opcional para easter eggs e enigmas que não precisam aparecer no percurso principal.",`<section class="section"><div class="wrap two"><div class="panel"><div class="eyebrow">Porta que não existe</div><h2>“Quanto mais perguntas recebe, mais caminhos oferece. O que é?”</h2><div class="field"><input class="input" id="secretAnswer" placeholder="Digite sua resposta"></div><button class="btn" id="openSecret">Tentar abrir</button></div><div class="panel" id="secretResult"><div class="empty">A porta permanece silenciosa.</div></div></div></section>`);$("#openSecret").onclick=()=>{const a=$("#secretAnswer").value.toLowerCase().trim();if(a.includes("filosofia")||a.includes("pergunta")){NevoaUniverse.addSecret("porta-pergunta");$("#secretResult").innerHTML='<div class="note success"><b>🔓 Passagem encontrada</b><small>Segredo registrado no Perfil do Explorador.</small></div>'}else $("#secretResult").innerHTML='<div class="note warning"><b>A fechadura range...</b><small>Talvez a resposta não seja uma coisa, mas uma forma de investigar.</small></div>'}}
+function segredos(){
+ shell("Segredos da Mansão","No Cemitério dos Segredos, um fantasma camarada transforma perguntas em desafios, pistas e descobertas.",`<section class="section secretSection"><div class="wrap"><div class="secretStage panel">
+   <div class="secretGhostScene">
+     <div class="secretBubble" id="secretGhostLine">He-he! Chegou alguém curioso...</div>
+     <img class="secretGhost" id="secretGhost" src="assets/segredos/fantasma-talk-00.png" alt="Fantasma camarada sentado sobre uma lápide">
+   </div>
+   <div class="secretPuzzleCard">
+     <div class="eyebrow">Enigma do cemitério</div>
+     <h2>“Quanto mais perguntas recebe, mais caminhos oferece. O que é?”</h2>
+     <p class="secretIntro">Digite uma resposta. O fantasma reage ao que você disser e registra o segredo quando você acerta.</p>
+     <div class="field"><input class="input" id="secretAnswer" autocomplete="off" placeholder="Digite sua resposta"></div>
+     <div class="secretActions">
+       <button class="btn" id="openSecret">Tentar abrir</button>
+       <button class="btn subtle" id="ghostHint">Pedir uma pista</button>
+     </div>
+     <div id="secretResult"><div class="empty">A porta permanece silenciosa.</div></div>
+   </div>
+ </div></div></section>`);
+
+ const ghost=$("#secretGhost"), bubble=$("#secretGhostLine");
+ let timer=null;
+ function stopTalk(finalSrc="assets/segredos/fantasma-talk-00.png"){
+   if(timer){clearInterval(timer);timer=null}
+   if(ghost) ghost.src=finalSrc;
+ }
+ function talk(text){
+   if(bubble) bubble.textContent=text;
+   stopTalk();
+   let open=false, ticks=0;
+   timer=setInterval(()=>{
+     open=!open;
+     if(ghost) ghost.src=open?"assets/segredos/fantasma-talk-04.png":"assets/segredos/fantasma-talk-00.png";
+     ticks++;
+     if(ticks>=10) stopTalk();
+   },135);
+ }
+ function explain(text){
+   stopTalk("assets/segredos/fantasma-explain.png");
+   if(bubble) bubble.textContent=text;
+   setTimeout(()=>{if(ghost) ghost.src="assets/segredos/fantasma-talk-00.png"},2300);
+ }
+
+ setTimeout(()=>talk("He-he! Eu guardo perguntas que nem a própria névoa conseguiu engolir. Quer tentar?"),350);
+
+ $("#ghostHint").onclick=()=>explain("Pista: não pense em um objeto. Pense numa maneira de investigar o mundo.");
+ $("#openSecret").onclick=()=>{
+   const a=$("#secretAnswer").value.toLowerCase().trim();
+   if(a.includes("filosofia")||a.includes("pergunta")){
+     NevoaUniverse.addSecret("porta-pergunta");
+     $("#secretResult").innerHTML='<div class="note success"><b>🔓 Passagem encontrada</b><small>Segredo registrado no Perfil do Explorador.</small></div>';
+     explain("Acertou! Filosofar é abrir caminhos com perguntas. Essa lápide quase sorriu.");
+   }else{
+     $("#secretResult").innerHTML='<div class="note warning"><b>A fechadura range...</b><small>Talvez a resposta não seja uma coisa, mas uma forma de investigar.</small></div>';
+     talk("Hmmm... quase! A névoa gostou da tentativa. Tente pensar no ato de perguntar e investigar.");
+   }
+ };
+}
 function professor(){shell("Central do Professor","A estrutura docente está separada da experiência do aluno. Nesta primeira camada, o planejamento funciona localmente; turmas online entram depois da validação visual.",`<section class="section"><div class="wrap two"><div class="panel"><h2>Montar uma sessão</h2><div class="field"><label>Nível</label><select id="level"><option>Fundamental II</option><option>Ensino Médio</option></select></div><div class="field"><label>Tema</label><select id="theme"><option>Ética</option><option>Lógica</option><option>Conhecimento</option><option>Argumentação</option><option>História da Filosofia</option></select></div><div class="field"><label>Tempo</label><select id="time"><option>10 minutos</option><option>20 minutos</option><option>50 minutos</option></select></div><button class="btn" id="plan">Gerar percurso</button></div><div class="panel"><h2>Percurso sugerido</h2><div id="planOut" class="empty">Escolha os parâmetros.</div><div class="note warning"><b>Turmas online</b><small>A área está reservada na arquitetura. A conexão de códigos de turma e painel coletivo ficará para a etapa de backend/testes, sem afetar os jogos atuais.</small></div></div></div></section>`);$("#plan").onclick=()=>{const t=$("#theme").value,map={Ética:["Tribunal das Sombras","Dilemas da Meia-Noite"],Lógica:["Sala da Lógica","Paradoxia — Circo das Falácias"],Conhecimento:["Espelho de Descartes","Caverna de Platão"],Argumentação:["Dilemas da Meia-Noite","Oficina de Argumentos"],"História da Filosofia":["Corredor dos Filósofos","Museu dos Filósofos"]};$("#planOut").className="";$("#planOut").innerHTML=(map[t]||[]).map((x,i)=>`<div class="note success"><b>${i+1}. ${x}</b><small>${i?"Aprofundamento":"Disparador inicial"}</small></div>`).join("")}}
 const page=document.body.dataset.page;({hub,grimorio,diario,museu,oficina,bestiario,cartas,perfil,teatro,fonografo,mapa,segredos,professor}[page]||hub)();
 })();
