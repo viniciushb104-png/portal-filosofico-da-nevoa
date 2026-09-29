@@ -255,9 +255,10 @@ function segredos(){
        <div class="secretFriendControls">
          <button class="btn subtle" id="secretVoiceToggle" type="button">🔊 Voz ligada</button>
          <button class="btn subtle" id="secretMusicToggle" type="button" title="Conversas Entre Lápides">🎵 Trilha ligada</button>
+         <button class="btn subtle" id="secretDeepToggle" type="button" title="Usa o cérebro generativo local apenas quando você quiser uma reflexão mais longa">⚡ Conversa ágil</button>
          <button class="btn subtle" id="secretClearChat" type="button">↻ Nova conversa</button>
        </div>
-       <small class="secretFriendTransparency">Sou uma IA local em forma de personagem. No primeiro despertar, o navegador baixa meu pequeno cérebro e o guarda em cache; sem WebGPU, entro automaticamente no modo leve. A conversa fica nesta sessão.</small>
+       <small class="secretFriendTransparency">Por padrão eu converso no modo ágil, sem downloads pesados. O modo profundo é opcional e usa um modelo generativo local no navegador. A conversa fica nesta sessão.</small>
      </div>
    </aside>
 
@@ -417,13 +418,68 @@ function segredos(){
    busy=on;send.disabled=on;mic.disabled=on;
    send.textContent=on?"Pensando...":"Enviar";
    if(on){setStatus("pensando na névoa...","busy");showGhostPose(lanternSrc,2600)}
-   else{setStatus(localAIReady?"IA local • consciência desperta":(localAIFailed?"modo leve • conversa disponível":"IA local • pronta para despertar"),"ready");stopTalking()}
+   else{setStatus(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta","ready");stopTalking()}
  }
  async function askFriendFallback(message){
    const raw=String(message||"").trim();
    const n=raw.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
    const pick=a=>a[Math.floor(Math.random()*a.length)];
    const has=(...words)=>words.some(w=>n.includes(w));
+   const previousUser=[...history].slice(0,-1).reverse().find(x=>x.role==="user");
+   const previousGhost=[...history].slice(0,-1).reverse().find(x=>x.role==="assistant");
+   const previousContext=normalizeAIText((previousUser?.content||"")+" "+(previousGhost?.content||""));
+   const context=n+" "+previousContext;
+   const short=n.split(/\\s+/).filter(Boolean).length<=7;
+   const claim=raw
+     .replace(/^\\s*(eu\\s+)?(acho|penso|acredito|considero|pra mim|para mim)(\\s+que)?\\s*/i,"")
+     .replace(/^\\s*(sim|não|nao|talvez|depende)[,.:;!?-]*\\s*/i,"")
+     .trim();
+   const topic=/(mentir|mentira|moral|etica|ética|certo|errado|bem|mal|dever)/.test(context)?"ética":
+     /(verdade|certeza|saber|conhecimento|prova|opiniao|opinião|duvida|dúvida)/.test(context)?"conhecimento":
+     /(liberdade|livre|escolha|determin|destino)/.test(context)?"liberdade":
+     /(justica|justiça|igualdade|equidade|direito)/.test(context)?"justiça":
+     /(sociedade|cultura|grupo|preconceito|desigualdade|norma social)/.test(context)?"sociedade":
+     /(historia|história|passado|revolucao|revolução|guerra|imperio|império)/.test(context)?"história":
+     /(literatura|poema|poesia|romance|conto|personagem|livro)/.test(context)?"literatura":
+     /(dinheiro|juros|divida|dívida|orcamento|orçamento|comprar|economizar)/.test(context)?"finanças":"ideias";
+   const topicInsight={
+     "ética":"Aqui aparece uma diferença importante entre julgar o ato em si e julgar suas consequências. Dependendo do critério moral usado, a mesma situação pode mudar bastante.",
+     "conhecimento":"O ponto interessante é separar convicção de justificação: sentir certeza não é a mesma coisa que ter boas razões ou evidências.",
+     "liberdade":"Você tocou numa tensão clássica: escolher não significa necessariamente escolher sem influências. A pergunta é quanto dessas influências ainda deixa espaço para autonomia.",
+     "justiça":"Aqui vale separar tratar todos exatamente igual de considerar diferenças relevantes. Justiça e igualdade podem caminhar juntas, mas não significam sempre a mesma coisa.",
+     "sociedade":"Aí entra um olhar sociológico: uma escolha pode parecer totalmente individual e, ao mesmo tempo, carregar hábitos, expectativas e pressões do grupo.",
+     "história":"Em história, vale distinguir o acontecimento das interpretações sobre ele. Fontes diferentes podem iluminar partes diferentes do mesmo processo.",
+     "literatura":"Na literatura, essa leitura ganha força quando conseguimos ligá-la à voz, às escolhas e aos conflitos do texto — não apenas ao que sentimos sobre ele.",
+     "finanças":"Em educação financeira, a decisão melhora quando saímos do 'cabe a parcela?' e olhamos custo total, prazo, prioridade e o que estamos deixando de fazer com esse dinheiro.",
+     "ideias":"O pedaço mais interessante da sua fala é o critério por trás dela: o que faria essa ideia continuar valendo quando mudamos o exemplo?"
+   };
+
+   if(/^(depende|depende disso|depende da situacao|depende da situação)[.!?]*$/.test(n)||n.startsWith("depende ")){
+     return "Esse ‘depende’ é importante: você saiu de uma regra absoluta e colocou um critério no meio. "+topicInsight[topic]+" Então a conversa fica mais precisa se descobrirmos: depende exatamente de quê?";
+   }
+   if(/\\b(mas|porem|porém|so que|só que|entretanto)\\b/.test(n)&&claim.length>8){
+     return "O seu ‘mas’ é justamente a parte mais interessante: ele mostra que você percebeu um limite na primeira ideia. "+topicInsight[topic]+" Se eu transformasse isso numa regra, qual seria a exceção que você não aceitaria?";
+   }
+   if(/\\bporque\\b|\\bpor que eu\\b|\\bpois\\b/.test(n)&&claim.length>10){
+     const reason=(raw.split(/porque|pois/i)[1]||claim).trim().replace(/[.!?]+$/,"");
+     return "Agora você me deu uma razão, não só uma resposta: “"+reason.slice(0,115)+"”. Isso deixa a conversa bem melhor. "+topicInsight[topic]+" Essa mesma razão valeria se as pessoas envolvidas fossem trocadas de lugar?";
+   }
+   if(/^(sim|concordo|acho que sim|com certeza)[.!?]*$/.test(n)&&previousGhost){
+     return "Entendi — você está aceitando a ideia anterior, mas quero ver até onde ela aguenta. "+topicInsight[topic]+" Consegue imaginar um caso em que você responderia o contrário?";
+   }
+   if(/^(nao|não|discordo|acho que nao|acho que não)[.!?]*$/.test(n)&&previousGhost){
+     return "Então você encontrou um limite na ideia anterior. Isso é mais interessante do que um simples ‘não’. "+topicInsight[topic]+" Qual parte exatamente não funciona para você?";
+   }
+   if(/^(talvez|nao sei|não sei|sei la|sei lá)[.!?]*$/.test(n)&&previousGhost){
+     return "Esse ‘talvez’ não é fraqueza; ele mostra que ainda faltou um critério. "+topicInsight[topic]+" Vamos testar com um caso concreto: o que precisaria mudar na situação para você ter certeza?";
+   }
+   if(/^(eu\\s+)?(acho|penso|acredito|considero|pra mim|para mim)\\b/.test(n)&&claim.length>5){
+     return "Entendi sua posição: “"+claim.slice(0,125).replace(/[.!?]+$/,"")+"”. "+topicInsight[topic]+" Agora quero testar a força dela: qual seria a melhor objeção que alguém poderia fazer contra essa ideia?";
+   }
+   if(short&&previousGhost&&previousGhost.content.includes("?")&&raw.length>2&&!n.endsWith("?")){
+     return "Peguei o que você respondeu. "+topicInsight[topic]+" Em vez de mudar de assunto, vou continuar exatamente desse ponto: o que na sua resposta é mais importante — o exemplo, a consequência ou o princípio por trás dela?";
+   }
+
    const questions={
      filosofia:[
        "Se ninguém pudesse descobrir sua escolha, você ainda faria o que considera certo?",
@@ -458,7 +514,7 @@ function segredos(){
      return "He-he! Então vamos de conversa "+names[topic]+". "+q;
    };
 
-   if(has("oi","ola","bom dia","boa tarde","boa noite","e ai","salve")){
+   if(/^(oi|olá|ola|e aí|e ai|salve)[!,. ]*$/.test(raw.toLowerCase())||has("bom dia","boa tarde","boa noite")){
      return pick([
        "Opa! A lápide estava confortável, mas uma boa conversa é melhor. Quer filosofia, história, literatura, sociologia ou educação financeira?",
        "He-he! Bem-vindo ao meu cantinho da névoa. Escolha um assunto ou me faça uma pergunta.",
@@ -501,9 +557,9 @@ function segredos(){
    }
    if(n.endsWith("?")||has("por que","porque","como ","qual ","quem ","quando ","onde ")){
      return pick([
-       "Boa pergunta. Eu consigo conversar melhor quando ela encosta nos meus temas: filosofia, história, literatura, sociologia e educação financeira. Qual desses lados combina mais com o que você perguntou?",
-       "Essa pergunta abriu uma portinha na névoa. Antes de eu responder, qual é a sua hipótese? Pode ser uma frase curta; eu continuo a partir dela.",
-       "Vamos investigar em vez de chutar. O que você já sabe sobre isso? A partir daí eu consigo puxar a próxima pergunta."
+       "Boa pergunta. Antes de transformar isso numa resposta pronta, eu separaria duas coisas: o que sabemos e o que estamos supondo. Me diga sua hipótese em uma frase e eu testo ela com você.",
+       "Essa pergunta tem mais de um caminho. Posso começar pelo conceito e depois trazer um exemplo; se você me disser o que já pensa sobre isso, eu consigo ir direto ao ponto.",
+       "Vamos investigar sem enrolar: diga o que você acha que acontece e por quê. Eu continuo exatamente da sua ideia, inclusive se eu enxergar uma objeção."
      ]);
    }
 
@@ -567,7 +623,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
    }
    return "";
  }
- let localAIWorker=null,localAISeq=0,localAIReady=false,localAIFailed=false;
+ let localAIWorker=null,localAISeq=0,localAIReady=false,localAIFailed=false,deepMode=false;
  const localAIPending=new Map();
  function ensureLocalAIWorker(){
    if(localAIWorker)return localAIWorker;
@@ -621,7 +677,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  }
  async function askFriend(message,onChunk){
    const safe=safetyReply(message);if(safe)return safe;
-   if(!localAIFailed&&"gpu" in navigator){
+   if(deepMode&&!localAIFailed&&"gpu" in navigator){
      try{
        if(!localAIReady)setStatus("despertando a consciência da névoa…","busy");
        const reply=await askLocalAI(message,onChunk);
@@ -658,6 +714,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  async function sendMessage(text){
    const message=String(text||"").trim();if(!message||busy)return;
    addMessage("user",message);input.value="";setBusy(true);thinkingReaction(message);
+   if(!deepMode)await new Promise(r=>setTimeout(r,160+Math.floor(Math.random()*140)));
    let draft=null,streamed="";
    const onChunk=chunk=>{
      if(!chunk)return;
@@ -690,6 +747,21 @@ NOTAS PEDAGÓGICAS RELEVANTES:
    if(!voiceOn)stopTalking();
  };
  $("#secretVoiceToggle").textContent=voiceOn?"🔊 Voz ligada":"🔇 Voz desligada";
+ const deepToggle=$("#secretDeepToggle");
+ if(deepToggle){
+   deepToggle.onclick=()=>{
+     deepMode=!deepMode;
+     deepToggle.textContent=deepMode?"🕯️ Reflexão profunda":"⚡ Conversa ágil";
+     if(deepMode){
+       setStatus("modo profundo • carregando só agora","busy");
+       bubbleText("He-he… acendi a lanterna grande. Esse modo pensa mais fundo, mas pode demorar.");
+       try{ensureLocalAIWorker().postMessage({type:"preload"})}catch(e){localAIFailed=true;deepMode=false;deepToggle.textContent="⚡ Conversa ágil";setStatus("⚡ conversa ágil • pronta","ready")}
+     }else{
+       setStatus("⚡ conversa ágil • pronta","ready");
+       bubbleText("Voltei ao modo ágil. Respostas rápidas, conversa contínua.");
+     }
+   };
+ }
  updateMusicToggle();
  $("#secretMusicToggle").onclick=()=>{
    musicOn=!musicOn;
@@ -715,14 +787,8 @@ NOTAS PEDAGÓGICAS RELEVANTES:
    mic.onclick=()=>{$("#secretChatHint").textContent="O reconhecimento de voz não está disponível neste navegador. A voz do fantasma ainda funciona normalmente."};
  }
  renderHistory();
- setStatus(localAIReady?"IA local • consciência desperta":(localAIFailed?"modo leve • conversa disponível":"IA local • pronta para despertar"),"ready");
+ setStatus(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta","ready");
  scheduleBlink();
- setTimeout(()=>{
-   const conn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
-   if("gpu" in navigator&&!(conn&&conn.saveData)){
-     try{ensureLocalAIWorker().postMessage({type:"preload"})}catch(e){}
-   }
- },850);
  if(musicOn){
    tryPlayMusic();
    const unlockMusic=()=>tryPlayMusic();
