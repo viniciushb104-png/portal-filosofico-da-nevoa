@@ -7,10 +7,73 @@ function saveU(u){localStorage.setItem("nevoaUniverseV1",JSON.stringify(u))}
 window.NevoaUniverse={unlock(id){const x=universe();if(!x.unlocks.includes(id))x.unlocks.push(id);saveU(x)},addCard(id){const x=universe();if(!x.cards.includes(id))x.cards.push(id);saveU(x)},addSecret(id){const x=universe();if(!x.secrets.includes(id))x.secrets.push(id);saveU(x)},addCoins(n=1){const x=universe();x.coins=(x.coins||0)+n;saveU(x)}};
 function seed(){const p=progress(),x=universe(),c=p.completed||{},ids=["socrates","argumento"];if(c.platao)ids.push("platao","caverna");if(c.descartes)ids.push("descartes");if(c.logica)ids.push("popularidade","adhominem");if((p.xp||0)>=120)ids.push("autonomia");if(localStorage.getItem("paradoxiaSave"))ids.push("teseu","certeza");ids.forEach(i=>{if(!x.unlocks.includes(i))x.unlocks.push(i)});D.cards.forEach(i=>{if((p.xp||0)>=i.xp&&!x.cards.includes(i.id))x.cards.push(i.id)});saveU(x);return x}
 const u=seed(),p=progress();
+const LAB_PHASES=[
+ {id:"platform_socrates",name:"Sócrates",icon:"🏛️",localKey:"plataforma",score:60},
+ {id:"platform_plato",name:"Platão",icon:"🌞",localKey:"plataoPlataforma",score:70},
+ {id:"platform_descartes",name:"Descartes",icon:"🪞",localKey:"descartesPlataforma",score:80},
+ {id:"platform_hume",name:"Hume",icon:"🌫️",localKey:"humePlataforma",score:90},
+ {id:"platform_ethics",name:"Ética",icon:"⚖️",localKey:"eticaPlataforma",score:100}
+];
+const JOURNEY_TROPHIES=[
+ {id:"mansion",icon:"🏚️",name:"Discípulo do Diálogo",desc:"Conclua os sete cômodos da Mansão de Sócrates."},
+ {id:"platform_socrates",icon:"🏛️",name:"Caminhante de Atenas",desc:"Conclua a primeira fase do Labirinto."},
+ {id:"platform_plato",icon:"🌞",name:"Libertado da Caverna",desc:"Conclua A Caverna de Platão."},
+ {id:"platform_descartes",icon:"🪞",name:"A Certeza do Cogito",desc:"Conclua O Pesadelo de Descartes."},
+ {id:"platform_hume",icon:"🌫️",name:"Investigador do Hábito",desc:"Conclua O Labirinto de Hume."},
+ {id:"platform_ethics",icon:"⚖️",name:"Juiz da Névoa",desc:"Conclua O Tribunal da Ética."},
+ {id:"labyrinthMaster",icon:"🏆",name:"Mestre do Labirinto",desc:"Conclua as cinco fases do Labirinto dos Filósofos."},
+ {id:"paradoxia",icon:"🎭",name:"Cidadão de Paradoxia",desc:"Conclua o Capítulo I de Paradoxia."}
+];
+function journeyStatus(progressRows=[],cloudRpg=null,base=progress()){
+ const completed=base.completed||{},achievements=base.achievements||{},claims={};
+ (Array.isArray(progressRows)?progressRows:[]).forEach(row=>{const k=String(row?.event_key||"");if(k)claims[k]=Math.max(Number(claims[k]||0),Number(row?.best_score||0))});
+ const localRooms=Math.min(7,Number(base.socrates||0));
+ const remoteMansionScore=Number(claims.socrates_mansion||0);
+ const remoteRooms=remoteMansionScore>=130?7:Math.min(6,Math.floor(remoteMansionScore/15));
+ const effectiveMansionRooms=Math.max(localRooms,remoteRooms);
+ const mansionPct=Math.round(effectiveMansionRooms/7*100);
+ const forceLabComplete=Number(completed.labirintoCompleto||0)>=1||!!achievements.labyrinthMaster;
+ const labPhases=LAB_PHASES.map(x=>forceLabComplete||Number(completed[x.localKey]||0)>=x.score||Number(claims[x.id]||0)>=x.score);
+ const labDoneCount=labPhases.filter(Boolean).length,labPct=labDoneCount*20;
+ const localRpg=readJSON("paradoxiaSaveV1",null)||readJSON("paradoxiaSave",null);
+ const cloudSave=cloudRpg&&typeof cloudRpg.save_data==="object"?cloudRpg.save_data:null;
+ const saves=[localRpg,cloudSave].filter(x=>x&&typeof x==="object");
+ const claimPara=Number(claims.rpg_paradoxia||0);
+ let paraScore=0,paraDone=claimPara>=120;
+ if(saves.length){
+   saves.forEach(save=>{paraScore=Math.max(paraScore,Math.max(0,Number(save.score||0)));if(save.completed===true)paraDone=true});
+ }else paraScore=Math.max(0,claimPara);
+ const paraPct=paraDone?100:Math.min(95,Math.round(Math.min(120,paraScore)/120*100));
+ const trophies={
+   mansion:effectiveMansionRooms>=7,
+   platform_socrates:labPhases[0],platform_plato:labPhases[1],platform_descartes:labPhases[2],
+   platform_hume:labPhases[3],platform_ethics:labPhases[4],labyrinthMaster:labDoneCount===5,paradoxia:paraDone
+ };
+ return {claims,effectiveMansionRooms,mansionPct,labPhases,labDoneCount,labPct,paraScore,paraPct,paraDone,trophies};
+}
 function shell(title,lead,body){document.title=title+" — Portal Filosófico da Névoa";$("#app").innerHTML=`<header class="top"><div class="wrap topIn"><a class="brand" href="../index.html#grande-mapa" title="Abrir o Grande Mapa">Portal Filosófico <span>da Névoa</span></a><nav class="nav"><a href="../index.html#grande-mapa">🗺️ Mapa</a><a href="../jogos/paradoxia/">Paradoxia</a><a href="../jogos/plataforma-filosofica/">Labirinto</a><a href="grimorio.html">Grimório</a><a href="perfil.html">Perfil</a><a href="../salao-da-nevoa.html">Salão</a></nav><a class="worldMapBtn" href="../index.html#grande-mapa" aria-label="Abrir Grande Mapa">🗺️ <span>Mapa</span></a></div></header><section class="hero"><div class="wrap"><div class="eyebrow">Universo da Névoa</div><h1>${title}</h1><p class="lead">${lead}</p><div class="chips"><span class="chip">${p.xp||0} XP</span><span class="chip">${u.unlocks.length} registros</span><span class="chip">${u.cards.length} cartas</span><span class="chip">${u.secrets.length} segredos</span></div></div></section>${body}<footer class="footer"><div class="wrap">PENSAR • QUESTIONAR • ARGUMENTAR • TRANSFORMAR<br><br><a href="../index.html#grande-mapa">← Voltar ao Grande Mapa</a></div></footer>`}
 const card=(icon,title,desc,href,meta="")=>`<article class="card"><div class="icon">${icon}</div>${meta?`<div class="meta">${meta}</div>`:""}<h3>${title}</h3><p>${desc}</p>${href?`<a href="${href}">Entrar →</a>`:""}</article>`;
 function hub(){shell("Praça Central da Névoa","Um refúgio entre as aventuras: aqui ficam seus livros, registros, coleções e ferramentas para pensar.",`<section class="section"><div class="wrap"><div class="sectionHead"><div class="eyebrow">ARQUIVOS • REFLEXÃO • DESCOBERTAS</div><h2>Explore os espaços da Praça</h2></div><div class="grid">${card("📖","Grimório do Explorador","Enciclopédia que registra filósofos, conceitos, paradoxos, falácias e criaturas encontrados.","grimorio.html","Coleção")}${card("📓","Diário Filosófico","Registre respostas e volte a elas no futuro para perceber como seu pensamento mudou.","diario.html","Reflexão")}${card("🏛️","Museu dos Filósofos","Galeria navegável de pensadores, problemas, conceitos e perguntas.","museu.html","Conhecimento")}${card("🧠","Oficina de Argumentos","Construa tese, razões, evidência, objeção e resposta.","oficina.html","Argumentação")}${card("👻","Bestiário Filosófico","Criaturas inspiradas em falácias e vícios argumentativos.","bestiario.html","Lógica")}${card("🃏","Cartas da Névoa","Coleção desbloqueada pela progressão do Portal.","cartas.html","Colecionável")}${card("🧙","Perfil do Explorador","XP, títulos, coleções, registros e jornada.","perfil.html","Progressão")}${card("🎭","Teatro Filosófico","Cenas interativas nas quais razões mudam o rumo do diálogo.","teatro.html","Narrativa")}${card("🎵","Fonógrafo da Névoa","Casa das trilhas e futuras músicas desbloqueáveis.","fonografo.html","Música")}${card("🔐","Segredos da Mansão","Enigmas opcionais e registros secretos.","segredos.html","Exploração")}${card("👨‍🏫","Central do Professor","Planejamento de sessões e estrutura para turmas.","professor.html?v=15","Docente")}${card("🗺️","Grande Mapa","Retorne ao coração do Portal e escolha seu próximo destino.","../index.html#grande-mapa","Navegação")}</div></div></section>`)}
-function grimorio(){let filter="Todos";shell("Grimório do Explorador","O livro cresce junto com a jornada. Sistemas antigos e futuros podem registrar descobertas aqui sem alterar a página.",`<section class="section"><div class="wrap"><div class="toolbar" id="filters"></div><div id="entries" class="grid"></div></div></section>`);const render=()=>{$("#entries").innerHTML=D.grimorio.filter(x=>filter==="Todos"||x.type===filter).map(x=>`<article class="card ${u.unlocks.includes(x.id)?"":"locked"}"><div class="icon">${x.icon}</div><div class="meta">${x.type}</div><h3>${u.unlocks.includes(x.id)?x.title:"Entrada selada"}</h3><p>${u.unlocks.includes(x.id)?x.desc:"Continue explorando o Portal para revelar este registro."}</p></article>`).join("")};["Todos",...new Set(D.grimorio.map(x=>x.type))].forEach(t=>{const b=document.createElement("button");b.className="btn subtle";b.textContent=t;b.onclick=()=>{filter=t;render()};$("#filters").appendChild(b)});render()}
+function grimorio(){
+ let filter="Todos";
+ const localJourney=journeyStatus();
+ shell("Grimório do Explorador","O livro cresce junto com a jornada. Aqui ficam seus registros filosóficos e as Memórias conquistadas nos grandes caminhos do Portal.",`
+ <section class="section memoriesSection"><div class="wrap">
+   <div class="journeySectionHead"><div><div class="eyebrow">MEMÓRIAS DA JORNADA</div><h2>Troféus do Explorador</h2></div><p>As Memórias são liberadas somente por conclusões reais registradas nos jogos.</p></div>
+   <div class="memorySummary panel"><div><small>MEMÓRIAS DESPERTAS</small><b id="memoryCount">0 / ${JOURNEY_TROPHIES.length}</b></div><a class="btn subtle" href="perfil.html">Ver Minha Jornada →</a></div>
+   <div class="memoryTrophyGrid" id="memoryTrophyGrid"></div>
+ </div></section>
+ <section class="section"><div class="wrap"><div class="journeySectionHead"><div><div class="eyebrow">ENCICLOPÉDIA DA NÉVOA</div><h2>Registros encontrados</h2></div></div><div class="toolbar" id="filters"></div><div id="entries" class="grid"></div></div></section>`);
+ const renderEntries=()=>{$("#entries").innerHTML=D.grimorio.filter(x=>filter==="Todos"||x.type===filter).map(x=>`<article class="card ${u.unlocks.includes(x.id)?"":"locked"}"><div class="icon">${x.icon}</div><div class="meta">${x.type}</div><h3>${u.unlocks.includes(x.id)?x.title:"Entrada selada"}</h3><p>${u.unlocks.includes(x.id)?x.desc:"Continue explorando o Portal para revelar este registro."}</p></article>`).join("")};
+ const renderMemories=st=>{
+   const count=JOURNEY_TROPHIES.filter(t=>st.trophies[t.id]).length;
+   $("#memoryCount").textContent=count+" / "+JOURNEY_TROPHIES.length;
+   $("#memoryTrophyGrid").innerHTML=JOURNEY_TROPHIES.map(t=>{const on=!!st.trophies[t.id];return `<article class="memoryTrophy ${on?"unlocked":"locked"}"><div class="memoryTrophySeal"><span>${on?t.icon:"◇"}</span></div><small>${on?"MEMÓRIA DESPERTA":"MEMÓRIA SELADA"}</small><h3>${on?t.name:"Segredo ainda adormecido"}</h3><p>${t.desc}</p><b>${on?"✓ Conquistada":"○ Ainda não conquistada"}</b></article>`}).join("");
+ };
+ ["Todos",...new Set(D.grimorio.map(x=>x.type))].forEach(t=>{const b=document.createElement("button");b.className="btn subtle";b.textContent=t;b.onclick=()=>{filter=t;renderEntries()};$("#filters").appendChild(b)});
+ renderEntries();renderMemories(localJourney);
+ (async()=>{if(!window.NevoaOnline?.getSession())return;let snap=null,cloud=null;try{snap=await window.NevoaOnline.syncLocal(progress())}catch(e){}try{cloud=await window.NevoaOnline.loadRpgState()}catch(e){}renderMemories(journeyStatus(snap?.progress||[],cloud,progress()))})().catch(()=>{});
+}
 function diario(){const key="nevoaDiaryV1";let notes=readJSON(key,[]);shell("Diário Filosófico","Aqui não há resposta automática: o objetivo é registrar pensamento, razões e mudanças de posição.",`<section class="section"><div class="wrap two"><div class="panel"><div class="eyebrow">Pergunta do momento</div><h2>O que torna uma escolha verdadeiramente sua?</h2><div class="field"><label>Sua reflexão</label><textarea id="diaryText" placeholder="Escreva o que pensa hoje..."></textarea></div><button class="btn" id="saveDiary">Registrar no diário</button></div><div class="panel"><h3>Registros anteriores</h3><div id="notes"></div></div></div></section>`);const draw=()=>$("#notes").innerHTML=notes.length?notes.slice().reverse().map(n=>`<div class="note"><b>${n.q}</b><small>${n.date}</small><p>${n.text}</p></div>`).join(""):`<div class="empty">Seu diário ainda está em branco.</div>`;draw();$("#saveDiary").onclick=()=>{const text=$("#diaryText").value.trim();if(!text)return;notes.push({q:"O que torna uma escolha verdadeiramente sua?",text,date:new Date().toLocaleDateString("pt-BR")});localStorage.setItem(key,JSON.stringify(notes));$("#diaryText").value="";draw()}}
 function museu(){shell("Museu dos Filósofos","Uma galeria de problemas e perguntas. Depois poderemos substituir estes símbolos por retratos e salas animadas.",`<section class="section"><div class="wrap"><input class="input search" id="search" placeholder="Buscar filósofo, época ou conceito..."><div class="grid" id="museum" style="margin-top:16px"></div></div></section>`);const draw=q=>{$("#museum").innerHTML=D.philosophers.filter(x=>(x.name+x.era+x.concept).toLowerCase().includes(q.toLowerCase())).map(x=>`<article class="card"><div class="icon">${x.icon}</div><div class="meta">${x.era}</div><h3>${x.name}</h3><p><b>${x.concept}</b></p><p>${x.question}</p></article>`).join("")};draw("");$("#search").oninput=e=>draw(e.target.value)}
 function oficina(){const key="nevoaArgumentsV1";shell("Oficina de Argumentos","Monte um argumento por partes. A ferramenta avalia estrutura, não qual opinião você escolheu defender.",`<section class="section"><div class="wrap two"><div class="panel"><div class="field"><label>Tese</label><textarea id="thesis"></textarea></div><div class="field"><label>Razão</label><textarea id="reason"></textarea></div><div class="field"><label>Evidência ou exemplo</label><textarea id="evidence"></textarea></div><div class="field"><label>Possível objeção</label><textarea id="objection"></textarea></div><div class="field"><label>Resposta à objeção</label><textarea id="reply"></textarea></div><button class="btn" id="build">Construir argumento</button></div><div class="panel"><h2>Estrutura</h2><div id="preview" class="empty">Preencha os blocos para montar seu argumento.</div></div></div></section>`);$("#build").onclick=()=>{const ids=["thesis","reason","evidence","objection","reply"],vals=ids.map(id=>$("#"+id).value.trim()),names=["Tese","Razão","Evidência","Objeção","Resposta"];$("#preview").className="";$("#preview").innerHTML=vals.map((v,i)=>`<div class="note ${v?"success":"warning"}"><b>${names[i]}</b><small>${v||"Bloco ainda vazio"}</small></div>`).join("");if(vals.filter(Boolean).length===5){const a=readJSON(key,[]);a.push({date:new Date().toISOString(),values:vals});localStorage.setItem(key,JSON.stringify(a))}}}
@@ -19,46 +82,15 @@ function cartas(){shell("Cartas da Névoa","Coleção sem compra e sem vantagem 
 function perfil(){
 const diary=readJSON("nevoaDiaryV1",[]),args=readJSON("nevoaArgumentsV1",[]),localXp=Number(p.xp||0);
 const avatars=Array.isArray(window.NEVOA_AVATARS)?window.NEVOA_AVATARS:[];
-const localCompleted=p.completed||{},ach=p.achievements||{};
-const mansionRooms=Math.min(7,Number(p.socrates||0));
-const localParadoxiaSave=readJSON("paradoxiaSaveV1",null)||readJSON("paradoxiaSave",null);
 const rankInfo=x=>x>=360?{name:"Guardião da Névoa",next:null,min:360,max:360}:x>=240?{name:"Mestre da Névoa",next:"Guardião",min:240,max:360}:x>=140?{name:"Filósofo da Névoa",next:"Mestre",min:140,max:240}:x>=60?{name:"Investigador da Névoa",next:"Filósofo",min:60,max:140}:{name:"Aprendiz da Névoa",next:"Investigador",min:0,max:60};
 const journeyData=(xp,progressRows=[],cloudRpg=null)=>{
  const r=rankInfo(xp),span=Math.max(1,r.max-r.min),pct=r.next?Math.max(0,Math.min(100,(xp-r.min)/span*100)):100;
- const claims={};(Array.isArray(progressRows)?progressRows:[]).forEach(row=>{const k=String(row?.event_key||"");if(k)claims[k]=Math.max(Number(claims[k]||0),Number(row?.best_score||0))});
- const remoteMansionScore=Number(claims.socrates_mansion||0);
- const remoteMansionRooms=remoteMansionScore>=130?7:Math.min(6,Math.floor(remoteMansionScore/15));
- const effectiveMansionRooms=Math.max(mansionRooms,remoteMansionRooms);
- const mansionPct=Math.round(effectiveMansionRooms/7*100);
-
- const localLabComplete=Number(localCompleted.labirintoCompleto||0)>=1||!!ach.labyrinthMaster;
- const labPhases=[
-   localLabComplete||Number(localCompleted.plataforma||0)>=60||Number(claims.platform_socrates||0)>=60,
-   localLabComplete||Number(localCompleted.plataoPlataforma||0)>=70||Number(claims.platform_plato||0)>=70,
-   localLabComplete||Number(localCompleted.descartesPlataforma||0)>=80||Number(claims.platform_descartes||0)>=80,
-   localLabComplete||Number(localCompleted.humePlataforma||0)>=90||Number(claims.platform_hume||0)>=90,
-   localLabComplete||Number(localCompleted.eticaPlataforma||0)>=100||Number(claims.platform_ethics||0)>=100
- ];
- const labDoneCount=labPhases.filter(Boolean).length;
- const labPct=labDoneCount*20;
-
- const cloudSave=cloudRpg&&typeof cloudRpg.save_data==="object"?cloudRpg.save_data:null;
- const currentSaves=[localParadoxiaSave,cloudSave].filter(x=>x&&typeof x==="object");
- const claimPara=Number(claims.rpg_paradoxia||0);
- let paraDone=claimPara>=120;
- let paraScore=0;
- if(currentSaves.length){
-   currentSaves.forEach(save=>{paraScore=Math.max(paraScore,Math.max(0,Number(save.score||0)));if(save.completed===true)paraDone=true});
- }else{
-   paraScore=Math.max(0,claimPara);
- }
- const paraPct=paraDone?100:Math.min(95,Math.round(Math.min(120,paraScore)/120*100));
-
+ const j=journeyStatus(progressRows,cloudRpg,progress());
  let next={icon:"🏚️",title:"Entre na Mansão de Sócrates",text:"A primeira porta da jornada espera por perguntas melhores.",href:"../index.html#jogos"};
- if(effectiveMansionRooms>=7&&labPct<100)next={icon:"🎮",title:"Atravesse o Labirinto",text:"Continue pelas cinco fases e transforme conceitos em caminho.",href:"../jogos/plataforma-filosofica/"};
- if(labPct>=100&&!paraDone)next={icon:"🎭",title:"Viaje para Paradoxia",text:"O Reino das Escolhas aguarda suas decisões e argumentos.",href:"../jogos/paradoxia/"};
- if(paraDone)next={icon:"🏆",title:"Explore as Memórias",text:"Sua jornada já deixou marcas. Reveja descobertas e procure os segredos restantes.",href:"grimorio.html"};
- return {r,pct,mansionPct,labPct,labDoneCount,paraPct,paraDone,effectiveMansionRooms,next};
+ if(j.effectiveMansionRooms>=7&&j.labPct<100)next={icon:"🎮",title:"Atravesse o Labirinto",text:"Continue pelas cinco fases e transforme conceitos em caminho.",href:"../jogos/plataforma-filosofica/"};
+ if(j.labPct>=100&&!j.paraDone)next={icon:"🎭",title:"Viaje para Paradoxia",text:"O Reino das Escolhas aguarda suas decisões e argumentos.",href:"../jogos/paradoxia/"};
+ if(j.paraDone)next={icon:"🏆",title:"Explore as Memórias",text:"Sua jornada já deixou marcas. Reveja descobertas e procure os segredos restantes.",href:"grimorio.html"};
+ return {...j,r,pct,next};
 };
 const jd=journeyData(localXp);
 const worldCard=(cls,icon,kicker,title,pct,desc,href)=>`<a class="journeyWorldCard ${cls}" href="${href}"><div class="journeyWorldArt"><span>${icon}</span><i style="--world-progress:${pct}%"></i></div><div class="journeyWorldCopy"><small>${kicker}</small><h3>${title}</h3><p>${desc}</p><div class="journeyWorldProgress"><i style="width:${pct}%"></i></div><b>${pct}% explorado <span>→</span></b></div></a>`;
@@ -89,9 +121,15 @@ shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro 
     ${worldCard("paradoxia","🎭","RPG FILOSÓFICO","Paradoxia",jd.paraPct,"Escolhas, falácias, missões e duelos de argumentos.","../jogos/paradoxia/")}
   </div>
 
+  <div class="panel journeyMilestones">
+    <div class="journeyMilestonesHead"><div><div class="eyebrow">SELOS DO LABIRINTO</div><h3>As cinco provas filosóficas</h3></div><b id="journeyLabStatus">${jd.labDoneCount}/5 concluídas</b></div>
+    <div class="journeyPhaseSeals" id="journeyPhaseSeals">${LAB_PHASES.map((phase,i)=>`<div class="journeyPhaseSeal ${jd.labPhases[i]?"done":""}" data-phase-index="${i}"><span>${phase.icon}</span><b>${phase.name}</b><small>${jd.labPhases[i]?"✓ Concluída":"◇ Pendente"}</small></div>`).join("")}</div>
+    <div class="journeyMilestoneFooter"><span id="journeyLabHint">${jd.labDoneCount===5?"🏆 Mestre do Labirinto conquistado":"Conclua as fases pendentes para despertar o troféu Mestre do Labirinto."}</span><a href="grimorio.html">Ver todas as Memórias →</a></div>
+  </div>
+
   <div class="journeyLower">
-    <div class="panel journeyMemories"><div class="eyebrow">Memórias da jornada</div><h3>O que você já levou da Névoa</h3><div class="journeyStats"><div><b id="journeyXpStat">${localXp}</b><small>XP</small></div><div><b>${u.unlocks.length}</b><small>Registros</small></div><div><b>${u.cards.length}</b><small>Cartas</small></div><div><b>${u.secrets.length}</b><small>Segredos</small></div><div><b>${diary.length}</b><small>Reflexões</small></div><div><b>${args.length}</b><small>Argumentos</small></div></div><a class="btn subtle" href="grimorio.html">📖 Abrir Grimório</a></div>
-    <div class="panel journeyChronicle"><div class="eyebrow">Crônica do explorador</div><h3>Marcas no mundo</h3><div class="chronicleLine ${mansionRooms?"done":""}"><span>🏚️</span><div><b>Mansão</b><small id="journeyMansionChronicle">${jd.effectiveMansionRooms?jd.effectiveMansionRooms+"/7 cômodos atravessados":"Ainda não explorada"}</small></div></div><div class="chronicleLine ${jd.labPct?"done":""}"><span>🎮</span><div><b>Labirinto</b><small id="journeyLabChronicle">${jd.labPct?jd.labDoneCount+"/5 fases concluídas":"As portas aguardam"}</small></div></div><div class="chronicleLine ${jd.paraPct?"done":""}"><span>🎭</span><div><b>Paradoxia</b><small id="journeyParaChronicle">${jd.paraPct?jd.paraPct+"% registrado":"O reino ainda chama"}</small></div></div></div>
+    <div class="panel journeyMemories"><div class="eyebrow">Memórias da jornada</div><h3>O que você já levou da Névoa</h3><div class="journeyStats"><div><b id="journeyXpStat">${localXp}</b><small>XP</small></div><div><b>${u.unlocks.length}</b><small>Registros</small></div><div><b>${u.cards.length}</b><small>Cartas</small></div><div><b>${u.secrets.length}</b><small>Segredos</small></div><div><b>${diary.length}</b><small>Reflexões</small></div><div><b>${args.length}</b><small>Argumentos</small></div></div><a class="btn subtle" href="grimorio.html">🏆 Ver Memórias e troféus</a></div>
+    <div class="panel journeyChronicle"><div class="eyebrow">Crônica do explorador</div><h3>Marcas no mundo</h3><div class="chronicleLine ${jd.effectiveMansionRooms?"done":""}"><span>🏚️</span><div><b>Mansão</b><small id="journeyMansionChronicle">${jd.effectiveMansionRooms?jd.effectiveMansionRooms+"/7 cômodos atravessados":"Ainda não explorada"}</small></div></div><div class="chronicleLine ${jd.labPct?"done":""}"><span>🎮</span><div><b>Labirinto</b><small id="journeyLabChronicle">${jd.labPct?jd.labDoneCount+"/5 fases concluídas":"As portas aguardam"}</small></div></div><div class="chronicleLine ${jd.paraPct?"done":""}"><span>🎭</span><div><b>Paradoxia</b><small id="journeyParaChronicle">${jd.paraPct?jd.paraPct+"% registrado":"O reino ainda chama"}</small></div></div></div>
   </div>
 
   <div class="panel profileAvatarEditor" id="profileAvatarEditor" hidden><div class="eyebrow">Galeria de Avatares da Névoa</div><h3>Escolha sua aparência no Portal</h3><p>Os dez avatares são artes oficiais do Portal. Você pode usar qualquer um deles e trocar quando quiser.</p><div class="avatarGallery" id="avatarGallery"></div><div class="avatarGalleryFooter"><div class="profileNameStatus" id="avatarStatus" role="status" aria-live="polite"></div><button class="btn subtle" id="closeAvatarGallery" type="button">Fechar galeria</button></div></div>
@@ -122,6 +160,9 @@ const repaintJourney=(xp,progressRows=[],cloudRpg=null)=>{
  const bar=$("#journeyXpBar");if(bar)bar.style.width=d.pct+"%";
  const link=$("#journeyNextLink");if(link)link.href=d.next.href;
  [["mansion",d.mansionPct],["labyrinth",d.labPct],["paradoxia",d.paraPct]].forEach(([cls,val])=>{const card=document.querySelector(".journeyWorldCard."+cls);if(!card)return;const fill=card.querySelector(".journeyWorldProgress i");if(fill)fill.style.width=val+"%";const label=card.querySelector(".journeyWorldCopy>b");if(label)label.innerHTML=val+'% explorado <span>→</span>'});
+ const labStatus=$("#journeyLabStatus");if(labStatus)labStatus.textContent=d.labDoneCount+"/5 concluídas";
+ const labHint=$("#journeyLabHint");if(labHint)labHint.textContent=d.labDoneCount===5?"🏆 Mestre do Labirinto conquistado":"Conclua as fases pendentes para despertar o troféu Mestre do Labirinto.";
+ document.querySelectorAll(".journeyPhaseSeal").forEach((seal,i)=>{const done=!!d.labPhases[i];seal.classList.toggle("done",done);const small=seal.querySelector("small");if(small)small.textContent=done?"✓ Concluída":"◇ Pendente"});
  return d;
 };
 async function loadProfile(){
