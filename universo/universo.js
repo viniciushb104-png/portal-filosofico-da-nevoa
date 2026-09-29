@@ -289,6 +289,7 @@ function segredos(){
 
  const FRIEND_AI_URL="https://gsenhfhmabkjqhybpixm.supabase.co/functions/v1/amigo-da-nevoa";
  const FRIEND_AI_KEY="sb_publishable_VZoR4YrEww-o6HTkN6UVJA_0ywIaTgB";
+ const REMOTE_AI_URL=String(window.NEVOA_AI_ENDPOINT||"").trim();
  const ghost=$("#secretGhost"),bubble=$("#secretGhostLine"),log=$("#secretChatLog"),form=$("#secretComposer"),input=$("#secretMessage"),status=$("#secretAiStatus"),send=$("#secretSend"),mic=$("#secretMic");
  const secretSprites={
    idle:"assets/segredos/fantasma-talk-00.webp",
@@ -418,7 +419,7 @@ function segredos(){
    busy=on;send.disabled=on;mic.disabled=on;
    send.textContent=on?"…":"➤";
    if(on){setStatus("pensando na névoa...","busy");showGhostPose(lanternSrc,2600)}
-   else{setStatus(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta","ready");stopTalking()}
+   else{setStatus(REMOTE_AI_URL?"✦ IA da Névoa • pronta":(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta"),"ready");stopTalking()}
  }
  async function askFriendFallback(message){
    const raw=String(message||"").trim();
@@ -737,8 +738,36 @@ NOTAS PEDAGÓGICAS RELEVANTES:
      }catch(err){reject(err)}
    });
  }
+ async function askRemoteAI(message){
+   if(!REMOTE_AI_URL)throw new Error("remote_ai_not_configured");
+   const prior=history.slice(0,-1).slice(-10).map(m=>({role:m.role,content:String(m.content||"").slice(0,1600)}));
+   const controller=new AbortController();
+   const timeout=setTimeout(()=>controller.abort(),18000);
+   try{
+     const res=await fetch(REMOTE_AI_URL,{
+       method:"POST",
+       headers:{"Content-Type":"application/json"},
+       body:JSON.stringify({message:String(message||"").slice(0,1600),history:prior}),
+       signal:controller.signal
+     });
+     const data=await res.json().catch(()=>({}));
+     if(!res.ok)throw new Error(data.error||("remote_ai_http_"+res.status));
+     const reply=String(data.reply||"").trim();
+     if(!reply)throw new Error("remote_ai_empty");
+     return reply;
+   }finally{clearTimeout(timeout)}
+ }
  async function askFriend(message,onChunk){
    const safe=safetyReply(message);if(safe)return safe;
+   if(REMOTE_AI_URL){
+     try{
+       setStatus("✦ Amigo da Névoa • pensando","busy");
+       return await askRemoteAI(message);
+     }catch(err){
+       console.warn("Amigo da Névoa remoto indisponível; usando fallback local.",err);
+       setStatus("modo reserva • conversa disponível","ready");
+     }
+   }
    if(deepMode&&!localAIFailed&&"gpu" in navigator){
      try{
        if(!localAIReady)setStatus("despertando a consciência da névoa…","busy");
@@ -810,7 +839,8 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  };
  $("#secretVoiceToggle").textContent=voiceOn?"🔊":"🔇";
  const deepToggle=$("#secretDeepToggle");
- if(deepToggle){
+ if(REMOTE_AI_URL&&deepToggle)deepToggle.style.display="none";
+ if(deepToggle&&!REMOTE_AI_URL){
    deepToggle.onclick=()=>{
      deepMode=!deepMode;
      deepToggle.textContent=deepMode?"🕯️":"⚡";
@@ -849,7 +879,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
    mic.onclick=()=>{$("#secretChatHint").textContent="O reconhecimento de voz não está disponível neste navegador. A voz do fantasma ainda funciona normalmente."};
  }
  renderHistory();
- setStatus(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta","ready");
+ setStatus(REMOTE_AI_URL?"✦ IA da Névoa • pronta":(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta"),"ready");
  scheduleBlink();
  if(musicOn){
    tryPlayMusic();
