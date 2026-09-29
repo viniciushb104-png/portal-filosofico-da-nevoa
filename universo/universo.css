@@ -1430,3 +1430,32 @@ body[data-page="segredos"] .footer{
   body[data-page="segredos"] .secretSend{width:38px;height:38px;min-height:38px}
   body[data-page="segredos"] .secretChatHint{font-size:.63rem}
 }
+
+
+/* V25 — escala do Amigo da Névoa: corpo inteiro sem cortar cabeça/mãos */
+body[data-page="segredos"] .secretGhost{
+  width:min(650px,108%);
+  max-height:590px;
+  scale:1.02;
+}
+@media(max-width:1050px){
+  body[data-page="segredos"] .secretGhost{
+    width:min(620px,108%);
+    max-height:570px;
+    scale:1.02;
+  }
+}
+@media(max-width:900px){
+  body[data-page="segredos"] .secretGhost{
+    width:min(620px,108%);
+    max-height:545px;
+    scale:1.02;
+  }
+}
+@media(max-width:600px){
+  body[data-page="segredos"] .secretGhost{
+    width:min(520px,110%);
+    max-height:445px;
+    scale:1.02;
+  }
+}
