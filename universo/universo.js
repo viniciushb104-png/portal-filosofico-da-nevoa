@@ -245,7 +245,7 @@ function segredos(){
  shell("Segredos da Mansão","No Cemitério dos Segredos, um fantasma camarada transforma perguntas em desafios, pistas e descobertas.",`<section class="section secretSection"><div class="wrap"><div class="secretStage panel">
    <div class="secretGhostScene">
      <div class="secretBubble" id="secretGhostLine">He-he! Chegou alguém curioso...</div>
-     <img class="secretGhost" id="secretGhost" src="assets/segredos/fantasma-talk-00.png" alt="Fantasma camarada sentado sobre uma lápide">
+     <img class="secretGhost" id="secretGhost" src="assets/segredos/fantasma-talk-00.webp" alt="Fantasma camarada sentado sobre uma lápide">
    </div>
    <div class="secretPuzzleCard">
      <div class="eyebrow">Enigma do cemitério</div>
@@ -261,8 +261,13 @@ function segredos(){
  </div></div></section>`);
 
  const ghost=$("#secretGhost"), bubble=$("#secretGhostLine");
+ const secretSpritePreload=[
+   "assets/segredos/fantasma-talk-04.webp",
+   "assets/segredos/fantasma-explain.webp"
+ ];
+ secretSpritePreload.forEach(src=>{const img=new Image();img.src=src});
  let timer=null;
- function stopTalk(finalSrc="assets/segredos/fantasma-talk-00.png"){
+ function stopTalk(finalSrc="assets/segredos/fantasma-talk-00.webp"){
    if(timer){clearInterval(timer);timer=null}
    if(ghost) ghost.src=finalSrc;
  }
@@ -272,15 +277,15 @@ function segredos(){
    let open=false, ticks=0;
    timer=setInterval(()=>{
      open=!open;
-     if(ghost) ghost.src=open?"assets/segredos/fantasma-talk-04.png":"assets/segredos/fantasma-talk-00.png";
+     if(ghost) ghost.src=open?"assets/segredos/fantasma-talk-04.webp":"assets/segredos/fantasma-talk-00.webp";
      ticks++;
      if(ticks>=10) stopTalk();
    },135);
  }
  function explain(text){
-   stopTalk("assets/segredos/fantasma-explain.png");
+   stopTalk("assets/segredos/fantasma-explain.webp");
    if(bubble) bubble.textContent=text;
-   setTimeout(()=>{if(ghost) ghost.src="assets/segredos/fantasma-talk-00.png"},2300);
+   setTimeout(()=>{if(ghost) ghost.src="assets/segredos/fantasma-talk-00.webp"},2300);
  }
 
  setTimeout(()=>talk("He-he! Eu guardo perguntas que nem a própria névoa conseguiu engolir. Quer tentar?"),350);
