@@ -1,4 +1,8 @@
 (()=>{
+if(!window.NevoaNotify&&!document.querySelector('script[data-nevoa-notify]')){
+ const ns=document.createElement('script');ns.src='../nevoa-notify.js?v=2';ns.dataset.nevoaNotify='1';document.head.appendChild(ns);
+}
+
 const D=window.NEVOA_DATA,$=s=>document.querySelector(s);
 function readJSON(k,f){try{return JSON.parse(localStorage.getItem(k))||f}catch{return f}}
 function progress(){return readJSON("nevoaProgressV4",readJSON("nevoaProgressV3",{xp:0,completed:{},achievements:{},socrates:0}))}
