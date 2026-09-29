@@ -242,21 +242,21 @@ $("#fullMap").onclick=async()=>{try{if(!document.fullscreenElement)await vp.requ
 requestAnimationFrame(()=>{if(innerWidth<760)center()});
 }
 function segredos(){
- shell("Segredos da Mansão","No cemitério vive o Amigo da Névoa: um personagem conversacional com voz, perguntas e respostas sobre filosofia, história, literatura, sociologia e educação financeira.",`<section class="section secretSection"><div class="wrap"><div class="secretFriendLayout">
+ shell("O Cemitério dos Segredos","Entre as lápides, uma conversa pode abrir caminhos que uma resposta pronta não abre.",`<section class="section secretSection"><div class="wrap"><div class="secretFriendLayout">
    <aside class="secretStage panel secretFriendStage">
      <div class="secretGhostScene">
        <div class="secretBubble" id="secretGhostLine">He-he! Agora eu prefiro uma boa conversa a um enigma.</div>
        <img class="secretGhost" id="secretGhost" src="assets/segredos/fantasma-talk-00.webp" alt="Amigo da Névoa, fantasma de conversa do Portal">
      </div>
      <div class="secretFriendIdentity">
-       <div class="eyebrow">Amigo da Névoa • conversa encantada</div>
-       <h2>Um parceiro para trocar ideias.</h2>
-       <p>Converse, pergunte, discorde e pense em voz alta. Eu gosto de filosofia, história, literatura, sociologia e educação financeira.</p>
+       <div class="eyebrow">✦ AMIGO DA NÉVOA</div>
+       <h2>Converse com quem mora entre as lápides.</h2>
+       <p>Pergunte, discorde, peça exemplos ou simplesmente pense em voz alta.</p>
        <div class="secretFriendControls">
-         <button class="btn subtle" id="secretVoiceToggle" type="button">🔊 Voz ligada</button>
-         <button class="btn subtle" id="secretMusicToggle" type="button" title="Conversas Entre Lápides">🎵 Trilha ligada</button>
-         <button class="btn subtle" id="secretDeepToggle" type="button" title="Usa o cérebro generativo local apenas quando você quiser uma reflexão mais longa">⚡ Conversa ágil</button>
-         <button class="btn subtle" id="secretClearChat" type="button">↻ Nova conversa</button>
+         <button class="btn subtle" id="secretVoiceToggle" type="button" aria-label="Voz" title="Voz">🔊</button>
+         <button class="btn subtle" id="secretMusicToggle" type="button" aria-label="Trilha sonora" title="Conversas Entre Lápides">🎵</button>
+         <button class="btn subtle" id="secretDeepToggle" type="button" aria-label="Modo de conversa" title="Modo ágil / reflexão profunda">⚡</button>
+         <button class="btn subtle" id="secretClearChat" type="button" aria-label="Nova conversa" title="Nova conversa">↻</button>
        </div>
        <small class="secretFriendTransparency">Por padrão eu converso no modo ágil, sem downloads pesados. O modo profundo é opcional e usa um modelo generativo local no navegador. A conversa fica nesta sessão.</small>
      </div>
@@ -264,7 +264,7 @@ function segredos(){
 
    <section class="panel secretChatPanel" aria-label="Conversa com o Amigo da Névoa">
      <header class="secretChatHead">
-       <div><div class="eyebrow">Conversa livre</div><h2>Sobre o que vamos pensar hoje?</h2></div>
+       <div><div class="eyebrow">CONVERSA À LUZ DA LUA</div><h2>O que está passando pela sua cabeça?</h2></div>
        <span class="secretAiStatus" id="secretAiStatus">verificando...</span>
      </header>
 
@@ -280,10 +280,10 @@ function segredos(){
 
      <form class="secretComposer" id="secretComposer">
        <button class="secretMic" id="secretMic" type="button" title="Falar com o Amigo da Névoa" aria-label="Falar com o Amigo da Névoa">🎙️</button>
-       <textarea id="secretMessage" rows="2" maxlength="1200" placeholder="Escreva como se estivesse puxando assunto com um amigo..."></textarea>
+       <textarea id="secretMessage" rows="2" maxlength="1200" placeholder="Sussurre alguma coisa à Névoa..."></textarea>
        <button class="btn secretSend" id="secretSend" type="submit">Enviar</button>
      </form>
-     <div class="secretChatHint" id="secretChatHint">Você pode escrever ou usar o microfone. Não precisa formular uma “pergunta escolar”.</div>
+     <div class="secretChatHint" id="secretChatHint">Escreva ou fale. O Amigo da Névoa acompanha o fio da conversa.</div>
    </section>
  </div></div></section>`);
 
@@ -363,7 +363,7 @@ function segredos(){
  }
  function updateMusicToggle(){
    const btn=$("#secretMusicToggle");if(!btn)return;
-   btn.textContent=musicOn?"🎵 Trilha ligada":"🎵 Trilha desligada";
+   btn.textContent=musicOn?"🎵":"♫";
    btn.setAttribute("aria-pressed",musicOn?"true":"false");
  }
  async function tryPlayMusic(){
@@ -402,7 +402,7 @@ function segredos(){
  function addMessage(role,text,save=true){
    const item=document.createElement("article");
    item.className="secretMsg "+(role==="assistant"?"fromGhost":"fromUser");
-   item.innerHTML='<div class="secretMsgAvatar">'+(role==="assistant"?"👻":"✦")+'</div><div class="secretMsgBody"><b>'+(role==="assistant"?"Amigo da Névoa":"Você")+'</b><p>'+esc(text).replace(/\n/g,"<br>")+'</p></div>';
+   item.innerHTML=(role==="assistant"?'<div class="secretMsgAvatar" aria-hidden="true">✦</div>':'')+'<div class="secretMsgBody"><b>'+(role==="assistant"?"Amigo da Névoa":"Você")+'</b><p>'+esc(text).replace(/\n/g,"<br>")+'</p></div>';
    log.appendChild(item);log.scrollTop=log.scrollHeight;
    if(save){history.push({role:role,content:text});history=history.slice(-12);saveHistory()}
  }
@@ -471,6 +471,51 @@ function segredos(){
      return "Perfeito: sem fórmula mágica. Educação financeira começa menos com 'como ficar rico?' e mais com entender escolhas, prazo, risco e custo. Um exemplo: uma compra cabe na parcela, mas isso não significa que ela cabe no orçamento — o custo total e o que você deixa de fazer com aquele dinheiro também importam. Quer testar isso com uma compra fictícia de R$ 300?";
    }
 
+   const developIntent=/desenvolv|aprofunda|aprofunde|explica melhor|explique melhor|fala mais|fale mais|continua|continue|vai alem|vai além|detalha|detalhe/.test(n);
+   const exampleIntent=/me da um exemplo|me dê um exemplo|da um exemplo|dá um exemplo|exemplo concreto|por exemplo/.test(n);
+   const objectionIntent=/discorda|discorde|objecao|objeção|contrario|contrário|me desafia|me desafie/.test(n);
+   const topicDevelop={
+     "ética":"Vamos desenvolver de verdade. Em ética, uma mesma escolha pode ser julgada por lentes diferentes: uma pergunta se o ato respeita um dever; outra olha as consequências; outra pergunta que tipo de caráter essa escolha revela. Por isso duas pessoas podem condenar a mesma mentira por razões completamente diferentes — e também podem aceitar exceções diferentes. O ponto forte de uma posição aparece quando ela consegue explicar não só o caso fácil, mas também o caso-limite.",
+     "conhecimento":"Vamos mais fundo. Ter certeza é um estado psicológico; ter conhecimento exige alguma forma de justificação. Eu posso estar absolutamente convencido e ainda assim estar errado. Por isso a filosofia pergunta não apenas ‘você acredita?’, mas ‘que razão torna essa crença confiável?’. Evidência, experiência, coerência e possibilidade de erro entram justamente aí.",
+     "liberdade":"Vamos desenvolver. Influência e ausência de liberdade não são a mesma coisa. Imagine escolher uma profissão porque sua família valoriza estabilidade: existe influência, claro, mas você ainda pode reconhecer essa pressão, compará-la com outros desejos e até rejeitá-la. A autonomia aparece nesse espaço de reflexão. O problema fica mais difícil quando as influências são tão profundas que parecem simplesmente ‘nossas’. A pergunta então muda: ser livre é não sofrer influência ou conseguir examiná-la e responder a ela?",
+     "justiça":"Vamos aprofundar. Justiça não é apenas dar a mesma coisa a todos. Às vezes aplicar exatamente a mesma regra preserva uma desigualdade que já existia; em outros casos, abrir exceções pode criar privilégios. Por isso precisamos dizer qual critério estamos usando: igualdade, necessidade, mérito, direitos, reparação? O debate começa a ficar filosófico quando dois critérios razoáveis entram em conflito.",
+     "sociedade":"Vamos desenvolver. A sociologia não diz que somos marionetes da sociedade. Ela pergunta como preferências pessoais se formam dentro de redes de família, escola, classe, mídia, religião, amigos e instituições. Você ainda age, escolhe e interpreta — mas nunca começa do zero. O interessante é justamente estudar a tensão entre agência individual e estruturas sociais.",
+     "história":"Vamos aprofundar historicamente. Um acontecimento não ganha significado apenas pela sequência de datas. Precisamos perguntar quem participou, quais interesses estavam em conflito, que condições tornaram aquilo possível e quais fontes sobreviveram. Duas interpretações podem usar evidências reais e ainda discordar porque dão pesos diferentes a causas e atores.",
+     "literatura":"Vamos desenvolver. Uma interpretação literária fica forte quando liga uma ideia a escolhas concretas da obra: narrador, linguagem, imagens, conflitos, silêncios e contexto. Não basta dizer ‘para mim significa isso’; a leitura precisa mostrar como o texto sustenta essa possibilidade. Ao mesmo tempo, textos complexos podem sustentar mais de uma interpretação bem argumentada.",
+     "finanças":"Vamos aprofundar. Uma decisão financeira não é só matemática: envolve tempo, risco, prioridade e comportamento. Uma parcela pequena pode esconder um custo total grande; guardar tudo pode sacrificar necessidades presentes; gastar tudo pode eliminar opções futuras. A pergunta útil é: que escolha preserva melhor seus objetivos sem ignorar os limites de hoje?",
+     "ideias":"Vamos desenvolver sem repetir o que eu já disse. Uma ideia fica mais forte quando conseguimos separar três camadas: a afirmação, a razão que a sustenta e o limite em que ela deixaria de valer. Se só repetimos a afirmação, não avançamos. Quando encontramos o limite, descobrimos qual é realmente o princípio por trás dela."
+   };
+   const topicExample={
+     "ética":"Exemplo concreto: esconder uma pessoa inocente de alguém que pretende machucá-la e mentir sobre onde ela está. Uma ética focada em deveres pode desconfiar da mentira em si; uma ética consequencialista tende a pesar o dano evitado. O exemplo serve justamente porque força os critérios a aparecer.",
+     "conhecimento":"Exemplo: você olha pela janela, vê a rua molhada e conclui que choveu. É uma conclusão razoável, mas a rua poderia ter sido lavada. A crença pode ser verdadeira e ainda ter uma justificativa frágil. É aí que ‘achar’, ‘ter razão’ e ‘saber’ começam a se separar.",
+     "liberdade":"Exemplo: dois alunos escolhem o mesmo curso. Um nunca considerou outra opção porque ouviu a vida inteira que aquela era a única profissão respeitável; o outro ouviu a mesma pressão, pesquisou alternativas e decidiu ficar com ela. O resultado é igual, mas o processo de autonomia pode ser bem diferente.",
+     "justiça":"Exemplo: dar exatamente 30 minutos de prova para todos parece igualdade. Mas se existe uma necessidade educacional legitimamente reconhecida que exige tempo adicional, tratar todos de forma idêntica pode não produzir uma condição justa. A dificuldade é definir quais diferenças são relevantes.",
+     "sociedade":"Exemplo: dizer ‘eu escolhi meu estilo musical sozinho’ parece simples. Mas algoritmo, amigos, família, idioma, bairro e geração ajudaram a definir quais músicas chegaram até você. Isso não elimina seu gosto; mostra de onde veio o repertório dentro do qual você escolheu.",
+     "história":"Exemplo: uma greve pode aparecer numa fonte oficial como problema de ordem pública e, nas cartas dos trabalhadores, como luta por condições de vida. Nenhuma fonte deve ser aceita automaticamente como ‘a história inteira’; o trabalho histórico compara contexto, autoria, interesse e evidência.",
+     "literatura":"Exemplo: um narrador diz que está perfeitamente calmo enquanto sua linguagem fica cada vez mais fragmentada e obsessiva. O leitor pode desconfiar dele não porque ‘sentiu’, mas porque a própria forma do texto cria evidências para essa leitura.",
+     "finanças":"Exemplo: um celular de R$ 1.200 à vista ou 12 parcelas de R$ 120. A parcela parece menor, mas o total vira R$ 1.440. Antes de decidir, ainda falta perguntar se os R$ 1.200 fariam falta para algo mais importante e qual é o custo de abrir mão dessa alternativa.",
+     "ideias":"Exemplo: ‘regras devem sempre ser obedecidas’. Parece claro até surgir uma regra injusta. O caso-limite não destrói automaticamente a ideia; ele obriga a reformulá-la: quais regras, em quais condições e com qual justificativa?"
+   };
+   if(developIntent&&previousGhost){
+     return topicDevelop[topic]+" Se quiser continuar daqui, eu posso agora defender essa ideia, atacá-la com uma objeção ou aplicar num caso concreto.";
+   }
+   if(exampleIntent&&previousGhost){
+     return topicExample[topic]+" Agora temos algo concreto para testar, em vez de ficar girando em frases abstratas.";
+   }
+   if(objectionIntent&&previousGhost){
+     return "Então eu vou fazer o papel do opositor, sem repetir sua resposta. "+({
+       "ética":"Uma objeção é que abrir exceções com base nas consequências pode permitir que cada pessoa justifique o próprio interesse dizendo que ‘era para um bem maior’. Como impedir esse abuso?",
+       "conhecimento":"Uma objeção é que exigir justificações cada vez mais fortes pode levar a uma regressão infinita: toda razão precisaria de outra razão. Em algum ponto, em que confiamos?",
+       "liberdade":"Uma objeção é que até a capacidade de ‘refletir sobre as influências’ foi formada por outras influências. Se isso for verdade, chamar essa reflexão de autonomia resolve o problema ou apenas o empurra um passo para trás?",
+       "justiça":"Uma objeção é que adaptar regras a diferenças individuais pode tornar o critério imprevisível ou favorecer quem consegue reivindicar melhor uma exceção. Como preservar equidade sem perder imparcialidade?",
+       "sociedade":"Uma objeção é que explicar demais pelo contexto social pode apagar responsabilidade individual. Em que momento a influência deixa de explicar e começa a virar desculpa?",
+       "história":"Uma objeção é que reconhecer múltiplas interpretações não significa que todas sejam igualmente boas. Algumas ignoram fontes ou distorcem evidências. Que critério separa interpretação legítima de invenção?",
+       "literatura":"Uma objeção é que aceitar muitas leituras pode virar ‘qualquer coisa vale’. O limite deveria estar nas evidências do texto: até onde sua interpretação consegue apontá-las?",
+       "finanças":"Uma objeção é que a decisão matematicamente mais econômica nem sempre é a melhor para a vida da pessoa. Como incluir bem-estar e urgência sem transformar qualquer gasto em justificável?",
+       "ideias":"Minha objeção seria simples: qual evidência faria você abandonar essa ideia? Se a resposta for ‘nenhuma’, talvez estejamos diante de uma crença protegida contra qualquer teste."
+     })[topic];
+   }
+
    if(/^(depende|depende disso|depende da situacao|depende da situação)[.!?]*$/.test(n)||n.startsWith("depende ")){
      return "Esse ‘depende’ é importante: você saiu de uma regra absoluta e colocou um critério no meio. "+topicInsight[topic]+" Então a conversa fica mais precisa se descobrirmos: depende exatamente de quê?";
    }
@@ -494,7 +539,7 @@ function segredos(){
      return "Entendi sua posição: “"+claim.slice(0,125).replace(/[.!?]+$/,"")+"”. "+topicInsight[topic]+" Agora quero testar a força dela: qual seria a melhor objeção que alguém poderia fazer contra essa ideia?";
    }
    if(short&&previousGhost&&previousGhost.content.includes("?")&&raw.length>2&&!n.endsWith("?")){
-     return "Peguei o que você respondeu. "+topicInsight[topic]+" Em vez de mudar de assunto, vou continuar exatamente desse ponto: o que na sua resposta é mais importante — o exemplo, a consequência ou o princípio por trás dela?";
+     return topicInsight[topic]+" Vou avançar um passo, não repetir: escolha o ponto que você quer testar agora — um exemplo concreto, uma objeção forte ou a consequência dessa ideia.";
    }
 
    const questions={
@@ -720,7 +765,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  function beginGhostDraft(){
    const item=document.createElement("article");
    item.className="secretMsg fromGhost secretMsgStreaming";
-   item.innerHTML='<div class="secretMsgAvatar">👻</div><div class="secretMsgBody"><b>Amigo da Névoa</b><p>…</p></div>';
+   item.innerHTML='<div class="secretMsgAvatar" aria-hidden="true">✦</div><div class="secretMsgBody"><b>Amigo da Névoa</b><p>…</p></div>';
    log.appendChild(item);log.scrollTop=log.scrollHeight;
    const p=item.querySelector("p");
    return{
@@ -759,20 +804,20 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  $("#secretVoiceToggle").onclick=()=>{
    voiceOn=!voiceOn;
    try{localStorage.setItem("nevoaFriendVoice",voiceOn?"on":"off")}catch(e){}
-   $("#secretVoiceToggle").textContent=voiceOn?"🔊 Voz ligada":"🔇 Voz desligada";
+   $("#secretVoiceToggle").textContent=voiceOn?"🔊":"🔇";
    if(!voiceOn&&"speechSynthesis" in window)window.speechSynthesis.cancel();
    if(!voiceOn)stopTalking();
  };
- $("#secretVoiceToggle").textContent=voiceOn?"🔊 Voz ligada":"🔇 Voz desligada";
+ $("#secretVoiceToggle").textContent=voiceOn?"🔊":"🔇";
  const deepToggle=$("#secretDeepToggle");
  if(deepToggle){
    deepToggle.onclick=()=>{
      deepMode=!deepMode;
-     deepToggle.textContent=deepMode?"🕯️ Reflexão profunda":"⚡ Conversa ágil";
+     deepToggle.textContent=deepMode?"🕯️":"⚡";
      if(deepMode){
        setStatus("modo profundo • carregando só agora","busy");
        bubbleText("He-he… acendi a lanterna grande. Esse modo pensa mais fundo, mas pode demorar.");
-       try{ensureLocalAIWorker().postMessage({type:"preload"})}catch(e){localAIFailed=true;deepMode=false;deepToggle.textContent="⚡ Conversa ágil";setStatus("⚡ conversa ágil • pronta","ready")}
+       try{ensureLocalAIWorker().postMessage({type:"preload"})}catch(e){localAIFailed=true;deepMode=false;deepToggle.textContent="⚡";setStatus("⚡ conversa ágil • pronta","ready")}
      }else{
        setStatus("⚡ conversa ágil • pronta","ready");
        bubbleText("Voltei ao modo ágil. Respostas rápidas, conversa contínua.");
