@@ -242,14 +242,14 @@ $("#fullMap").onclick=async()=>{try{if(!document.fullscreenElement)await vp.requ
 requestAnimationFrame(()=>{if(innerWidth<760)center()});
 }
 function segredos(){
- shell("Segredos da Mansão","No cemitério vive o Amigo da Névoa: uma IA de conversa para pensar junto sobre filosofia, história, literatura, sociologia e educação financeira.",`<section class="section secretSection"><div class="wrap"><div class="secretFriendLayout">
+ shell("Segredos da Mansão","No cemitério vive o Amigo da Névoa: um personagem conversacional com voz, perguntas e respostas sobre filosofia, história, literatura, sociologia e educação financeira.",`<section class="section secretSection"><div class="wrap"><div class="secretFriendLayout">
    <aside class="secretStage panel secretFriendStage">
      <div class="secretGhostScene">
        <div class="secretBubble" id="secretGhostLine">He-he! Agora eu prefiro uma boa conversa a um enigma.</div>
        <img class="secretGhost" id="secretGhost" src="assets/segredos/fantasma-talk-00.webp" alt="Amigo da Névoa, fantasma de conversa do Portal">
      </div>
      <div class="secretFriendIdentity">
-       <div class="eyebrow">Amigo da Névoa • IA de conversa</div>
+       <div class="eyebrow">Amigo da Névoa • conversa encantada</div>
        <h2>Um parceiro para trocar ideias.</h2>
        <p>Converse, pergunte, discorde e pense em voz alta. Eu gosto de filosofia, história, literatura, sociologia e educação financeira.</p>
        <div class="secretFriendControls">
@@ -257,7 +257,7 @@ function segredos(){
          <button class="btn subtle" id="secretMusicToggle" type="button" title="Conversas Entre Lápides">🎵 Trilha ligada</button>
          <button class="btn subtle" id="secretClearChat" type="button">↻ Nova conversa</button>
        </div>
-       <small class="secretFriendTransparency">Sou uma IA em forma de personagem. O histórico não é salvo no seu perfil; ele fica nesta sessão apenas para dar continuidade à conversa.</small>
+       <small class="secretFriendTransparency">Sou um personagem conversacional do Portal. Minhas respostas funcionam no próprio navegador, sem chave de API; o histórico fica apenas nesta sessão.</small>
      </div>
    </aside>
 
@@ -417,26 +417,106 @@ function segredos(){
    busy=on;send.disabled=on;mic.disabled=on;
    send.textContent=on?"Pensando...":"Enviar";
    if(on){setStatus("pensando na névoa...","busy");showGhostPose(lanternSrc,2600)}
-   else{setStatus(portalSession()?"IA conectada":"entre no Portal",portalSession()?"ready":"offline");stopTalking()}
+   else{setStatus("conversa local • pronta","ready");stopTalking()}
  }
  async function askFriend(message){
-   const token=portalSession();
-   if(!token)throw Object.assign(new Error("Entre no Portal para conversar comigo. Assim eu sei que você é um explorador daqui."),{code:"login_required"});
-   const recent=history.slice(0,-1).slice(-10);
-   const res=await fetch(FRIEND_AI_URL,{
-     method:"POST",
-     headers:{"apikey":FRIEND_AI_KEY,"Content-Type":"application/json","Accept":"application/json"},
-     body:JSON.stringify({sessionToken:token,message:message,history:recent})
-   });
-   let data={};try{data=await res.json()}catch(e){}
-   if(!res.ok){
-     const code=data.error||"friend_ai_error";
-     const friendly=code==="setup_required"
-       ?"O Amigo da Névoa está pronto, mas a IA online ainda precisa ser conectada no servidor."
-       :(data.message||"A névoa ficou espessa demais por alguns instantes.");
-     throw Object.assign(new Error(friendly),{code});
+   const raw=String(message||"").trim();
+   const n=raw.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+   const pick=a=>a[Math.floor(Math.random()*a.length)];
+   const has=(...words)=>words.some(w=>n.includes(w));
+   const questions={
+     filosofia:[
+       "Se ninguém pudesse descobrir sua escolha, você ainda faria o que considera certo?",
+       "Uma opinião continua sendo sua quando nasceu de algo que todo mundo ao redor repete?",
+       "O que vale mais: ter certeza ou saber explicar por que você pensa assim?",
+       "Se uma mentira evita sofrimento, ela deixa de ser errada?"
+     ],
+     historia:[
+       "Quando estudamos uma revolução, devemos olhar primeiro para os líderes ou para a vida das pessoas comuns?",
+       "Por que duas pessoas podem contar o mesmo acontecimento histórico de maneiras diferentes?",
+       "Uma sociedade aprende com o passado ou apenas repete problemas com novas roupas?"
+     ],
+     literatura:[
+       "Um personagem precisa ser uma boa pessoa para ser um bom personagem?",
+       "Quando um final fica em aberto, isso empobrece a história ou convida o leitor a participar?",
+       "Uma obra antiga pode continuar falando de problemas atuais? Dê um exemplo."
+     ],
+     sociologia:[
+       "Quanto das nossas escolhas é realmente individual e quanto vem do grupo em que vivemos?",
+       "Uma regra social precisa estar escrita para influenciar nosso comportamento?",
+       "Por que algo considerado normal em um grupo pode parecer estranho em outro?"
+     ],
+     financas:[
+       "Se você recebe R$ 100 e quer muito algo de R$ 80, que perguntas faria antes de comprar?",
+       "Qual é a diferença entre querer uma coisa e precisar dela?",
+       "Guardar dinheiro sempre significa deixar de aproveitar o presente?"
+     ]
+   };
+   const topicQuestion=topic=>{
+     const q=pick(questions[topic]);
+     const names={filosofia:"filosófica",historia:"histórica",literatura:"literária",sociologia:"sociológica",financas:"financeira"};
+     return "He-he! Então vamos de conversa "+names[topic]+". "+q;
+   };
+
+   if(has("oi","ola","bom dia","boa tarde","boa noite","e ai","salve")){
+     return pick([
+       "Opa! A lápide estava confortável, mas uma boa conversa é melhor. Quer filosofia, história, literatura, sociologia ou educação financeira?",
+       "He-he! Bem-vindo ao meu cantinho da névoa. Escolha um assunto ou me faça uma pergunta.",
+       "Olá! Prometo não assombrar sua nota. Quer responder uma pergunta curiosa ou me perguntar alguma coisa?"
+     ]);
    }
-   return data.reply||"Eu fiquei sem palavras por um instante. Tenta me dizer isso de outro jeito?";
+   if(has("quem e voce","quem é você","seu nome","como voce se chama","como você se chama")){
+     return "Eu sou o Amigo da Névoa, o fantasma tagarela deste cemitério. Fui feito para puxar conversas, lançar perguntas e explicar ideias sem precisar de internet ou chave de IA.";
+   }
+   if(has("filosofia","filosofico","filosófico","socrates","sócrates","platao","platão","aristoteles","aristóteles","descartes","hume")){
+     if(has("o que e filosofia","o que é filosofia")) return "Filosofia é investigar ideias e problemas usando perguntas, conceitos e argumentos. Em vez de aceitar o óbvio de primeira, ela pergunta: por quê? como sabemos? poderia ser diferente? Agora eu devolvo: qual ideia parece óbvia para você até começarmos a questioná-la?";
+     if(has("socrates","sócrates")) return "Sócrates ficou famoso por investigar ideias por meio de perguntas e diálogo. Em vez de simplesmente entregar respostas, ele pressionava definições e justificativas. Então aqui vai uma bem socrática: o que é justiça para você — e sua definição funciona em todos os casos?";
+     if(has("descartes")) return "Descartes usou a dúvida como método: queria descobrir se existia alguma certeza capaz de resistir ao questionamento. Daí vem o famoso ponto de partida ligado ao pensamento. Mas me diga: duvidar de tudo ajuda a pensar melhor ou pode nos paralisar?";
+     if(has("hume")) return "Hume desconfiava de certezas que ultrapassassem nossa experiência. Ele discutiu hábitos, causalidade e a força das impressões. Um desafio humeano: quando vemos duas coisas acontecerem sempre juntas, isso prova que uma causa a outra?";
+     return topicQuestion("filosofia");
+   }
+   if(has("historia","história","revolucao","revolução","imperio","império","guerra","idade media","idade média")){
+     if(has("o que e historia","o que é história")) return "História não é só decorar datas. É investigar mudanças, permanências, conflitos e experiências humanas a partir de vestígios e fontes. Agora pense comigo: uma fonte histórica conta o passado inteiro ou apenas um ponto de vista sobre ele?";
+     return topicQuestion("historia");
+   }
+   if(has("literatura","livro","poema","poesia","romance","conto","personagem","fernando pessoa","machado")){
+     if(has("fernando pessoa")) return "Fernando Pessoa transformou a própria escrita em muitas vozes, inclusive por meio de heterônimos com estilos e visões de mundo diferentes. Pergunta de fantasma curioso: escrever com outra identidade pode revelar partes de nós que a nossa voz habitual esconde?";
+     return topicQuestion("literatura");
+   }
+   if(has("sociologia","sociedade","cultura","preconceito","desigualdade","grupo social","norma social")){
+     if(has("o que e sociologia","o que é sociologia")) return "Sociologia estuda relações sociais, instituições, grupos, desigualdades e os padrões que aparecem na vida coletiva. Ela pega coisas que parecem apenas individuais e pergunta o que a sociedade tem a ver com elas. Por exemplo: até onde nossas escolhas são realmente só nossas?";
+     return topicQuestion("sociologia");
+   }
+   if(has("educacao financeira","educação financeira","dinheiro","economizar","poupar","juros","divida","dívida","orcamento","orçamento")){
+     if(has("juros")) return "Juros são o preço do dinheiro ao longo do tempo: podem trabalhar contra você numa dívida ou a seu favor em certos investimentos. O detalhe importante é observar taxa e prazo. Quer um exemplo simples com R$ 100?";
+     if(has("divida","dívida")) return "Para entender uma dívida, vale olhar valor total, juros, parcelas, prazo e quanto ela ocupa da renda. A primeira pergunta não é só 'cabe a parcela?', mas 'quanto isso custa no total?'.";
+     return topicQuestion("financas");
+   }
+   if(has("nao sei","não sei","sei la","sei lá","talvez")){
+     return pick([
+       "Não saber já é um ótimo começo. Escolha uma pista: você quer pensar sobre certo e errado, sociedade, passado, livros ou dinheiro?",
+       "He-he! Resposta permitida neste cemitério. Vamos diminuir a névoa: me diga uma coisa que você acha verdadeira, mesmo sem ter certeza do motivo.",
+       "Então eu facilito: você prefere uma pergunta fácil, uma estranha ou uma que dê discussão?"
+     ]);
+   }
+   if(n.endsWith("?")||has("por que","porque","como ","qual ","quem ","quando ","onde ")){
+     return pick([
+       "Boa pergunta. Eu consigo conversar melhor quando ela encosta nos meus temas: filosofia, história, literatura, sociologia e educação financeira. Qual desses lados combina mais com o que você perguntou?",
+       "Essa pergunta abriu uma portinha na névoa. Antes de eu responder, qual é a sua hipótese? Pode ser uma frase curta; eu continuo a partir dela.",
+       "Vamos investigar em vez de chutar. O que você já sabe sobre isso? A partir daí eu consigo puxar a próxima pergunta."
+     ]);
+   }
+
+   const lastGhost=[...history].reverse().find(x=>x.role==="assistant");
+   if(lastGhost){
+     return pick([
+       "Interessante. O que na sua resposta é uma razão e o que é apenas uma impressão? Dê um exemplo.",
+       "Gostei do caminho. Agora vou complicar um pouquinho: alguém poderia discordar de você por qual motivo?",
+       "He-he! A névoa se mexeu. Se eu invertesse a situação, sua resposta continuaria valendo?",
+       "Boa. Tente defender essa ideia com um exemplo concreto — depois eu faço uma objeção."
+     ]);
+   }
+   return "Gostei do começo. Me conte um pouco mais, ou escolha um dos meus terrenos favoritos: filosofia, história, literatura, sociologia ou educação financeira.";
  }
  async function sendMessage(text){
    const message=String(text||"").trim();if(!message||busy)return;
@@ -487,7 +567,7 @@ function segredos(){
    mic.onclick=()=>{$("#secretChatHint").textContent="O reconhecimento de voz não está disponível neste navegador. A voz do fantasma ainda funciona normalmente."};
  }
  renderHistory();
- setStatus(portalSession()?"IA conectada":"entre no Portal",portalSession()?"ready":"offline");
+ setStatus("conversa local • pronta","ready");
  scheduleBlink();
  if(musicOn){
    tryPlayMusic();
