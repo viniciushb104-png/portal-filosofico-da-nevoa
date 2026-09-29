@@ -687,6 +687,8 @@ function continueExploring(){
 async function finishGame(){
  closeScene();renderHUD();
  const [title,text]=dominantEnding();
+ window.NevoaNotify?.phase('Capítulo I de Paradoxia concluído',0,'Seu final foi registrado: '+title+'.','🎭','phase:paradoxia:chapter1');
+ window.NevoaNotify?.achievement('Cidadão de Paradoxia','Você concluiu o primeiro capítulo do Reino das Escolhas.','🎭','achievement:rpgParadoxia');
  $('#endingTitle').textContent=title;$('#endingText').textContent=text;
  $('#endingXP').textContent=state.score+' XP';
  $('#endingIdeas').textContent=state.history.length+' ideias';
