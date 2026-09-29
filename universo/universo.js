@@ -407,7 +407,13 @@ function segredos(){
      body:JSON.stringify({sessionToken:token,message:message,history:recent})
    });
    let data={};try{data=await res.json()}catch(e){}
-   if(!res.ok)throw Object.assign(new Error(data.message||"A névoa ficou espessa demais por alguns instantes."),{code:data.error||"friend_ai_error"});
+   if(!res.ok){
+     const code=data.error||"friend_ai_error";
+     const friendly=code==="setup_required"
+       ?"O Amigo da Névoa está pronto, mas a IA online ainda precisa ser conectada no servidor."
+       :(data.message||"A névoa ficou espessa demais por alguns instantes.");
+     throw Object.assign(new Error(friendly),{code});
+   }
    return data.reply||"Eu fiquei sem palavras por um instante. Tenta me dizer isso de outro jeito?";
  }
  async function sendMessage(text){
