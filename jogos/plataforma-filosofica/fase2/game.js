@@ -1,5 +1,6 @@
 (() => {
 'use strict';
+try{localStorage.setItem('nevoaLastActivityV1',JSON.stringify({kind:'labyrinth',phase:2,title:'Fase 2 — Platão',ts:Date.now()}))}catch(e){}
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height,$=s=>document.querySelector(s);
 const keys={left:false,right:false,jump:false,interact:false,lantern:false};
 let started=false,paused=true,won=false,last=0,cameraX=0,interactLatch=false,lanternLatch=false,audioCtx=null,sound=false;
