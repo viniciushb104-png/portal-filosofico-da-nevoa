@@ -711,3 +711,21 @@ body[data-page="segredos"] .secretChatHint{
   body[data-page="segredos"] .secretSend{grid-column:2;justify-self:end;min-height:40px;padding:.55rem 1rem}
   body[data-page="segredos"] .secretChatHint{padding-left:0}
 }
+
+
+/* V16 — atuação expressiva do Amigo da Névoa */
+body[data-page="segredos"] .secretGhost{
+  image-rendering:auto;
+  will-change:transform,filter;
+}
+body[data-page="segredos"] .secretGhost.secretGhostPop{
+  animation:secretGhostReact .42s cubic-bezier(.2,.85,.25,1.2),secretGhostFloat 3.2s ease-in-out .42s infinite;
+}
+@keyframes secretGhostReact{
+  0%{transform:translateY(4px) scale(.94) rotate(-1deg);filter:drop-shadow(0 18px 28px rgba(0,0,0,.55)) drop-shadow(0 0 18px rgba(119,232,255,.16))}
+  58%{transform:translateY(-9px) scale(1.045) rotate(1deg);filter:drop-shadow(0 20px 30px rgba(0,0,0,.55)) drop-shadow(0 0 34px rgba(171,106,255,.34))}
+  100%{transform:translateY(0) scale(1) rotate(-.5deg);filter:drop-shadow(0 18px 28px rgba(0,0,0,.55)) drop-shadow(0 0 24px rgba(119,232,255,.20))}
+}
+@media (prefers-reduced-motion:reduce){
+  body[data-page="segredos"] .secretGhost.secretGhostPop{animation:none}
+}
