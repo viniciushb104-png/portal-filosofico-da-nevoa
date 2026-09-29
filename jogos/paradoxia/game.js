@@ -149,6 +149,7 @@ const fresh=()=>({
 let state=fresh();
 let presenceStop=null;
 let cloudTimer=null;
+let missionOnline={};
 
 function toast(msg){
  const t=$('#toast');t.textContent=msg;t.classList.add('show');
@@ -205,7 +206,7 @@ function sceneDone(sc){
  return false;
 }
 function saveLocal(){
- localStorage.setItem(SAVE_KEY,JSON.stringify(state));updatePortalScore();setSaveState(false);
+ localStorage.setItem(SAVE_KEY,JSON.stringify(state));updatePortalScore();setSaveState(false);renderMissionJournal();
  clearTimeout(cloudTimer);
  cloudTimer=setTimeout(saveCloud,220);
 }
@@ -393,6 +394,32 @@ function renderLog(){
  if(!state.history.length){box.innerHTML='<span>Nenhum conceito registrado ainda.</span>';return}
  box.innerHTML=state.history.map(x=>'<span>✦ '+x+'</span>').join('');
 }
+function renderMissionJournal(){
+ const story=$('#missionJournalStory'),realm=$('#missionJournalRealm');
+ if(!story||!realm)return;
+ const storyDone=scenes.filter(sceneDone).length;
+ const storyCount=$('#missionJournalStoryCount');if(storyCount)storyCount.textContent=storyDone+'/'+scenes.length;
+ story.innerHTML=scenes.map((sc,i)=>{
+   const done=sceneDone(sc),active=i===state.sceneIndex&&!done;
+   return '<article class="journalMission '+(done?'done ':active?'active ':'')+'"><span>'+sc.icon+'</span><div><b>'+sc.location+'</b><small>'+sc.concept+'</small></div><em>'+(done?'✓ Concluída':active?'◈ Em foco':'◇ Pendente')+'</em></article>';
+ }).join('');
+ const missions=window.ParadoxiaMissions?.places||[];
+ const doneCount=missions.filter(m=>Number(missionOnline[m.key]?.best_score||0)>0).length;
+ const realmCount=$('#missionJournalRealmCount');if(realmCount)realmCount.textContent=doneCount+'/'+missions.length;
+ realm.innerHTML=missions.map(m=>{
+   const row=missionOnline[m.key]||{},done=Number(row.best_score||0)>0,enabled=row.enabled!==false;
+   return '<a class="journalMission realm '+(done?'done ':enabled?'':'locked ')+'" href="'+m.href+'"><span>'+m.icon+'</span><div><b>'+m.title+'</b><small>'+m.theme+'</small></div><em>'+(done?'🏆 '+Number(row.best_score||0)+' pts':enabled?'Entrar →':'Em produção')+'</em></a>';
+ }).join('');
+}
+async function syncMissionJournal(){
+ renderMissionJournal();
+ if(!window.NevoaOnline?.getSession()||!window.NevoaOnline.paradoxiaMissions)return;
+ try{
+   const rows=await window.NevoaOnline.paradoxiaMissions();
+   missionOnline=Object.fromEntries((rows||[]).map(r=>[r.mission_key,r]));
+   renderMissionJournal();
+ }catch(e){}
+}
 function renderScene(){
  const sc=scene();hideFeedback();
  $('#sceneIcon').textContent=sc.icon;$('#sceneType').textContent=sc.badge;
@@ -439,7 +466,7 @@ function renderScene(){
  }
  renderHUD();renderMap();
 }
-function render(){renderHUD();renderMap();renderLog();renderScene();renderWorld()}
+function render(){renderHUD();renderMap();renderLog();renderMissionJournal();renderScene();renderWorld()}
 
 
 function openScene(){
@@ -568,8 +595,15 @@ function worldFrame(ts){
      dx/=len;dy/=len;
      const nx=Math.max(35,Math.min(WORLD.w-35,state.world.x+dx*speed*dt));
      const ny=Math.max(60,Math.min(WORLD.h-35,state.world.y+dy*speed*dt));
+     let moved=false;
      if(isWalkable(nx,ny)){
-       state.world.x=nx;state.world.y=ny;
+       state.world.x=nx;state.world.y=ny;moved=true;
+     }else{
+       // Desliza pela trilha quando a diagonal tenta atravessar a borda da área caminhável.
+       if(isWalkable(nx,state.world.y)){state.world.x=nx;moved=true}
+       if(isWalkable(state.world.x,ny)){state.world.y=ny;moved=true}
+     }
+     if(moved){
        $('#worldPlayer')?.classList.remove('blocked');
      }else{
        $('#worldPlayer')?.classList.add('blocked');
@@ -603,12 +637,15 @@ function setupWorldControls(){
  });
  window.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.body.classList.contains('sceneOpen'))closeScene();else closeWorldDialogue()}});
  window.addEventListener('keyup',e=>{if(keyMap[e.key])setMove(keyMap[e.key],false)});
- $$('.dpad button[data-move]').forEach(b=>{
+ $('.dpad button[data-move]').forEach(b=>{
    const k=b.dataset.move;
-   const down=e=>{e.preventDefault();setMove(k,true)};
-   const up=e=>{e.preventDefault();setMove(k,false)};
-   b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up);
+   const down=e=>{e.preventDefault();try{b.setPointerCapture?.(e.pointerId)}catch(_){}setMove(k,true)};
+   const up=e=>{e.preventDefault();try{b.releasePointerCapture?.(e.pointerId)}catch(_){}setMove(k,false)};
+   b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);
  });
+ const clearMovement=()=>{Object.keys(moveKeys).forEach(k=>moveKeys[k]=false);walkFrame=0;lastWalkFrameAt=0;renderWorld()};
+ window.addEventListener('blur',clearMovement);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)clearMovement()});
  $('#interactMobile')?.addEventListener('click',interactWorld);
  $('#sceneClose')?.addEventListener('click',closeScene);
  $('#worldDialogueClose')?.addEventListener('click',closeWorldDialogue);
@@ -714,6 +751,7 @@ async function init(){
  renderClasses();
  await loadInitial();
  await initAccount();
+ await syncMissionJournal();
  $('#guestWarning').hidden=!!window.NevoaOnline?.getSession();
  $('#abilityBtn').onclick=useAbility;
  $('#replayBtn').onclick=replay;
