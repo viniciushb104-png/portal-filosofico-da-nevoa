@@ -2,6 +2,7 @@
 'use strict';
 const C=window.PHASE_CONFIG;
 if(!C) throw new Error('PHASE_CONFIG ausente');
+try{localStorage.setItem('nevoaLastActivityV1',JSON.stringify({kind:'labyrinth',phase:Number(C.phase)||3,title:'Fase '+C.phase+' — '+(C.shortName||'Labirinto'),ts:Date.now()}))}catch(e){}
 const $=s=>document.querySelector(s);
 const canvas=$('#game'),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
 const keys={left:false,right:false,jump:false,ability:false,interact:false};
