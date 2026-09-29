@@ -439,7 +439,7 @@ function segredos(){
      /(liberdade|livre|escolha|determin|destino)/.test(context)?"liberdade":
      /(justica|justiça|igualdade|equidade|direito)/.test(context)?"justiça":
      /(sociedade|cultura|grupo|preconceito|desigualdade|norma social)/.test(context)?"sociedade":
-     /(historia|história|passado|revolucao|revolução|guerra|imperio|império)/.test(context)?"história":
+     /(historia|histórico|historico|histórica|historica|passado|revolucao|revolução|guerra|imperio|império)/.test(context)?"história":
      /(literatura|poema|poesia|romance|conto|personagem|livro)/.test(context)?"literatura":
      /(dinheiro|juros|divida|dívida|orcamento|orçamento|comprar|economizar)/.test(context)?"finanças":"ideias";
    const topicInsight={
@@ -453,6 +453,23 @@ function segredos(){
      "finanças":"Em educação financeira, a decisão melhora quando saímos do 'cabe a parcela?' e olhamos custo total, prazo, prioridade e o que estamos deixando de fazer com esse dinheiro.",
      "ideias":"O pedaço mais interessante da sua fala é o critério por trás dela: o que faria essa ideia continuar valendo quando mudamos o exemplo?"
    };
+
+   // Intenções dos botões de tema: responda ao pedido, não devolva uma pergunta genérica.
+   if(/episodio historico|episódio histórico|episodio histórico|episódio historico/.test(raw.toLowerCase())||(/\\bconte\\b/.test(n)&&/historic/.test(n))){
+     return "Então vem comigo para 1791, em Saint-Domingue, colônia francesa no Caribe. Uma grande revolta de pessoas escravizadas iniciou o processo que, depois de anos de guerra, levou à independência do Haiti em 1804. Isso importa porque colocou uma contradição enorme diante do mundo atlântico: como falar em liberdade e igualdade enquanto a escravidão continuava existindo? Agora a parte interessante: você acha que ideias de liberdade mudam a história sozinhas, ou precisam de pessoas organizadas para ganhar força?";
+   }
+   if(/pergunta filosofic|conversar sobre uma pergunta filosofic/.test(n)){
+     return "He-he… então vou começar com uma que parece simples e fica perigosa quando a gente mexe nela: se uma regra é injusta, desobedecê-la pode ser a atitude mais justa? Pense primeiro no critério: quem decide que a regra é injusta — e como essa pessoa justificaria isso para quem discorda?";
+   }
+   if(/conversar sobre literatura/.test(n)&&/pergunta/.test(n)){
+     return "Vamos de literatura. Um personagem precisa ser admirável para ser um grande personagem? Pense em alguém de um livro, conto, filme ou peça que faça coisas questionáveis, mas ainda assim seja interessante. O que prende você nele: identificação, curiosidade, conflito ou outra coisa?";
+   }
+   if(/tema de sociologia/.test(n)&&/cotidiano/.test(n)){
+     return "Vamos começar por algo cotidiano: o jeito como nos vestimos parece uma escolha pessoal, mas família, grupo, trabalho, escola, moda e condição econômica também influenciam. A sociologia entra justamente nessa passagem entre o individual e o social. Escolha uma coisa que você faz 'porque gosta' — música, roupa, gíria, comida — e vamos investigar quanto dessa preferência nasceu só de você.";
+   }
+   if(/educacao financeira/.test(n)&&/enriquecer rapido/.test(n)){
+     return "Perfeito: sem fórmula mágica. Educação financeira começa menos com 'como ficar rico?' e mais com entender escolhas, prazo, risco e custo. Um exemplo: uma compra cabe na parcela, mas isso não significa que ela cabe no orçamento — o custo total e o que você deixa de fazer com aquele dinheiro também importam. Quer testar isso com uma compra fictícia de R$ 300?";
+   }
 
    if(/^(depende|depende disso|depende da situacao|depende da situação)[.!?]*$/.test(n)||n.startsWith("depende ")){
      return "Esse ‘depende’ é importante: você saiu de uma regra absoluta e colocou um critério no meio. "+topicInsight[topic]+" Então a conversa fica mais precisa se descobrirmos: depende exatamente de quê?";
@@ -524,14 +541,14 @@ function segredos(){
    if(has("quem e voce","quem é você","seu nome","como voce se chama","como você se chama")){
      return "Eu sou o Amigo da Névoa, o fantasma tagarela deste cemitério. Fui feito para puxar conversas, lançar perguntas e explicar ideias sem precisar de internet ou chave de IA.";
    }
-   if(has("filosofia","filosofico","filosófico","socrates","sócrates","platao","platão","aristoteles","aristóteles","descartes","hume")){
+   if(has("filosofia","filosofico","filosófico","filosofica","filosófica","socrates","sócrates","platao","platão","aristoteles","aristóteles","descartes","hume")){
      if(has("o que e filosofia","o que é filosofia")) return "Filosofia é investigar ideias e problemas usando perguntas, conceitos e argumentos. Em vez de aceitar o óbvio de primeira, ela pergunta: por quê? como sabemos? poderia ser diferente? Agora eu devolvo: qual ideia parece óbvia para você até começarmos a questioná-la?";
      if(has("socrates","sócrates")) return "Sócrates ficou famoso por investigar ideias por meio de perguntas e diálogo. Em vez de simplesmente entregar respostas, ele pressionava definições e justificativas. Então aqui vai uma bem socrática: o que é justiça para você — e sua definição funciona em todos os casos?";
      if(has("descartes")) return "Descartes usou a dúvida como método: queria descobrir se existia alguma certeza capaz de resistir ao questionamento. Daí vem o famoso ponto de partida ligado ao pensamento. Mas me diga: duvidar de tudo ajuda a pensar melhor ou pode nos paralisar?";
      if(has("hume")) return "Hume desconfiava de certezas que ultrapassassem nossa experiência. Ele discutiu hábitos, causalidade e a força das impressões. Um desafio humeano: quando vemos duas coisas acontecerem sempre juntas, isso prova que uma causa a outra?";
      return topicQuestion("filosofia");
    }
-   if(has("historia","história","revolucao","revolução","imperio","império","guerra","idade media","idade média")){
+   if(has("historia","história","historico","histórico","historica","histórica","revolucao","revolução","imperio","império","guerra","idade media","idade média")){
      if(has("o que e historia","o que é história")) return "História não é só decorar datas. É investigar mudanças, permanências, conflitos e experiências humanas a partir de vestígios e fontes. Agora pense comigo: uma fonte histórica conta o passado inteiro ou apenas um ponto de vista sobre ele?";
      return topicQuestion("historia");
    }
