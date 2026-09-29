@@ -12,3 +12,11 @@
 @media(max-width:1000px){.statsGrid{grid-template-columns:repeat(2,1fr)}.adminHeroGrid{grid-template-columns:1fr}.adminRow{grid-template-columns:1fr}.rowActions{justify-content:flex-start}.adminSeal{max-width:500px}}
 @media(max-width:720px){.adminTopIn{height:62px}.adminIdentity{display:none}.adminBack:last-child{display:none}.adminHero{padding-top:32px}.adminHero h1{font-size:48px}.statsGrid{grid-template-columns:1fr 1fr}.controlBar{align-items:stretch;flex-direction:column}.refreshAdmin{align-self:flex-start}.filterBar{display:grid;grid-template-columns:1fr}.filterBar label{min-width:0}.filterCount{margin-left:0}.adminPanel{padding:14px}.sealedCard{align-items:flex-start}.sealedSigil{width:58px;height:58px;flex-basis:58px;font-size:30px}.sealedCard h1{font-size:29px}}
 @media(max-width:480px){.statsGrid{grid-template-columns:1fr}.adminTabs{display:grid;grid-template-columns:1fr 1fr 1fr}.adminTab{padding:9px 7px;font-size:10px}.adminHero h1{font-size:42px}}
+/* V2 — hardening mobile */
+html,body{max-width:100%;overflow-x:hidden}
+@media(max-width:720px){
+ .adminPage{overflow-x:hidden}
+ .adminTopIn{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+ .filterBar input,.filterBar select{font-size:16px}
+ .adminTab,.refreshAdmin,.rowActions button,.gateActions a,.gateActions button{min-height:44px}
+}
