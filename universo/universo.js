@@ -256,7 +256,7 @@ function segredos(){
          <button class="btn subtle" id="secretVoiceToggle" type="button">🔊 Voz ligada</button>
          <button class="btn subtle" id="secretClearChat" type="button">↻ Nova conversa</button>
        </div>
-       <small class="secretFriendTransparency">Sou uma IA em forma de personagem. A conversa desta página fica apenas nesta sessão do navegador.</small>
+       <small class="secretFriendTransparency">Sou uma IA em forma de personagem. O histórico não é salvo no seu perfil; ele fica nesta sessão apenas para dar continuidade à conversa.</small>
      </div>
    </aside>
 
@@ -351,7 +351,7 @@ function segredos(){
  async function askFriend(message){
    const token=portalSession();
    if(!token)throw Object.assign(new Error("Entre no Portal para conversar comigo. Assim eu sei que você é um explorador daqui."),{code:"login_required"});
-   const recent=history.slice(-10);
+   const recent=history.slice(0,-1).slice(-10);
    const res=await fetch(FRIEND_AI_URL,{
      method:"POST",
      headers:{"apikey":FRIEND_AI_KEY,"Content-Type":"application/json","Accept":"application/json"},
