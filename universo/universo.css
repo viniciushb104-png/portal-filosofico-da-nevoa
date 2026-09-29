@@ -752,3 +752,188 @@ body[data-page="segredos"] .secretGhost.secretGhostPop{
   body[data-page="segredos"] .secretFriendStage .secretGhostScene{min-height:400px}
   body[data-page="segredos"] .secretGhost{width:min(108%,410px);max-height:410px}
 }
+
+
+/* V19 — Segredos da Mansão: composição cinematográfica e fantasma protagonista */
+body[data-page="segredos"] .hero{
+  padding:52px 0 24px;
+  background:
+    radial-gradient(ellipse at 50% 110%,rgba(110,224,255,.08),transparent 48%),
+    linear-gradient(180deg,rgba(7,4,11,.16),rgba(7,4,11,.52));
+}
+body[data-page="segredos"] .hero h1{
+  font-size:clamp(46px,6.8vw,76px);
+  letter-spacing:-.035em;
+}
+body[data-page="segredos"] .hero .lead{font-size:15px}
+body[data-page="segredos"] .secretSection{padding-top:10px}
+body[data-page="segredos"] .secretSection>.wrap{
+  width:min(1360px,calc(100% - 28px));
+}
+body[data-page="segredos"] .secretFriendLayout{
+  grid-template-columns:minmax(500px,1.08fr) minmax(430px,.92fr);
+  gap:clamp(18px,2.2vw,30px);
+  align-items:stretch;
+}
+body[data-page="segredos"] .secretFriendStage{
+  position:relative;
+  min-height:760px;
+  padding:0;
+  border-color:rgba(206,156,236,.42);
+  border-radius:28px;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 50% 38%,rgba(105,231,255,.16),transparent 31%),
+    radial-gradient(ellipse at 52% 48%,rgba(178,91,255,.16),transparent 48%),
+    linear-gradient(180deg,rgba(11,7,18,.36),rgba(9,5,15,.86));
+  box-shadow:
+    0 30px 90px rgba(0,0,0,.56),
+    inset 0 0 80px rgba(135,86,205,.08),
+    0 0 0 1px rgba(255,255,255,.025);
+}
+body[data-page="segredos"] .secretFriendStage:after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  left:9%;
+  right:9%;
+  bottom:205px;
+  height:110px;
+  pointer-events:none;
+  background:radial-gradient(ellipse,rgba(112,229,255,.18),rgba(154,91,219,.07) 42%,transparent 72%);
+  filter:blur(18px);
+}
+body[data-page="segredos"] .secretFriendStage .secretGhostScene{
+  position:relative;
+  z-index:1;
+  min-height:610px;
+  flex:1 1 auto;
+  padding-top:92px;
+  overflow:hidden;
+}
+body[data-page="segredos"] .secretGhost{
+  width:720px;
+  max-width:none;
+  max-height:650px;
+  scale:1.22;
+  transform-origin:center bottom;
+  filter:
+    drop-shadow(0 28px 34px rgba(0,0,0,.62))
+    drop-shadow(0 0 28px rgba(91,231,255,.27))
+    drop-shadow(0 0 58px rgba(188,94,255,.20));
+}
+body[data-page="segredos"] .secretBubble{
+  top:22px;
+  width:min(84%,470px);
+  padding:15px 19px;
+  font-size:.98rem;
+  line-height:1.48;
+  border-radius:20px;
+  background:linear-gradient(145deg,rgba(24,12,34,.96),rgba(10,7,17,.94));
+  border-color:rgba(226,190,255,.62);
+  box-shadow:0 16px 42px rgba(0,0,0,.48),0 0 32px rgba(118,229,255,.12);
+}
+body[data-page="segredos"] .secretFriendIdentity{
+  z-index:4;
+  margin:-32px 18px 18px;
+  padding:20px 22px 19px;
+  border:1px solid rgba(220,177,242,.26);
+  border-radius:21px;
+  background:linear-gradient(145deg,rgba(16,8,23,.91),rgba(9,6,15,.95));
+  box-shadow:0 18px 42px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+body[data-page="segredos"] .secretFriendIdentity .eyebrow{
+  color:#c9f5ff;
+}
+body[data-page="segredos"] .secretFriendIdentity h2{
+  font-size:clamp(1.65rem,2.2vw,2.25rem);
+  margin:.32rem 0 .45rem;
+}
+body[data-page="segredos"] .secretFriendIdentity p{
+  max-width:650px;
+  color:#e7ddeb;
+}
+body[data-page="segredos"] .secretFriendControls .btn{
+  border-radius:999px;
+  background:rgba(18,10,25,.74);
+}
+body[data-page="segredos"] .secretChatPanel{
+  min-height:760px;
+  border-radius:28px;
+  padding:clamp(19px,2.2vw,28px);
+  background:
+    radial-gradient(circle at 90% 0,rgba(139,77,191,.10),transparent 28%),
+    linear-gradient(155deg,rgba(19,10,27,.93),rgba(7,5,11,.95));
+  border-color:rgba(193,132,213,.34);
+}
+body[data-page="segredos"] .secretChatHead{
+  padding-bottom:5px;
+}
+body[data-page="segredos"] .secretChatHead h2{
+  font-size:clamp(1.55rem,2.25vw,2.25rem);
+}
+body[data-page="segredos"] .secretTopics button{
+  padding:9px 13px;
+  background:linear-gradient(180deg,rgba(43,22,55,.72),rgba(27,14,36,.72));
+}
+body[data-page="segredos"] .secretChatLog{
+  min-height:390px;
+  max-height:520px;
+  padding:20px 4px 12px;
+}
+body[data-page="segredos"] .secretMsgBody{
+  padding:12px 14px;
+  background:linear-gradient(145deg,rgba(28,15,38,.86),rgba(19,11,27,.82));
+}
+body[data-page="segredos"] .secretComposer{
+  padding-top:15px;
+}
+body[data-page="segredos"] .secretComposer textarea{
+  min-height:52px;
+  border-radius:18px;
+  background:rgba(7,5,11,.82);
+}
+@media(max-width:1050px){
+  body[data-page="segredos"] .secretFriendLayout{
+    grid-template-columns:minmax(420px,.98fr) minmax(400px,1.02fr);
+  }
+  body[data-page="segredos"] .secretGhost{width:650px;scale:1.16}
+}
+@media(max-width:900px){
+  body[data-page="segredos"] .secretFriendLayout{grid-template-columns:1fr}
+  body[data-page="segredos"] .secretFriendStage{min-height:720px}
+  body[data-page="segredos"] .secretFriendStage .secretGhostScene{min-height:570px}
+  body[data-page="segredos"] .secretGhost{width:650px;max-height:610px;scale:1.18}
+  body[data-page="segredos"] .secretChatPanel{min-height:650px}
+}
+@media(max-width:600px){
+  body[data-page="segredos"] .hero{padding:34px 0 18px}
+  body[data-page="segredos"] .hero h1{font-size:clamp(40px,13vw,58px)}
+  body[data-page="segredos"] .secretSection>.wrap{width:min(100% - 16px,1360px)}
+  body[data-page="segredos"] .secretFriendStage{min-height:610px;border-radius:23px}
+  body[data-page="segredos"] .secretFriendStage .secretGhostScene{
+    min-height:455px;
+    padding-top:82px;
+  }
+  body[data-page="segredos"] .secretGhost{
+    width:500px;
+    max-height:500px;
+    scale:1.12;
+  }
+  body[data-page="segredos"] .secretBubble{
+    top:14px;
+    width:min(91%,410px);
+    padding:12px 14px;
+    font-size:.9rem;
+  }
+  body[data-page="segredos"] .secretFriendIdentity{
+    margin:-22px 10px 10px;
+    padding:17px 16px;
+    border-radius:18px;
+  }
+  body[data-page="segredos"] .secretFriendIdentity h2{font-size:1.55rem}
+  body[data-page="segredos"] .secretFriendTransparency{font-size:.72rem}
+  body[data-page="segredos"] .secretChatPanel{min-height:610px;border-radius:23px}
+}
