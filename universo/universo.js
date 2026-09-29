@@ -572,7 +572,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  function ensureLocalAIWorker(){
    if(localAIWorker)return localAIWorker;
    if(!("Worker" in window)||!("gpu" in navigator))throw new Error("local_ai_unavailable");
-   localAIWorker=new Worker("amigo-nevoa-ai.js?v=2",{type:"module"});
+   localAIWorker=new Worker("amigo-nevoa-ai.js?v=3",{type:"module"});
    localAIWorker.onmessage=e=>{
      const d=e.data||{};
      if(d.type==="progress"){
@@ -585,6 +585,12 @@ NOTAS PEDAGÓGICAS RELEVANTES:
        setStatus("IA local • consciência desperta","ready");
        return;
      }
+     if(d.type==="chunk"){
+       const pending=localAIPending.get(d.id);
+       if(pending&&pending.onChunk)pending.onChunk(d.text||"");
+       return;
+     }
+     if(d.type==="preload_error"){localAIFailed=true;setStatus("modo leve • conversa disponível","ready");return}
      if(d.type==="result"||d.type==="error"){
        const pending=localAIPending.get(d.id);if(!pending)return;
        localAIPending.delete(d.id);
@@ -601,24 +607,24 @@ NOTAS PEDAGÓGICAS RELEVANTES:
    };
    return localAIWorker;
  }
- function askLocalAI(message){
+ function askLocalAI(message,onChunk){
    return new Promise((resolve,reject)=>{
      try{
        const worker=ensureLocalAIWorker();
        const id=++localAISeq;
-       localAIPending.set(id,{resolve,reject});
-       const prior=history.slice(0,-1).slice(-8).map(m=>({role:m.role,content:m.content}));
+       localAIPending.set(id,{resolve,reject,onChunk});
+       const prior=history.slice(0,-1).slice(-6).map(m=>({role:m.role,content:m.content}));
        const system=LOCAL_AI_SYSTEM.replace("{KNOWLEDGE}",knowledgeFor(message));
        worker.postMessage({type:"generate",id,message,history:prior,system});
      }catch(err){reject(err)}
    });
  }
- async function askFriend(message){
+ async function askFriend(message,onChunk){
    const safe=safetyReply(message);if(safe)return safe;
    if(!localAIFailed&&"gpu" in navigator){
      try{
        if(!localAIReady)setStatus("despertando a consciência da névoa…","busy");
-       const reply=await askLocalAI(message);
+       const reply=await askLocalAI(message,onChunk);
        if(reply&&reply.trim())return reply.trim();
      }catch(err){
        localAIFailed=true;
@@ -628,13 +634,45 @@ NOTAS PEDAGÓGICAS RELEVANTES:
    return askFriendFallback(message);
  }
 
+ function thinkingReaction(message){
+   const n=normalizeAIText(message);
+   const lines=n.includes("?")
+     ?["Opa… boa pergunta. Deixa eu puxar esse fio.","Hmm… essa tem mais de uma camada. Um instante.","He-he… gostei dessa. Estou juntando as peças."]
+     :/(acho|penso|acredito|pra mim|para mim)/.test(n)
+       ?["Hmm… entendi o caminho da sua ideia. Quero olhar mais de perto.","Opa… aí tem um ponto interessante. Deixa eu pensar com você.","He-he… gostei desse raciocínio. Só um instante."]
+       :["Hmm… deixa eu puxar esse fio.","Opa… a névoa está formando uma ideia.","Um segundo… estou juntando as peças."];
+   const phrase=lines[Math.floor(Math.random()*lines.length)];
+   bubbleText(phrase);setGhostSprite(lanternSrc,true);
+ }
+ function beginGhostDraft(){
+   const item=document.createElement("article");
+   item.className="secretMsg fromGhost secretMsgStreaming";
+   item.innerHTML='<div class="secretMsgAvatar">👻</div><div class="secretMsgBody"><b>Amigo da Névoa</b><p>…</p></div>';
+   log.appendChild(item);log.scrollTop=log.scrollHeight;
+   const p=item.querySelector("p");
+   return{
+     update(text){p.textContent=text+"▌";log.scrollTop=log.scrollHeight},
+     remove(){item.remove()}
+   };
+ }
  async function sendMessage(text){
    const message=String(text||"").trim();if(!message||busy)return;
-   addMessage("user",message);input.value="";setBusy(true);
+   addMessage("user",message);input.value="";setBusy(true);thinkingReaction(message);
+   let draft=null,streamed="";
+   const onChunk=chunk=>{
+     if(!chunk)return;
+     if(!draft)draft=beginGhostDraft();
+     streamed+=chunk;
+     draft.update(streamed);
+     bubbleText(streamed.slice(-230));
+     setGhostSprite(explainSrc);
+   };
    try{
-     const reply=await askFriend(message);
+     const reply=await askFriend(message,onChunk);
+     if(draft)draft.remove();
      addMessage("assistant",reply);setBusy(false);speak(reply,replyPose(reply));
    }catch(err){
+     if(draft)draft.remove();
      setBusy(false);
      const msg=err&&err.message?err.message:"Não consegui responder agora.";
      addMessage("assistant",msg);
@@ -679,6 +717,12 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  renderHistory();
  setStatus(localAIReady?"IA local • consciência desperta":(localAIFailed?"modo leve • conversa disponível":"IA local • pronta para despertar"),"ready");
  scheduleBlink();
+ setTimeout(()=>{
+   const conn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+   if("gpu" in navigator&&!(conn&&conn.saveData)){
+     try{ensureLocalAIWorker().postMessage({type:"preload"})}catch(e){}
+   }
+ },850);
  if(musicOn){
    tryPlayMusic();
    const unlockMusic=()=>tryPlayMusic();
