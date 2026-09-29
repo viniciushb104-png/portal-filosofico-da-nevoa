@@ -729,3 +729,26 @@ body[data-page="segredos"] .secretGhost.secretGhostPop{
 @media (prefers-reduced-motion:reduce){
   body[data-page="segredos"] .secretGhost.secretGhostPop{animation:none}
 }
+
+
+/* V17 — fantasma em primeiro plano */
+@media(min-width:901px){
+  body[data-page="segredos"] .secretFriendLayout{
+    grid-template-columns:minmax(390px,.98fr) minmax(430px,1.02fr);
+  }
+  body[data-page="segredos"] .secretFriendStage .secretGhostScene{
+    min-height:560px;
+  }
+  body[data-page="segredos"] .secretGhost{
+    width:min(118%,590px);
+    max-height:590px;
+  }
+}
+@media(min-width:601px) and (max-width:900px){
+  body[data-page="segredos"] .secretFriendStage .secretGhostScene{min-height:500px}
+  body[data-page="segredos"] .secretGhost{width:min(100%,520px);max-height:520px}
+}
+@media(max-width:600px){
+  body[data-page="segredos"] .secretFriendStage .secretGhostScene{min-height:400px}
+  body[data-page="segredos"] .secretGhost{width:min(108%,410px);max-height:410px}
+}
