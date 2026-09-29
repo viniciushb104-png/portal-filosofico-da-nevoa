@@ -15,3 +15,5 @@ Depois do primeiro deploy, copie a URL `https://...workers.dev/chat` para:
 `universo/amigo-nevoa-config.js`
 
 Enquanto o endpoint estiver vazio, o portal mantém o cérebro local de reserva.
+
+Cloudflare Builds conectado ao branch `main`.
