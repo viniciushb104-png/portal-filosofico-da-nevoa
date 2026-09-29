@@ -44,14 +44,17 @@ function once(id,data){
 }
 function drainStored(){
  const stored=read(QUEUE_KEY,[]);
- if(stored.length)localQueue.push(...stored);
- write(QUEUE_KEY,[]);
+ if(stored.length)localQueue.push(...stored.filter(x=>!localQueue.some(y=>y._qid===x._qid)));
+}
+function removePersisted(qid){
+ const stored=read(QUEUE_KEY,[]).filter(x=>x._qid!==qid);
+ persistQueue(stored);
 }
 function pump(){
  if(busy)return;
  if(!localQueue.length)drainStored();
  const item=localQueue.shift();if(!item)return;
- busy=true;showItem(item,()=>{busy=false;setTimeout(pump,120)});
+ busy=true;showItem(item,()=>{removePersisted(item._qid);busy=false;setTimeout(pump,120)});
 }
 function showItem(item,done){
  const host=ensureUI(),el=document.createElement('div');el.className='nevoaNotify '+(item.type||'achievement');el.style.setProperty('--life',(Number(item.duration)||4600)+'ms');
