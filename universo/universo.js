@@ -242,66 +242,168 @@ $("#fullMap").onclick=async()=>{try{if(!document.fullscreenElement)await vp.requ
 requestAnimationFrame(()=>{if(innerWidth<760)center()});
 }
 function segredos(){
- shell("Segredos da Mansão","No Cemitério dos Segredos, um fantasma camarada transforma perguntas em desafios, pistas e descobertas.",`<section class="section secretSection"><div class="wrap"><div class="secretStage panel">
-   <div class="secretGhostScene">
-     <div class="secretBubble" id="secretGhostLine">He-he! Chegou alguém curioso...</div>
-     <img class="secretGhost" id="secretGhost" src="assets/segredos/fantasma-talk-00.webp" alt="Fantasma camarada sentado sobre uma lápide">
-   </div>
-   <div class="secretPuzzleCard">
-     <div class="eyebrow">Enigma do cemitério</div>
-     <h2>“Quanto mais perguntas recebe, mais caminhos oferece. O que é?”</h2>
-     <p class="secretIntro">Digite uma resposta. O fantasma reage ao que você disser e registra o segredo quando você acerta.</p>
-     <div class="field"><input class="input" id="secretAnswer" autocomplete="off" placeholder="Digite sua resposta"></div>
-     <div class="secretActions">
-       <button class="btn" id="openSecret">Tentar abrir</button>
-       <button class="btn subtle" id="ghostHint">Pedir uma pista</button>
+ shell("Segredos da Mansão","No cemitério vive o Amigo da Névoa: uma IA de conversa para pensar junto sobre filosofia, história, literatura, sociologia e educação financeira.",`<section class="section secretSection"><div class="wrap"><div class="secretFriendLayout">
+   <aside class="secretStage panel secretFriendStage">
+     <div class="secretGhostScene">
+       <div class="secretBubble" id="secretGhostLine">He-he! Agora eu prefiro uma boa conversa a um enigma.</div>
+       <img class="secretGhost" id="secretGhost" src="assets/segredos/fantasma-talk-00.webp" alt="Amigo da Névoa, fantasma de conversa do Portal">
      </div>
-     <div id="secretResult"><div class="empty">A porta permanece silenciosa.</div></div>
-   </div>
+     <div class="secretFriendIdentity">
+       <div class="eyebrow">Amigo da Névoa • IA de conversa</div>
+       <h2>Um parceiro para trocar ideias.</h2>
+       <p>Converse, pergunte, discorde e pense em voz alta. Eu gosto de filosofia, história, literatura, sociologia e educação financeira.</p>
+       <div class="secretFriendControls">
+         <button class="btn subtle" id="secretVoiceToggle" type="button">🔊 Voz ligada</button>
+         <button class="btn subtle" id="secretClearChat" type="button">↻ Nova conversa</button>
+       </div>
+       <small class="secretFriendTransparency">Sou uma IA em forma de personagem. A conversa desta página fica apenas nesta sessão do navegador.</small>
+     </div>
+   </aside>
+
+   <section class="panel secretChatPanel" aria-label="Conversa com o Amigo da Névoa">
+     <header class="secretChatHead">
+       <div><div class="eyebrow">Conversa livre</div><h2>Sobre o que vamos pensar hoje?</h2></div>
+       <span class="secretAiStatus" id="secretAiStatus">verificando...</span>
+     </header>
+
+     <div class="secretTopics" aria-label="Temas do Amigo da Névoa">
+       <button type="button" data-secret-prompt="Quero conversar sobre uma pergunta filosófica interessante.">Filosofia</button>
+       <button type="button" data-secret-prompt="Conte um episódio histórico interessante e vamos conversar sobre por que ele importa.">História</button>
+       <button type="button" data-secret-prompt="Quero conversar sobre literatura. Me faça uma pergunta boa sobre livros, personagens ou ideias.">Literatura</button>
+       <button type="button" data-secret-prompt="Quero entender melhor um tema de sociologia a partir do cotidiano.">Sociologia</button>
+       <button type="button" data-secret-prompt="Quero aprender educação financeira de um jeito simples e sem papo de enriquecer rápido.">Educação financeira</button>
+     </div>
+
+     <div class="secretChatLog" id="secretChatLog" aria-live="polite"></div>
+
+     <form class="secretComposer" id="secretComposer">
+       <button class="secretMic" id="secretMic" type="button" title="Falar com o Amigo da Névoa" aria-label="Falar com o Amigo da Névoa">🎙️</button>
+       <textarea id="secretMessage" rows="2" maxlength="1200" placeholder="Escreva como se estivesse puxando assunto com um amigo..."></textarea>
+       <button class="btn secretSend" id="secretSend" type="submit">Enviar</button>
+     </form>
+     <div class="secretChatHint" id="secretChatHint">Você pode escrever ou usar o microfone. Não precisa formular uma “pergunta escolar”.</div>
+   </section>
  </div></div></section>`);
 
- const ghost=$("#secretGhost"), bubble=$("#secretGhostLine");
- const secretSpritePreload=[
-   "assets/segredos/fantasma-talk-04.webp",
-   "assets/segredos/fantasma-explain.webp"
- ];
- secretSpritePreload.forEach(src=>{const img=new Image();img.src=src});
- let timer=null;
- function stopTalk(finalSrc="assets/segredos/fantasma-talk-00.webp"){
-   if(timer){clearInterval(timer);timer=null}
-   if(ghost) ghost.src=finalSrc;
- }
- function talk(text){
-   if(bubble) bubble.textContent=text;
-   stopTalk();
-   let open=false, ticks=0;
-   timer=setInterval(()=>{
-     open=!open;
-     if(ghost) ghost.src=open?"assets/segredos/fantasma-talk-04.webp":"assets/segredos/fantasma-talk-00.webp";
-     ticks++;
-     if(ticks>=10) stopTalk();
-   },135);
- }
- function explain(text){
-   stopTalk("assets/segredos/fantasma-explain.webp");
-   if(bubble) bubble.textContent=text;
-   setTimeout(()=>{if(ghost) ghost.src="assets/segredos/fantasma-talk-00.webp"},2300);
- }
+ const FRIEND_AI_URL="https://gsenhfhmabkjqhybpixm.supabase.co/functions/v1/amigo-da-nevoa";
+ const FRIEND_AI_KEY="sb_publishable_VZoR4YrEww-o6HTkN6UVJA_0ywIaTgB";
+ const ghost=$("#secretGhost"),bubble=$("#secretGhostLine"),log=$("#secretChatLog"),form=$("#secretComposer"),input=$("#secretMessage"),status=$("#secretAiStatus"),send=$("#secretSend"),mic=$("#secretMic");
+ const idleSrc="assets/segredos/fantasma-talk-00.webp",talkSrc="assets/segredos/fantasma-talk-04.webp",explainSrc="assets/segredos/fantasma-explain.webp";
+ [talkSrc,explainSrc].forEach(src=>{const img=new Image();img.src=src});
+ let speakingTimer=null,busy=false,voiceOn=true,history=[];
+ try{voiceOn=localStorage.getItem("nevoaFriendVoice")!=="off"}catch(e){}
+ try{const saved=JSON.parse(sessionStorage.getItem("nevoaFriendHistory")||"[]");if(Array.isArray(saved))history=saved.slice(-12)}catch(e){}
 
- setTimeout(()=>talk("He-he! Eu guardo perguntas que nem a própria névoa conseguiu engolir. Quer tentar?"),350);
-
- $("#ghostHint").onclick=()=>explain("Pista: não pense em um objeto. Pense numa maneira de investigar o mundo.");
- $("#openSecret").onclick=()=>{
-   const a=$("#secretAnswer").value.toLowerCase().trim();
-   if(a.includes("filosofia")||a.includes("pergunta")){
-     NevoaUniverse.addSecret("porta-pergunta");
-     $("#secretResult").innerHTML='<div class="note success"><b>🔓 Passagem encontrada</b><small>Segredo registrado no Perfil do Explorador.</small></div>';
-     explain("Acertou! Filosofar é abrir caminhos com perguntas. Essa lápide quase sorriu.");
-   }else{
-     $("#secretResult").innerHTML='<div class="note warning"><b>A fechadura range...</b><small>Talvez a resposta não seja uma coisa, mas uma forma de investigar.</small></div>';
-     talk("Hmmm... quase! A névoa gostou da tentativa. Tente pensar no ato de perguntar e investigar.");
+ function portalSession(){try{return(localStorage.getItem("nevoaStudentSession")||"").trim()}catch(e){return""}}
+ function esc(v){return String(v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]))}
+ function saveHistory(){try{sessionStorage.setItem("nevoaFriendHistory",JSON.stringify(history.slice(-12)))}catch(e){}}
+ function stopTalking(finalSrc=idleSrc){if(speakingTimer){clearInterval(speakingTimer);speakingTimer=null}if(ghost)ghost.src=finalSrc}
+ function animateTalking(){
+   stopTalking();
+   let open=false;
+   speakingTimer=setInterval(()=>{open=!open;if(ghost)ghost.src=open?talkSrc:idleSrc},125);
+ }
+ function bubbleText(text){
+   if(!bubble)return;
+   const clean=String(text||"").replace(/\s+/g," ").trim();
+   bubble.textContent=clean.length>190?clean.slice(0,187)+"…":clean;
+ }
+ function preferredVoice(){
+   if(!("speechSynthesis" in window))return null;
+   const voices=window.speechSynthesis.getVoices()||[];
+   const pt=voices.filter(v=>/^pt(-|_)?BR/i.test(v.lang||""));
+   return pt[0]||voices.find(v=>/^pt/i.test(v.lang||""))||null;
+ }
+ function speak(text){
+   bubbleText(text);
+   if(!voiceOn||!("speechSynthesis" in window)){if(ghost){ghost.src=explainSrc;setTimeout(()=>stopTalking(),950)}return}
+   window.speechSynthesis.cancel();
+   const u=new SpeechSynthesisUtterance(text);
+   u.lang="pt-BR";u.rate=.97;u.pitch=.88;u.volume=1;
+   const v=preferredVoice();if(v)u.voice=v;
+   u.onstart=animateTalking;
+   u.onboundary=()=>{if(!speakingTimer)animateTalking()};
+   u.onend=()=>stopTalking();
+   u.onerror=()=>stopTalking();
+   window.speechSynthesis.speak(u);
+ }
+ function addMessage(role,text,save=true){
+   const item=document.createElement("article");
+   item.className="secretMsg "+(role==="assistant"?"fromGhost":"fromUser");
+   item.innerHTML='<div class="secretMsgAvatar">'+(role==="assistant"?"👻":"✦")+'</div><div class="secretMsgBody"><b>'+(role==="assistant"?"Amigo da Névoa":"Você")+'</b><p>'+esc(text).replace(/\n/g,"<br>")+'</p></div>';
+   log.appendChild(item);log.scrollTop=log.scrollHeight;
+   if(save){history.push({role:role,content:text});history=history.slice(-12);saveHistory()}
+ }
+ function renderHistory(){
+   log.innerHTML="";
+   if(history.length){history.forEach(m=>addMessage(m.role,m.content,false));return}
+   addMessage("assistant","He-he! Pode chegar. Não tenho missão, prova nem resposta certa escondida. Só gosto de conversar sobre ideias. Quer começar por alguma coisa que anda passando pela sua cabeça?",false);
+ }
+ function setStatus(text,state){
+   status.textContent=text;status.dataset.state=state||"";
+ }
+ function setBusy(on){
+   busy=on;send.disabled=on;mic.disabled=on;
+   send.textContent=on?"Pensando...":"Enviar";
+   if(on){setStatus("pensando na névoa...","busy");if(ghost)ghost.src=explainSrc}
+   else{setStatus(portalSession()?"IA conectada":"entre no Portal",portalSession()?"ready":"offline");stopTalking()}
+ }
+ async function askFriend(message){
+   const token=portalSession();
+   if(!token)throw Object.assign(new Error("Entre no Portal para conversar comigo. Assim eu sei que você é um explorador daqui."),{code:"login_required"});
+   const recent=history.slice(-10);
+   const res=await fetch(FRIEND_AI_URL,{
+     method:"POST",
+     headers:{"apikey":FRIEND_AI_KEY,"Content-Type":"application/json","Accept":"application/json"},
+     body:JSON.stringify({sessionToken:token,message:message,history:recent})
+   });
+   let data={};try{data=await res.json()}catch(e){}
+   if(!res.ok)throw Object.assign(new Error(data.message||"A névoa ficou espessa demais por alguns instantes."),{code:data.error||"friend_ai_error"});
+   return data.reply||"Eu fiquei sem palavras por um instante. Tenta me dizer isso de outro jeito?";
+ }
+ async function sendMessage(text){
+   const message=String(text||"").trim();if(!message||busy)return;
+   addMessage("user",message);input.value="";setBusy(true);
+   try{
+     const reply=await askFriend(message);
+     addMessage("assistant",reply);setBusy(false);speak(reply);
+   }catch(err){
+     setBusy(false);
+     const msg=err&&err.message?err.message:"Não consegui responder agora.";
+     addMessage("assistant",msg);
+     bubbleText(msg);
    }
+ }
+ form.addEventListener("submit",e=>{e.preventDefault();sendMessage(input.value)});
+ input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+ document.querySelectorAll("[data-secret-prompt]").forEach(btn=>btn.addEventListener("click",()=>sendMessage(btn.dataset.secretPrompt||"")));
+ $("#secretVoiceToggle").onclick=()=>{
+   voiceOn=!voiceOn;
+   try{localStorage.setItem("nevoaFriendVoice",voiceOn?"on":"off")}catch(e){}
+   $("#secretVoiceToggle").textContent=voiceOn?"🔊 Voz ligada":"🔇 Voz desligada";
+   if(!voiceOn&&"speechSynthesis" in window)window.speechSynthesis.cancel();
+   if(!voiceOn)stopTalking();
  };
+ $("#secretVoiceToggle").textContent=voiceOn?"🔊 Voz ligada":"🔇 Voz desligada";
+ $("#secretClearChat").onclick=()=>{
+   if("speechSynthesis" in window)window.speechSynthesis.cancel();
+   history=[];saveHistory();renderHistory();stopTalking();
+   bubbleText("Recomeçamos. Que assunto merece uma boa conversa?");
+ };
+ const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(SpeechRecognition){
+   const rec=new SpeechRecognition();rec.lang="pt-BR";rec.interimResults=false;rec.continuous=false;
+   rec.onstart=()=>{mic.classList.add("listening");mic.textContent="⏺";$("#secretChatHint").textContent="Estou ouvindo... fale normalmente."};
+   rec.onend=()=>{mic.classList.remove("listening");mic.textContent="🎙️";$("#secretChatHint").textContent="Você pode escrever ou usar o microfone. Não precisa formular uma “pergunta escolar”."};
+   rec.onerror=()=>{mic.classList.remove("listening");mic.textContent="🎙️";$("#secretChatHint").textContent="Não consegui ouvir direito. Você pode tentar de novo ou escrever."};
+   rec.onresult=e=>{const text=e.results&&e.results[0]&&e.results[0][0]?e.results[0][0].transcript:"";if(text){input.value=text;sendMessage(text)}};
+   mic.onclick=()=>{try{rec.start()}catch(e){}};
+ }else{
+   mic.onclick=()=>{$("#secretChatHint").textContent="O reconhecimento de voz não está disponível neste navegador. A voz do fantasma ainda funciona normalmente."};
+ }
+ renderHistory();
+ setStatus(portalSession()?"IA conectada":"entre no Portal",portalSession()?"ready":"offline");
+ setTimeout(()=>{if(!history.length)speak("Pode chegar. Eu gosto de conversar sobre ideias. O que anda passando pela sua cabeça?");else bubbleText(history[history.length-1].content)},450);
 }
 function professor(){shell("Central do Professor","A estrutura docente está separada da experiência do aluno. Nesta primeira camada, o planejamento funciona localmente; turmas online entram depois da validação visual.",`<section class="section"><div class="wrap two"><div class="panel"><h2>Montar uma sessão</h2><div class="field"><label>Nível</label><select id="level"><option>Fundamental II</option><option>Ensino Médio</option></select></div><div class="field"><label>Tema</label><select id="theme"><option>Ética</option><option>Lógica</option><option>Conhecimento</option><option>Argumentação</option><option>História da Filosofia</option></select></div><div class="field"><label>Tempo</label><select id="time"><option>10 minutos</option><option>20 minutos</option><option>50 minutos</option></select></div><button class="btn" id="plan">Gerar percurso</button></div><div class="panel"><h2>Percurso sugerido</h2><div id="planOut" class="empty">Escolha os parâmetros.</div><div class="note warning"><b>Turmas online</b><small>A área está reservada na arquitetura. A conexão de códigos de turma e painel coletivo ficará para a etapa de backend/testes, sem afetar os jogos atuais.</small></div></div></div></section>`);$("#plan").onclick=()=>{const t=$("#theme").value,map={Ética:["Tribunal das Sombras","Dilemas da Meia-Noite"],Lógica:["Sala da Lógica","Paradoxia — Circo das Falácias"],Conhecimento:["Espelho de Descartes","Caverna de Platão"],Argumentação:["Dilemas da Meia-Noite","Oficina de Argumentos"],"História da Filosofia":["Corredor dos Filósofos","Museu dos Filósofos"]};$("#planOut").className="";$("#planOut").innerHTML=(map[t]||[]).map((x,i)=>`<div class="note success"><b>${i+1}. ${x}</b><small>${i?"Aprofundamento":"Disparador inicial"}</small></div>`).join("")}}
 const page=document.body.dataset.page;({hub,grimorio,diario,museu,oficina,bestiario,cartas,perfil,teatro,fonografo,mapa,segredos,professor}[page]||hub)();
