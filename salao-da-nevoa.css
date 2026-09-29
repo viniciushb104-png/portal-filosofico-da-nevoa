@@ -23,3 +23,12 @@
 .msgAvatar{overflow:hidden;padding:0}.msgAvatar img{width:100%;height:100%;object-fit:cover}
 .msg.mine .msgAvatar{border-color:#d78348}.msg:not(.mine) .msgAvatar{border-color:#8c55a3}
 @media(max-width:620px){.userChipText{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.userChipAvatar{width:28px;height:28px;flex-basis:28px}}
+
+/* V4 — hardening mobile */
+html,body{max-width:100%;overflow-x:hidden}
+@media(max-width:720px){
+ .salaoPage{overflow-x:hidden}
+ .salaoTopIn{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+ .composer textarea,.reportShell textarea,.reportShell select{font-size:16px}
+ .gateActions a,.gateActions button,.refreshBtn,.composerBottom button{min-height:44px}
+}
