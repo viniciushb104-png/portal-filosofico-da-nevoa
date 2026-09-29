@@ -637,7 +637,7 @@ function setupWorldControls(){
  });
  window.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.body.classList.contains('sceneOpen'))closeScene();else closeWorldDialogue()}});
  window.addEventListener('keyup',e=>{if(keyMap[e.key])setMove(keyMap[e.key],false)});
- $('.dpad button[data-move]').forEach(b=>{
+ $$('.dpad button[data-move]').forEach(b=>{
    const k=b.dataset.move;
    const down=e=>{e.preventDefault();try{b.setPointerCapture?.(e.pointerId)}catch(_){}setMove(k,true)};
    const up=e=>{e.preventDefault();try{b.releasePointerCapture?.(e.pointerId)}catch(_){}setMove(k,false)};
