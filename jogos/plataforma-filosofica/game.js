@@ -1,5 +1,6 @@
 (() => {
 'use strict';
+try{localStorage.setItem('nevoaLastActivityV1',JSON.stringify({kind:'labyrinth',phase:1,title:'Fase 1 — Sócrates',ts:Date.now()}))}catch(e){}
 
 const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
