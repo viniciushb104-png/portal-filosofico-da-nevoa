@@ -322,3 +322,84 @@ body[data-page="segredos"] .footer{
     background:linear-gradient(180deg,rgba(7,4,11,.28),rgba(7,4,11,.70));
   }
 }
+
+
+/* V11 — Fantasma camarada do Cemitério dos Segredos */
+body[data-page="segredos"] .secretSection{padding-top:18px}
+body[data-page="segredos"] .secretStage{
+  display:grid;
+  grid-template-columns:minmax(280px,.9fr) minmax(320px,1.1fr);
+  gap:clamp(18px,4vw,48px);
+  align-items:center;
+  overflow:hidden;
+  min-height:520px;
+}
+body[data-page="segredos"] .secretGhostScene{
+  position:relative;
+  min-height:440px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+}
+body[data-page="segredos"] .secretGhost{
+  width:min(100%,430px);
+  max-height:430px;
+  object-fit:contain;
+  object-position:center bottom;
+  filter:drop-shadow(0 18px 28px rgba(0,0,0,.55)) drop-shadow(0 0 24px rgba(119,232,255,.20));
+  transform-origin:center bottom;
+  animation:secretGhostFloat 3.2s ease-in-out infinite;
+}
+body[data-page="segredos"] .secretBubble{
+  position:absolute;
+  z-index:2;
+  top:6px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(92%,360px);
+  padding:14px 16px;
+  border:1px solid rgba(220,190,255,.45);
+  border-radius:18px;
+  background:rgba(12,7,18,.88);
+  color:#f5eff8;
+  box-shadow:0 12px 30px rgba(0,0,0,.36),0 0 24px rgba(149,79,184,.14);
+  text-align:center;
+  line-height:1.42;
+}
+body[data-page="segredos"] .secretBubble:after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-10px;
+  width:18px;height:18px;
+  transform:translateX(-50%) rotate(45deg);
+  background:rgba(12,7,18,.88);
+  border-right:1px solid rgba(220,190,255,.45);
+  border-bottom:1px solid rgba(220,190,255,.45);
+}
+body[data-page="segredos"] .secretPuzzleCard{padding:6px 4px}
+body[data-page="segredos"] .secretPuzzleCard h2{
+  margin:.4rem 0 1rem;
+  font-size:clamp(1.55rem,2.8vw,2.35rem);
+  line-height:1.12;
+  text-shadow:0 3px 18px rgba(0,0,0,.55);
+}
+body[data-page="segredos"] .secretIntro{color:#ddd0e6;line-height:1.6}
+body[data-page="segredos"] .secretActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+body[data-page="segredos"] #secretResult{margin-top:16px}
+@keyframes secretGhostFloat{
+  0%,100%{transform:translateY(0) rotate(-.5deg)}
+  50%{transform:translateY(-7px) rotate(.5deg)}
+}
+@media(max-width:760px){
+  body[data-page="segredos"] .secretStage{
+    grid-template-columns:1fr;
+    min-height:0;
+    padding:16px;
+  }
+  body[data-page="segredos"] .secretGhostScene{min-height:350px}
+  body[data-page="segredos"] .secretGhost{max-height:340px;width:min(100%,350px)}
+  body[data-page="segredos"] .secretBubble{top:0;font-size:.94rem}
+  body[data-page="segredos"] .secretPuzzleCard{text-align:center}
+  body[data-page="segredos"] .secretActions{justify-content:center}
+}
