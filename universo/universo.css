@@ -258,7 +258,7 @@ body[data-page="segredos"]{
   background-color:#08050d;
   background-image:
     linear-gradient(180deg,rgba(6,3,10,.28) 0%,rgba(6,3,10,.42) 44%,rgba(6,3,10,.82) 100%),
-    url("assets/segredos/cemiterio-segredos-bg.png");
+    url("assets/segredos/cemiterio-segredos-bg.webp");
   background-size:cover;
   background-position:center top;
   background-repeat:no-repeat;
@@ -402,4 +402,66 @@ body[data-page="segredos"] #secretResult{margin-top:16px}
   body[data-page="segredos"] .secretBubble{top:0;font-size:.94rem}
   body[data-page="segredos"] .secretPuzzleCard{text-align:center}
   body[data-page="segredos"] .secretActions{justify-content:center}
+}
+
+
+/* V12 — novo cenário autoral e fantasma dos enigmas */
+body[data-page="segredos"]{
+  background-position:center center;
+}
+body[data-page="segredos"] .hero{
+  background:linear-gradient(180deg,rgba(7,4,11,.12),rgba(7,4,11,.40));
+}
+body[data-page="segredos"] .secretStage.panel{
+  position:relative;
+  background:
+    radial-gradient(circle at 22% 48%,rgba(87,221,255,.11),transparent 34%),
+    radial-gradient(circle at 82% 38%,rgba(190,94,255,.10),transparent 36%),
+    linear-gradient(145deg,rgba(12,7,20,.56),rgba(8,5,14,.72));
+  border-color:rgba(209,159,239,.34);
+  box-shadow:0 26px 80px rgba(0,0,0,.48),inset 0 0 50px rgba(118,89,191,.07);
+}
+body[data-page="segredos"] .secretStage.panel:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  background:linear-gradient(115deg,rgba(255,255,255,.035),transparent 28% 72%,rgba(113,235,255,.035));
+}
+body[data-page="segredos"] .secretGhostScene{
+  min-height:470px;
+}
+body[data-page="segredos"] .secretGhost{
+  width:min(100%,470px);
+  max-height:470px;
+  filter:
+    drop-shadow(0 22px 32px rgba(0,0,0,.60))
+    drop-shadow(0 0 22px rgba(91,231,255,.20))
+    drop-shadow(0 0 38px rgba(188,94,255,.12));
+}
+body[data-page="segredos"] .secretBubble{
+  background:linear-gradient(145deg,rgba(21,10,31,.94),rgba(11,7,18,.92));
+  border-color:rgba(222,177,255,.55);
+  box-shadow:0 14px 34px rgba(0,0,0,.42),0 0 28px rgba(132,222,255,.10);
+}
+body[data-page="segredos"] .secretBubble:after{
+  background:rgba(13,8,20,.94);
+  border-color:rgba(222,177,255,.55);
+}
+body[data-page="segredos"] .secretPuzzleCard{
+  position:relative;
+  z-index:1;
+  padding:clamp(10px,2vw,24px);
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(10,6,16,.50),rgba(24,11,33,.54));
+  border:1px solid rgba(203,142,225,.16);
+}
+@media(max-width:760px){
+  body[data-page="segredos"]{
+    background-size:cover;
+    background-position:center top;
+  }
+  body[data-page="segredos"] .secretGhostScene{min-height:390px}
+  body[data-page="segredos"] .secretGhost{width:min(100%,390px);max-height:390px}
 }
