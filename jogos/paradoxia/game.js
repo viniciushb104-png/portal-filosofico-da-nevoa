@@ -206,7 +206,9 @@ function sceneDone(sc){
  return false;
 }
 function saveLocal(){
- localStorage.setItem(SAVE_KEY,JSON.stringify(state));updatePortalScore();setSaveState(false);renderMissionJournal();
+ localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+ if(state.classKey)try{localStorage.setItem('nevoaLastActivityV1',JSON.stringify({kind:'paradoxia',title:'Paradoxia — O Reino das Escolhas',ts:Date.now()}))}catch(e){}
+ updatePortalScore();setSaveState(false);renderMissionJournal();
  clearTimeout(cloudTimer);
  cloudTimer=setTimeout(saveCloud,220);
 }
