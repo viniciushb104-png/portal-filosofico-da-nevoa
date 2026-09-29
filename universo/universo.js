@@ -436,7 +436,7 @@ function segredos(){
      .trim();
    const topic=/(mentir|mentira|moral|etica|ética|certo|errado|bem|mal|dever)/.test(context)?"ética":
      /(verdade|certeza|saber|conhecimento|prova|opiniao|opinião|duvida|dúvida)/.test(context)?"conhecimento":
-     /(liberdade|livre|escolha|determin|destino)/.test(context)?"liberdade":
+     /(liberdade|livre|escolh|autonom|influenc|determin|destino)/.test(context)?"liberdade":
      /(justica|justiça|igualdade|equidade|direito)/.test(context)?"justiça":
      /(sociedade|cultura|grupo|preconceito|desigualdade|norma social)/.test(context)?"sociedade":
      /(historia|histórico|historico|histórica|historica|passado|revolucao|revolução|guerra|imperio|império)/.test(context)?"história":
