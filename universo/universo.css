@@ -192,3 +192,62 @@ body[data-page="perfil"] .journeyWorldCard:hover .journeyWorldArt{background-siz
  body[data-page="perfil"] .journeyWorldCard.labyrinth .journeyWorldArt,
  body[data-page="perfil"] .journeyWorldCard.paradoxia .journeyWorldArt{background-position:center 25%}
 }
+
+
+/* V9 — Selos do Labirinto e Memórias da Jornada */
+.journeyMilestones{margin-top:22px;padding:22px;border:1px solid rgba(214,166,82,.28);background:linear-gradient(145deg,rgba(19,11,26,.96),rgba(10,7,15,.96));box-shadow:0 24px 60px rgba(0,0,0,.28),inset 0 0 40px rgba(124,75,147,.06)}
+.journeyMilestonesHead{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:18px}
+.journeyMilestonesHead h3{margin:5px 0 0;font-size:1.35rem}
+.journeyMilestonesHead>b{font-family:Georgia,serif;color:#f0ca79;white-space:nowrap}
+.journeyPhaseSeals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.journeyPhaseSeal{position:relative;min-height:128px;padding:16px 10px;border-radius:16px;border:1px solid rgba(139,122,153,.2);background:linear-gradient(180deg,rgba(19,13,24,.9),rgba(9,7,12,.98));text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden;opacity:.62;filter:saturate(.55)}
+.journeyPhaseSeal::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0,rgba(180,138,220,.12),transparent 54%);pointer-events:none}
+.journeyPhaseSeal span{font-size:1.75rem;filter:grayscale(.55)}
+.journeyPhaseSeal b{font-size:.9rem}
+.journeyPhaseSeal small{font-size:.72rem;color:#9f95a8}
+.journeyPhaseSeal.done{opacity:1;filter:none;border-color:rgba(235,189,92,.48);box-shadow:0 0 24px rgba(197,141,57,.11),inset 0 0 28px rgba(221,168,72,.05)}
+.journeyPhaseSeal.done span{filter:none;text-shadow:0 0 18px rgba(245,197,91,.35)}
+.journeyPhaseSeal.done small{color:#efd487}
+.journeyMilestoneFooter{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-top:16px;padding-top:15px;border-top:1px solid rgba(255,255,255,.07);font-size:.86rem;color:#bdb3c4}
+.journeyMilestoneFooter a{color:#efc86f;font-weight:700;text-decoration:none}
+.journeyMilestoneFooter a:hover{text-decoration:underline}
+
+.memoriesSection{padding-bottom:10px}
+.memorySummary{display:flex;justify-content:space-between;align-items:center;gap:18px;margin:18px 0;padding:18px 20px;background:linear-gradient(135deg,rgba(33,17,38,.95),rgba(12,8,17,.98));border:1px solid rgba(222,175,81,.28)}
+.memorySummary>div{display:flex;flex-direction:column;gap:4px}
+.memorySummary small{font-size:.7rem;letter-spacing:.16em;color:#a99eb0}
+.memorySummary b{font-family:Georgia,serif;font-size:1.7rem;color:#f1d184}
+.memoryTrophyGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.memoryTrophy{position:relative;min-height:250px;padding:20px 17px 18px;border-radius:18px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(165deg,rgba(24,16,30,.97),rgba(9,7,13,.99));display:flex;flex-direction:column;align-items:center;text-align:center;overflow:hidden}
+.memoryTrophy::before{content:"";position:absolute;width:170px;height:170px;top:-75px;border-radius:50%;background:radial-gradient(circle,rgba(173,112,205,.16),transparent 68%)}
+.memoryTrophySeal{position:relative;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;margin-bottom:12px;border:1px solid rgba(173,156,184,.22);background:#0d0911;box-shadow:inset 0 0 25px rgba(0,0,0,.6)}
+.memoryTrophySeal span{font-size:2rem}
+.memoryTrophy>small{font-size:.66rem;letter-spacing:.13em;color:#8e8495}
+.memoryTrophy h3{font-size:1rem;margin:8px 0 7px}
+.memoryTrophy p{font-size:.82rem;color:#aaa0b0;line-height:1.45;flex:1;margin:0 0 12px}
+.memoryTrophy>b{font-size:.78rem;color:#93899a}
+.memoryTrophy.locked{opacity:.58;filter:saturate(.45)}
+.memoryTrophy.locked .memoryTrophySeal span{font-size:1.6rem;color:#77707d}
+.memoryTrophy.unlocked{border-color:rgba(231,183,80,.46);box-shadow:0 18px 42px rgba(0,0,0,.25),inset 0 0 34px rgba(189,123,40,.045)}
+.memoryTrophy.unlocked::before{background:radial-gradient(circle,rgba(230,174,74,.22),transparent 68%)}
+.memoryTrophy.unlocked .memoryTrophySeal{border-color:rgba(241,196,103,.55);box-shadow:0 0 28px rgba(224,168,63,.13),inset 0 0 24px rgba(231,185,87,.07)}
+.memoryTrophy.unlocked>small,.memoryTrophy.unlocked>b{color:#eccb7e}
+
+@media(max-width:900px){
+ .journeyPhaseSeals{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .memoryTrophyGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+ .journeyMilestonesHead,.journeyMilestoneFooter,.memorySummary{align-items:flex-start;flex-direction:column}
+ .journeyPhaseSeals{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .journeyPhaseSeal{min-height:112px}
+ .memoryTrophyGrid{grid-template-columns:1fr 1fr;gap:10px}
+ .memoryTrophy{min-height:226px;padding:16px 12px}
+ .memoryTrophySeal{width:64px;height:64px}
+}
+@media(max-width:420px){
+ .journeyPhaseSeals,.memoryTrophyGrid{grid-template-columns:1fr}
+ .journeyPhaseSeal{min-height:94px;display:grid;grid-template-columns:42px 1fr;grid-template-rows:auto auto;text-align:left;justify-items:start}
+ .journeyPhaseSeal span{grid-row:1/3}
+ .memoryTrophy{min-height:0}
+}
