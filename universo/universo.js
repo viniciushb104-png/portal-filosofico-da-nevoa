@@ -288,20 +288,63 @@ function segredos(){
  const FRIEND_AI_URL="https://gsenhfhmabkjqhybpixm.supabase.co/functions/v1/amigo-da-nevoa";
  const FRIEND_AI_KEY="sb_publishable_VZoR4YrEww-o6HTkN6UVJA_0ywIaTgB";
  const ghost=$("#secretGhost"),bubble=$("#secretGhostLine"),log=$("#secretChatLog"),form=$("#secretComposer"),input=$("#secretMessage"),status=$("#secretAiStatus"),send=$("#secretSend"),mic=$("#secretMic");
- const idleSrc="assets/segredos/fantasma-talk-00.webp",talkSrc="assets/segredos/fantasma-talk-04.webp",explainSrc="assets/segredos/fantasma-explain.webp";
- [talkSrc,explainSrc].forEach(src=>{const img=new Image();img.src=src});
- let speakingTimer=null,busy=false,voiceOn=true,history=[];
+ const secretSprites={
+   idle:"assets/segredos/fantasma-talk-00.webp",
+   talk:"assets/segredos/fantasma-talk-04.webp",
+   blink:"assets/segredos/fantasma-blink.webp",
+   explain:"assets/segredos/fantasma-explain.webp",
+   eureka:"assets/segredos/fantasma-eureka.webp",
+   lantern:"assets/segredos/fantasma-lantern.webp"
+ };
+ const {idle:idleSrc,talk:talkSrc,blink:blinkSrc,explain:explainSrc,eureka:eurekaSrc,lantern:lanternSrc}=secretSprites;
+ Object.values(secretSprites).forEach(src=>{const img=new Image();img.src=src});
+ let speakingTimer=null,poseTimer=null,blinkTimer=null,busy=false,voiceOn=true,history=[];
  try{voiceOn=localStorage.getItem("nevoaFriendVoice")!=="off"}catch(e){}
  try{const saved=JSON.parse(sessionStorage.getItem("nevoaFriendHistory")||"[]");if(Array.isArray(saved))history=saved.slice(-12)}catch(e){}
 
  function portalSession(){try{return(localStorage.getItem("nevoaStudentSession")||"").trim()}catch(e){return""}}
  function esc(v){return String(v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]))}
  function saveHistory(){try{sessionStorage.setItem("nevoaFriendHistory",JSON.stringify(history.slice(-12)))}catch(e){}}
- function stopTalking(finalSrc=idleSrc){if(speakingTimer){clearInterval(speakingTimer);speakingTimer=null}if(ghost)ghost.src=finalSrc}
+ function clearGhostTimers(){
+   if(speakingTimer){clearInterval(speakingTimer);speakingTimer=null}
+   if(poseTimer){clearTimeout(poseTimer);poseTimer=null}
+   if(blinkTimer){clearTimeout(blinkTimer);blinkTimer=null}
+ }
+ function setGhostSprite(src,pop=false){
+   if(!ghost)return;
+   ghost.src=src;
+   if(pop){
+     ghost.classList.remove("secretGhostPop");
+     void ghost.offsetWidth;
+     ghost.classList.add("secretGhostPop");
+     setTimeout(()=>ghost&&ghost.classList.remove("secretGhostPop"),430);
+   }
+ }
+ function scheduleBlink(){
+   if(blinkTimer)clearTimeout(blinkTimer);
+   blinkTimer=setTimeout(()=>{
+     if(!busy&&!speakingTimer&&!poseTimer&&ghost){
+       setGhostSprite(blinkSrc);
+       setTimeout(()=>{if(!busy&&!speakingTimer&&!poseTimer)setGhostSprite(idleSrc)},145);
+     }
+     scheduleBlink();
+   },2600+Math.random()*2600);
+ }
+ function stopTalking(finalSrc=idleSrc){
+   if(speakingTimer){clearInterval(speakingTimer);speakingTimer=null}
+   if(poseTimer){clearTimeout(poseTimer);poseTimer=null}
+   setGhostSprite(finalSrc);
+   scheduleBlink();
+ }
+ function showGhostPose(src,duration=900){
+   clearGhostTimers();
+   setGhostSprite(src,true);
+   poseTimer=setTimeout(()=>{poseTimer=null;setGhostSprite(idleSrc);scheduleBlink()},duration);
+ }
  function animateTalking(){
-   stopTalking();
+   clearGhostTimers();
    let open=false;
-   speakingTimer=setInterval(()=>{open=!open;if(ghost)ghost.src=open?talkSrc:idleSrc},125);
+   speakingTimer=setInterval(()=>{open=!open;setGhostSprite(open?talkSrc:idleSrc)},115+Math.floor(Math.random()*45));
  }
  function bubbleText(text){
    if(!bubble)return;
@@ -314,10 +357,16 @@ function segredos(){
    const pt=voices.filter(v=>/^pt(-|_)?BR/i.test(v.lang||""));
    return pt[0]||voices.find(v=>/^pt/i.test(v.lang||""))||null;
  }
- function speak(text){
+ function replyPose(text){
+   const t=String(text||"").toLowerCase();
+   return /(acert|parab|excelente|isso mesmo|boa|brilh|conseguiu|eureka)/.test(t)?eurekaSrc:explainSrc;
+ }
+ function speak(text,leadSrc=explainSrc){
    bubbleText(text);
-   if(!voiceOn||!("speechSynthesis" in window)){if(ghost){ghost.src=explainSrc;setTimeout(()=>stopTalking(),950)}return}
+   if(!voiceOn||!("speechSynthesis" in window)){showGhostPose(leadSrc,1150);return}
    window.speechSynthesis.cancel();
+   clearGhostTimers();
+   setGhostSprite(leadSrc,true);
    const u=new SpeechSynthesisUtterance(text);
    u.lang="pt-BR";u.rate=.97;u.pitch=.88;u.volume=1;
    const v=preferredVoice();if(v)u.voice=v;
@@ -325,7 +374,7 @@ function segredos(){
    u.onboundary=()=>{if(!speakingTimer)animateTalking()};
    u.onend=()=>stopTalking();
    u.onerror=()=>stopTalking();
-   window.speechSynthesis.speak(u);
+   poseTimer=setTimeout(()=>{poseTimer=null;window.speechSynthesis.speak(u)},360);
  }
  function addMessage(role,text,save=true){
    const item=document.createElement("article");
@@ -345,7 +394,7 @@ function segredos(){
  function setBusy(on){
    busy=on;send.disabled=on;mic.disabled=on;
    send.textContent=on?"Pensando...":"Enviar";
-   if(on){setStatus("pensando na névoa...","busy");if(ghost)ghost.src=explainSrc}
+   if(on){setStatus("pensando na névoa...","busy");showGhostPose(lanternSrc,2600)}
    else{setStatus(portalSession()?"IA conectada":"entre no Portal",portalSession()?"ready":"offline");stopTalking()}
  }
  async function askFriend(message){
@@ -366,12 +415,12 @@ function segredos(){
    addMessage("user",message);input.value="";setBusy(true);
    try{
      const reply=await askFriend(message);
-     addMessage("assistant",reply);setBusy(false);speak(reply);
+     addMessage("assistant",reply);setBusy(false);speak(reply,replyPose(reply));
    }catch(err){
      setBusy(false);
      const msg=err&&err.message?err.message:"Não consegui responder agora.";
      addMessage("assistant",msg);
-     bubbleText(msg);
+     bubbleText(msg);showGhostPose(explainSrc,1100);
    }
  }
  form.addEventListener("submit",e=>{e.preventDefault();sendMessage(input.value)});
@@ -403,7 +452,8 @@ function segredos(){
  }
  renderHistory();
  setStatus(portalSession()?"IA conectada":"entre no Portal",portalSession()?"ready":"offline");
- setTimeout(()=>{if(!history.length)speak("Pode chegar. Eu gosto de conversar sobre ideias. O que anda passando pela sua cabeça?");else bubbleText(history[history.length-1].content)},450);
+ scheduleBlink();
+ setTimeout(()=>{if(!history.length)speak("Pode chegar. Eu gosto de conversar sobre ideias. O que anda passando pela sua cabeça?",lanternSrc);else bubbleText(history[history.length-1].content)},450);
 }
 function professor(){shell("Central do Professor","A estrutura docente está separada da experiência do aluno. Nesta primeira camada, o planejamento funciona localmente; turmas online entram depois da validação visual.",`<section class="section"><div class="wrap two"><div class="panel"><h2>Montar uma sessão</h2><div class="field"><label>Nível</label><select id="level"><option>Fundamental II</option><option>Ensino Médio</option></select></div><div class="field"><label>Tema</label><select id="theme"><option>Ética</option><option>Lógica</option><option>Conhecimento</option><option>Argumentação</option><option>História da Filosofia</option></select></div><div class="field"><label>Tempo</label><select id="time"><option>10 minutos</option><option>20 minutos</option><option>50 minutos</option></select></div><button class="btn" id="plan">Gerar percurso</button></div><div class="panel"><h2>Percurso sugerido</h2><div id="planOut" class="empty">Escolha os parâmetros.</div><div class="note warning"><b>Turmas online</b><small>A área está reservada na arquitetura. A conexão de códigos de turma e painel coletivo ficará para a etapa de backend/testes, sem afetar os jogos atuais.</small></div></div></div></section>`);$("#plan").onclick=()=>{const t=$("#theme").value,map={Ética:["Tribunal das Sombras","Dilemas da Meia-Noite"],Lógica:["Sala da Lógica","Paradoxia — Circo das Falácias"],Conhecimento:["Espelho de Descartes","Caverna de Platão"],Argumentação:["Dilemas da Meia-Noite","Oficina de Argumentos"],"História da Filosofia":["Corredor dos Filósofos","Museu dos Filósofos"]};$("#planOut").className="";$("#planOut").innerHTML=(map[t]||[]).map((x,i)=>`<div class="note success"><b>${i+1}. ${x}</b><small>${i?"Aprofundamento":"Disparador inicial"}</small></div>`).join("")}}
 const page=document.body.dataset.page;({hub,grimorio,diario,museu,oficina,bestiario,cartas,perfil,teatro,fonografo,mapa,segredos,professor}[page]||hub)();
