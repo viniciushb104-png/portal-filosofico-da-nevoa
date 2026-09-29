@@ -41,8 +41,8 @@ async function getGenerator(){
 
 function cleanReply(text){
   return String(text||"")
-    .replace(/<\\/?think>/gi,"")
-    .replace(/^\\s*(assistant|amigo da névoa)\\s*:\\s*/i,"")
+    .replace(/<\/?think>/gi,"")
+    .replace(/^\s*(assistant|amigo da névoa)\s*:\s*/i,"")
     .trim();
 }
 
