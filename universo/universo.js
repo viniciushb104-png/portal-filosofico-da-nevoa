@@ -572,7 +572,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  function ensureLocalAIWorker(){
    if(localAIWorker)return localAIWorker;
    if(!("Worker" in window)||!("gpu" in navigator))throw new Error("local_ai_unavailable");
-   localAIWorker=new Worker("amigo-nevoa-ai.js?v=1",{type:"module"});
+   localAIWorker=new Worker("amigo-nevoa-ai.js?v=2",{type:"module"});
    localAIWorker.onmessage=e=>{
      const d=e.data||{};
      if(d.type==="progress"){
