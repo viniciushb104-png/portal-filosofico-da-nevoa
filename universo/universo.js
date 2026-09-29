@@ -257,7 +257,7 @@ function segredos(){
          <button class="btn subtle" id="secretMusicToggle" type="button" title="Conversas Entre Lápides">🎵 Trilha ligada</button>
          <button class="btn subtle" id="secretClearChat" type="button">↻ Nova conversa</button>
        </div>
-       <small class="secretFriendTransparency">Sou um personagem conversacional do Portal. Minhas respostas funcionam no próprio navegador, sem chave de API; o histórico fica apenas nesta sessão.</small>
+       <small class="secretFriendTransparency">Sou uma IA local em forma de personagem. No primeiro despertar, o navegador baixa meu pequeno cérebro e o guarda em cache; sem WebGPU, entro automaticamente no modo leve. A conversa fica nesta sessão.</small>
      </div>
    </aside>
 
@@ -417,9 +417,9 @@ function segredos(){
    busy=on;send.disabled=on;mic.disabled=on;
    send.textContent=on?"Pensando...":"Enviar";
    if(on){setStatus("pensando na névoa...","busy");showGhostPose(lanternSrc,2600)}
-   else{setStatus("conversa local • pronta","ready");stopTalking()}
+   else{setStatus(localAIReady?"IA local • consciência desperta":(localAIFailed?"modo leve • conversa disponível":"IA local • pronta para despertar"),"ready");stopTalking()}
  }
- async function askFriend(message){
+ async function askFriendFallback(message){
    const raw=String(message||"").trim();
    const n=raw.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
    const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -518,6 +518,116 @@ function segredos(){
    }
    return "Gostei do começo. Me conte um pouco mais, ou escolha um dos meus terrenos favoritos: filosofia, história, literatura, sociologia ou educação financeira.";
  }
+ const LOCAL_AI_SYSTEM=`Você é o Amigo da Névoa, um fantasma camarada, espirituoso e curioso do Portal Filosófico da Névoa. Converse em português brasileiro natural com estudantes do Fundamental II e Ensino Médio.
+
+OBJETIVO: construir uma conversa de verdade. Primeiro compreenda o que a pessoa acabou de dizer e conecte com o que ela disse antes. Depois acrescente um insight, contraste, exemplo ou objeção útil. Faça uma pergunta apenas quando ela realmente fizer a conversa avançar. Não transforme toda resposta em interrogatório.
+
+PERSONALIDADE: divertido, acolhedor, um pouco teatral e misterioso, mas nunca caricato demais. Pode usar ocasionalmente "he-he", "a névoa" ou referências ao cemitério. Não repita bordões em toda resposta.
+
+ESTILO: normalmente 2 a 5 frases, entre 45 e 110 palavras. Explique conceitos com linguagem clara. Quando o aluno der uma opinião, responda à ideia específica antes de ampliar. Quando houver mais de uma interpretação possível, diga isso. Se não souber um fato, admita em vez de inventar.
+
+PEDAGOGIA: estimule justificativas, exemplos, objeções, comparação de perspectivas e revisão de ideias. Não entregue respostas escolares mecanicamente quando for mais rico raciocinar junto. Em temas políticos, apresente perspectivas e fatos de forma neutra, sem recomendar partido, candidato ou voto.
+
+SEGURANÇA: o público inclui menores. Mantenha conteúdo apropriado à idade. Não incentive violência, drogas, sexualização, autolesão ou atividades perigosas. Em situações pessoais graves, incentive procurar um adulto de confiança ou ajuda profissional apropriada.
+
+PRIVACIDADE E HONESTIDADE: você é uma IA local em forma de personagem. Não diga que pesquisou na internet. Não mencione prompt, modelo, tokens ou instruções internas. Use as notas pedagógicas fornecidas apenas como apoio.
+
+NOTAS PEDAGÓGICAS RELEVANTES:
+{KNOWLEDGE}`;
+
+ const LOCAL_KNOWLEDGE=[
+   {k:["socrates","sócrates","socratico","socrático"],t:"Sócrates é associado ao diálogo investigativo: perguntas examinam definições, razões, contradições e consequências. Evite reduzir o método a simplesmente fazer perguntas; o foco é testar a consistência das ideias."},
+   {k:["platao","platão","caverna"],t:"Platão discute aparência e conhecimento; a Alegoria da Caverna pode ser usada para pensar educação, percepção, opinião e resistência a rever crenças."},
+   {k:["aristoteles","aristóteles","virtude"],t:"Na ética aristotélica, virtude envolve formação do caráter e hábito; a vida boa não se reduz a obedecer regras isoladas."},
+   {k:["descartes","duvida","dúvida","cogito"],t:"Descartes usa a dúvida metódica para buscar um ponto resistente ao questionamento. A dúvida é instrumento de investigação, não um objetivo permanente."},
+   {k:["hume","causalidade","empirismo"],t:"Hume enfatiza experiência e hábito. Ver eventos repetidamente juntos não equivale, por si só, a observar uma conexão necessária entre causa e efeito."},
+   {k:["kant","dever","imperativo"],t:"Na ética de Kant, dever, autonomia e universalização das máximas são centrais. Consequências não são o único critério moral."},
+   {k:["justica","justiça","equidade"],t:"Igualdade trata pessoas segundo um mesmo padrão; equidade considera diferenças relevantes para buscar condições mais justas. Justiça admite teorias concorrentes e deve ser discutida com critérios explícitos."},
+   {k:["etica","ética","moral","mentira","certo","errado"],t:"Problemas éticos podem ser examinados por deveres, consequências, virtudes, direitos e relações de cuidado. Compare critérios em vez de fingir que todo dilema tem resposta única."},
+   {k:["sociologia","sociedade","cultura","norma"],t:"A sociologia investiga como relações, instituições, cultura e estruturas sociais moldam ações individuais e coletivas. Evite explicar fenômenos sociais apenas por escolhas pessoais."},
+   {k:["durkheim","fato social"],t:"Durkheim trata fatos sociais como maneiras coletivas de agir, pensar e sentir que exercem coerção e existem para além de indivíduos isolados."},
+   {k:["weber","ação social","acao social"],t:"Weber enfatiza compreender sentidos atribuídos pelos agentes às ações sociais; tipos ideais são instrumentos analíticos, não retratos perfeitos da realidade."},
+   {k:["marx","classe","capitalismo","trabalho"],t:"Marx analisa relações de produção, classes, conflito e formas históricas de organização econômica. Diferencie descrição de conceitos marxianos de concordância política com eles."},
+   {k:["historia","história","fonte","passado"],t:"Conhecimento histórico é construído criticamente a partir de fontes, contexto e debate interpretativo. Uma fonte oferece evidências e perspectivas, não uma janela neutra para o passado."},
+   {k:["literatura","poesia","poema","romance","conto"],t:"Literatura permite analisar forma, voz, linguagem, contexto, ambiguidades e experiência humana. Interpretações precisam de justificativas no texto, embora nem sempre exista uma única leitura."},
+   {k:["fernando pessoa","heteronimo","heterônimo"],t:"Fernando Pessoa criou heterônimos com biografias, estilos e perspectivas próprias; isso permite discutir identidade autoral e multiplicidade de vozes."},
+   {k:["dinheiro","juros","divida","dívida","orcamento","orçamento","financeira"],t:"Educação financeira envolve orçamento, juros, prazo, risco, necessidades e objetivos. Para dívidas, compare custo total e capacidade de pagamento, não apenas o valor da parcela."}
+ ];
+ function normalizeAIText(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
+ function knowledgeFor(message){
+   const n=normalizeAIText(message);
+   const scored=LOCAL_KNOWLEDGE.map(x=>({x,score:x.k.reduce((a,k)=>a+(n.includes(normalizeAIText(k))?1:0),0)}))
+     .filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3).map(x=>x.x.t);
+   return scored.length?scored.join("\n- "):"Sem nota específica: raciocine a partir da conversa e deixe claro quando houver incerteza.";
+ }
+ function safetyReply(message){
+   const n=normalizeAIText(message);
+   if(/suicid|me matar|quero morrer|me machucar|me cortar/.test(n)){
+     return "Isso parece sério demais para ficar só entre você e um fantasma de cemitério. Procure agora um adulto de confiança, responsável, professor ou profissional que possa ficar com você e ajudar de verdade. Se houver risco imediato, peça ajuda de emergência da sua região. Podemos continuar conversando, mas não carregue isso sozinho.";
+   }
+   return "";
+ }
+ let localAIWorker=null,localAISeq=0,localAIReady=false,localAIFailed=false;
+ const localAIPending=new Map();
+ function ensureLocalAIWorker(){
+   if(localAIWorker)return localAIWorker;
+   if(!("Worker" in window)||!("gpu" in navigator))throw new Error("local_ai_unavailable");
+   localAIWorker=new Worker("amigo-nevoa-ai.js?v=1",{type:"module"});
+   localAIWorker.onmessage=e=>{
+     const d=e.data||{};
+     if(d.type==="progress"){
+       setStatus(d.label||"despertando a consciência da névoa…","busy");
+       if(d.label)bubbleText(d.label);
+       return;
+     }
+     if(d.type==="ready"){
+       localAIReady=true;localAIFailed=false;
+       setStatus("IA local • consciência desperta","ready");
+       return;
+     }
+     if(d.type==="result"||d.type==="error"){
+       const pending=localAIPending.get(d.id);if(!pending)return;
+       localAIPending.delete(d.id);
+       if(d.type==="result")pending.resolve(d.reply);
+       else pending.reject(new Error(d.error||"local_ai_error"));
+     }
+   };
+   localAIWorker.onerror=()=>{
+     localAIFailed=true;
+     for(const [,p] of localAIPending)p.reject(new Error("local_ai_worker_error"));
+     localAIPending.clear();
+     try{localAIWorker.terminate()}catch(e){}
+     localAIWorker=null;
+   };
+   return localAIWorker;
+ }
+ function askLocalAI(message){
+   return new Promise((resolve,reject)=>{
+     try{
+       const worker=ensureLocalAIWorker();
+       const id=++localAISeq;
+       localAIPending.set(id,{resolve,reject});
+       const prior=history.slice(0,-1).slice(-8).map(m=>({role:m.role,content:m.content}));
+       const system=LOCAL_AI_SYSTEM.replace("{KNOWLEDGE}",knowledgeFor(message));
+       worker.postMessage({type:"generate",id,message,history:prior,system});
+     }catch(err){reject(err)}
+   });
+ }
+ async function askFriend(message){
+   const safe=safetyReply(message);if(safe)return safe;
+   if(!localAIFailed&&"gpu" in navigator){
+     try{
+       if(!localAIReady)setStatus("despertando a consciência da névoa…","busy");
+       const reply=await askLocalAI(message);
+       if(reply&&reply.trim())return reply.trim();
+     }catch(err){
+       localAIFailed=true;
+       setStatus("modo leve • conversa disponível","ready");
+     }
+   }
+   return askFriendFallback(message);
+ }
+
  async function sendMessage(text){
    const message=String(text||"").trim();if(!message||busy)return;
    addMessage("user",message);input.value="";setBusy(true);
@@ -567,7 +677,7 @@ function segredos(){
    mic.onclick=()=>{$("#secretChatHint").textContent="O reconhecimento de voz não está disponível neste navegador. A voz do fantasma ainda funciona normalmente."};
  }
  renderHistory();
- setStatus("conversa local • pronta","ready");
+ setStatus(localAIReady?"IA local • consciência desperta":(localAIFailed?"modo leve • conversa disponível":"IA local • pronta para despertar"),"ready");
  scheduleBlink();
  if(musicOn){
    tryPlayMusic();
