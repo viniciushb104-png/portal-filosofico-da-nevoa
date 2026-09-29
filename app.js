@@ -196,6 +196,7 @@ function applyServerProgress(snapshot){
    if(k==='platform_descartes')state.completed.descartesPlataforma=Math.max(Number(state.completed.descartesPlataforma||0),score);
    if(k==='platform_hume')state.completed.humePlataforma=Math.max(Number(state.completed.humePlataforma||0),score);
    if(k==='platform_ethics'){state.completed.eticaPlataforma=Math.max(Number(state.completed.eticaPlataforma||0),score);if(score>=100)state.completed.labirintoCompleto=1;}
+   if(k==='rpg_paradoxia')state.completed.rpgParadoxia=Math.max(Number(state.completed.rpgParadoxia||0),score);
  });
  saveState();checkAchievements();setOnlineProfile(p);updateUI();
 }
