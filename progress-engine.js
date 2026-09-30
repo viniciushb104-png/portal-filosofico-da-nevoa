@@ -109,11 +109,11 @@ function analyze({local=null,progressRows=[],cloudRpg=null,profile=null,routes=n
  const labyrinth={phases,doneCount,pct,started:doneCount>0,completed:doneCount===5,state:stateLabel(doneCount>0,doneCount===5),nextPhase:phases[nextIndex]};
 
  const rpg=chooseRpg(localRpg(),cloudRpg);
- const claimPara=Number(claims.rpg_paradoxia||0);
+ const claimPara=Math.max(Number(claims.rpg_paradoxia||0),Number(completed.rpgParadoxia||0));
  const hasSave=!!(rpg&&typeof rpg==='object');
- const started=hasSave?(!!rpg.classKey||Number(rpg.sceneIndex||0)>0||Number(rpg.score||0)>0||Object.keys(rpg.flags||{}).length>0||Object.keys(rpg.awards||{}).length>0||rpg.completed===true):claimPara>0;
- const score=hasSave?Math.max(0,Number(rpg.score||0)):Math.max(0,claimPara);
- const paraDone=(rpg?.completed===true)||(!hasSave&&claimPara>=120);
+ const paraDone=(rpg?.completed===true)||claimPara>=120;
+ const started=paraDone||(hasSave?(!!rpg.classKey||Number(rpg.sceneIndex||0)>0||Number(rpg.score||0)>0||Object.keys(rpg.flags||{}).length>0||Object.keys(rpg.awards||{}).length>0):claimPara>0);
+ const score=hasSave?Math.max(0,Number(rpg.score||0),paraDone?claimPara:0):Math.max(0,claimPara);
  const paraPct=paraDone?100:Math.min(95,Math.round(Math.min(120,score)/120*100));
  const paradoxia={save:rpg,score,pct:paraPct,started,completed:paraDone,state:stateLabel(started,paraDone),place:rpg?.world?.place||null};
 
