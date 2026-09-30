@@ -783,43 +783,27 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  }
  async function askRemoteAI(message,onChunk){
    if(!REMOTE_AI_URL)throw new Error("remote_ai_not_configured");
-   const prior=history.slice(0,-1).slice(-8).map(m=>({role:m.role,content:String(m.content||"").slice(0,1200)}));
-
-   const requestOnce=async()=>{
-     const controller=new AbortController();
-     const timeout=setTimeout(()=>controller.abort(),60000);
-     try{
-       const res=await fetch(REMOTE_AI_URL,{
-         method:"POST",
-         headers:{"Content-Type":"application/json","Accept":"application/json"},
-         body:JSON.stringify({message:String(message||"").slice(0,1600),history:prior,stream:false}),
-         signal:controller.signal
-       });
-       const data=await res.json().catch(()=>({}));
-       if(!res.ok){
-         const err=new Error(data.error||("remote_ai_http_"+res.status));
-         err.status=res.status;
-         err.code=data.code||"";
-         throw err;
-       }
-       const reply=String(data.reply||data.response||"").trim();
-       if(!reply)throw new Error("remote_ai_empty");
-       return reply;
-     }finally{clearTimeout(timeout)}
-   };
-
+   const prior=history.slice(0,-1).slice(-6).map(m=>({role:m.role,content:String(m.content||"").slice(0,1000)}));
+   const controller=new AbortController();
+   const timeout=setTimeout(()=>controller.abort(),120000);
    try{
-     return await requestOnce();
-   }catch(err){
-     const retryable=
-       err?.name==="AbortError" ||
-       [408,429,502,503,504].includes(Number(err?.status||0)) ||
-       /tempor|timeout|capacity|network|fetch|empty|aborted/i.test(String(err?.message||""));
-     if(!retryable||err?.code==="daily_limit")throw err;
-     setStatus("✦ Amigo da Névoa • reorganizando a névoa","busy");
-     await new Promise(r=>setTimeout(r,900));
-     return requestOnce();
-   }
+     const res=await fetch(REMOTE_AI_URL,{
+       method:"POST",
+       headers:{"Content-Type":"application/json","Accept":"application/json"},
+       body:JSON.stringify({message:String(message||"").slice(0,1400),history:prior}),
+       signal:controller.signal
+     });
+     const data=await res.json().catch(()=>({}));
+     if(!res.ok){
+       const err=new Error(data.error||("remote_ai_http_"+res.status));
+       err.status=res.status;
+       err.code=data.code||"";
+       throw err;
+     }
+     const reply=String(data.reply||data.response||"").trim();
+     if(!reply)throw new Error("remote_ai_empty");
+     return reply;
+   }finally{clearTimeout(timeout)}
  }
  async function askFriend(message,onChunk){
    const safe=safetyReply(message);if(safe)return safe;
@@ -829,7 +813,10 @@ NOTAS PEDAGÓGICAS RELEVANTES:
        return await askRemoteAI(message,onChunk);
      }catch(err){
        console.warn("Amigo da Névoa remoto indisponível.",err);
-       throw new Error("A névoa oscilou por um instante. Tente enviar sua mensagem novamente.");
+       if(err?.code==="daily_limit")throw new Error("O Amigo da Névoa gastou a energia de IA disponível por hoje. Amanhã ele desperta novamente.");
+       if(err?.code==="capacity")throw new Error("Muitos espíritos chamaram a IA ao mesmo tempo. Espere alguns segundos e tente novamente.");
+       if(err?.name==="AbortError")throw new Error("A resposta demorou além do normal. Tente novamente em alguns instantes.");
+       throw new Error("A conexão com o Amigo da Névoa falhou por um instante. Tente novamente.");
      }
    }
    if(deepMode&&!localAIFailed&&"gpu" in navigator){
