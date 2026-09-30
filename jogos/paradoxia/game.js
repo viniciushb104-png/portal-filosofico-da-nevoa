@@ -281,7 +281,8 @@ function addContinue(label='Continuar a jornada →',fn=nextScene){
 }
 function resolveDilemma(choice){
  const sc=scene();if(state.flags[sc.id])return;
- state.flags[sc.id]=choice.key;applyEffects(choice.effects);addConcept(sc.concept);awardOnce(sc.id,10);
+ state.flags[sc.id]=choice.key;applyEffects(choice.effects);addConcept(sc.concept);const gained=awardOnce(sc.id,10);
+ window.NevoaActivity?.once('paradoxia:encounter:'+sc.id,{type:'progress',icon:sc.icon,title:sc.location+' concluída',text:sc.concept,xp:gained||0,href:'../../universo/perfil.html'});
  showFeedback(choice.feedback,'neutral');
  $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Conceito registrado:</b> '+sc.concept;
  saveLocal();updateHUD();renderLog();addContinue();
@@ -303,7 +304,8 @@ function resolveBattle(index){
  const sc=scene(),opt=sc.options[index];
  $$('.choice').forEach(b=>b.disabled=true);
  if(opt.correct){
-   awardOnce(sc.id,15);addConcept(sc.concept);
+   const gained=awardOnce(sc.id,15);addConcept(sc.concept);
+   window.NevoaActivity?.once('paradoxia:encounter:'+sc.id,{type:'progress',icon:sc.icon,title:sc.location+' concluída',text:sc.concept,xp:gained||0,href:'../../universo/perfil.html'});
    showFeedback('✓ '+opt.feedback,'good');
    $('#conceptBox').hidden=false;$('#conceptBox').innerHTML='<b>Conceito registrado:</b> '+sc.concept;
    saveLocal();updateHUD();renderLog();
@@ -495,7 +497,7 @@ function interactAmbient(id){
  if(!already){
    state.worldFlags[id]=true;
    state.inventory.mistCoins+=Number(item.coins)||0;
-   if(item.secret)state.inventory.secrets=Math.min(2,state.inventory.secrets+1);
+   if(item.secret){state.inventory.secrets=Math.min(2,state.inventory.secrets+1);window.NevoaActivity?.once('paradoxia:secret:'+id,{type:'secret',icon:item.icon||'🔮',title:'Segredo descoberto em Paradoxia',text:item.concept||item.speaker||'Uma descoberta foi registrada no mapa.',href:'../../universo/perfil.html'})}
    if(item.concept)addConcept(item.concept);
    if(item.effect)applyEffects(item.effect);
    saveLocal();
@@ -687,6 +689,8 @@ function continueExploring(){
 async function finishGame(){
  closeScene();renderHUD();
  const [title,text]=dominantEnding();
+ window.NevoaActivity?.once('paradoxia:encounter:boss',{type:'phase',icon:'👑',title:'Castelo do Paradoxo concluído',text:'O confronto final contra Lorde Certeza Absoluta foi vencido.',href:'../../universo/perfil.html'});
+ window.NevoaActivity?.once('achievement:rpgParadoxia',{type:'memory',icon:'🎭',title:'Cidadão de Paradoxia',text:'Capítulo I concluído — '+title+'.',xp:state.score,href:'../../universo/grimorio.html'});
  window.NevoaNotify?.phase('Capítulo I de Paradoxia concluído',0,'Seu final foi registrado: '+title+'.','🎭','phase:paradoxia:chapter1');
  window.NevoaNotify?.memory('Cidadão de Paradoxia','Você concluiu o primeiro capítulo do Reino das Escolhas.','🎭','achievement:rpgParadoxia');
  $('#endingTitle').textContent=title;$('#endingText').textContent=text;
