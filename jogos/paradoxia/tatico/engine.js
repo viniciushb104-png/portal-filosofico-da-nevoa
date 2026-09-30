@@ -657,6 +657,7 @@ async function end(win,msg){
  if(state.ended)return;state.ended=true;state.phase='end';$('#commandBox').hidden=true;
  const bonus=win?Math.max(0,(stage.turnLimit-state.turn)*20):0,score=Math.max(0,state.score+bonus);
  const gains=await awardProgress(win);
+ if(win)window.NevoaActivity?.once('paradoxia:mission:'+stage.key,{type:'mission',icon:stage.icon||'🏆',title:(stage.title||'Missão de Paradoxia')+' concluída',text:stage.theme||stage.objective?.text||'Missão tática concluída.',xp:score,href:'../../../universo/perfil.html'});
  await playOutcomeScene(win,msg,score,gains);
 
  const server=$('#serverResult');server.textContent='';
