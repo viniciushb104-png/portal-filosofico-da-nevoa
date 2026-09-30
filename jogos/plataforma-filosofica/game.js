@@ -327,6 +327,7 @@ function openBossQuiz(){
 function winGame(perfectBoss=false){
  won=true;paused=true;
  const newXP=savePortalWin();
+ window.NevoaActivity?.once('phase:labyrinth:1',{type:'phase',icon:'🏛️',title:'Fase 1 concluída — Sócrates',text:'O Caminho de Sócrates foi registrado na sua Jornada.',xp:newXP||0,href:'../../universo/perfil.html'});
  window.NevoaNotify?.phase('Fase 1 concluída — Sócrates',newXP||0,'O Caminho de Sócrates foi registrado na sua Jornada.','🏛️','phase:labyrinth:1');
  const collected=scrolls.filter(s=>s.got).length;
  $('#finalScrolls').textContent=collected+'/8';
