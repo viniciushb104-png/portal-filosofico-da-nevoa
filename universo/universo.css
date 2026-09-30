@@ -1838,3 +1838,17 @@ body[data-page="segredos"] textarea{
  .journeyParadoxiaMissions{grid-template-columns:1fr}
  .journeyParaSubhead{align-items:flex-start;flex-direction:column}
 }
+
+
+/* V12 — Crônica real do Explorador */
+.activityChronicle{min-height:100%}
+.journeyChronicleLead{margin:4px 0 12px;color:#96879f;font-size:.76rem;line-height:1.45}
+.journeyActivityList{display:grid;gap:8px}
+.journeyActivityItem{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 10px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:rgba(255,255,255,.022)}
+.journeyActivityIcon{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;border:1px solid #5a3866;background:#100817;font-size:19px}
+.journeyActivityItem b,.journeyActivityItem small,.journeyActivityItem em{display:block}.journeyActivityItem b{font-size:9px;color:#e3d7e8}.journeyActivityItem small{font-size:7px;color:#9b8da3;line-height:1.4;margin-top:2px}.journeyActivityItem em{font-size:7px;color:#6f6576;font-style:normal;margin-top:3px}.journeyActivityItem>span{font-size:8px;color:#f0bd72;font-weight:900;white-space:nowrap}
+.journeyActivityItem.memory{border-color:rgba(213,169,75,.28);background:rgba(85,57,18,.1)}.journeyActivityItem.memory .journeyActivityIcon{border-color:#aa7c32;background:#211507}
+.journeyActivityItem.phase,.journeyActivityItem.mission{border-color:rgba(111,74,137,.3)}.journeyActivityItem.secret{border-color:rgba(65,134,111,.3)}
+.journeyActivityItem.legacy{opacity:.68}.journeyActivityItem.legacy em{color:#9d8f73}
+.journeyActivityEmpty{padding:15px;border:1px dashed rgba(255,255,255,.08);border-radius:12px;color:#82768a;font-size:.75rem;text-align:center}
+@media(max-width:620px){.journeyActivityItem{grid-template-columns:38px minmax(0,1fr)}.journeyActivityItem>span{grid-column:2}.journeyActivityIcon{width:34px;height:34px;font-size:17px}}
