@@ -224,7 +224,7 @@ const repaintJourney=(xp,progressRows=[],cloudRpg=null,missionRows=[])=>{
 async function loadProfile(){
  paintAvatar("avatar-01");
  if(!window.NevoaOnline){hint.textContent="O serviço de conta não carregou. Reabra a página para tentar novamente.";login.hidden=false;return}
- if(!window.NevoaOnline.getSession()){nameEl.textContent="Explorador da Névoa";hint.textContent="Entre na sua conta para sincronizar sua Jornada, nome e avatar.";login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return}
+ if(!window.NevoaOnline.getSession()){window.NevoaActivity?.baseline?.(jd.core);renderActivityChronicle();nameEl.textContent="Explorador da Névoa";hint.textContent="Entre na sua conta para sincronizar sua Jornada, nome e avatar.";login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return}
  let snapshot=null,cloudRpg=null,missionRows=[];
  try{snapshot=await window.NevoaOnline.syncLocal(progress())}catch(e){}
  try{cloudRpg=await window.NevoaOnline.loadRpgState()}catch(e){}
