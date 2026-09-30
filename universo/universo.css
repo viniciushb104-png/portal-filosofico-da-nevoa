@@ -1767,3 +1767,44 @@ body[data-page="segredos"] textarea{
 @media(max-width:600px) and (prefers-reduced-motion:reduce){
   body[data-page="segredos"] .secretGhost{animation:none}
 }
+
+
+/* V10 — Linha da Jornada */
+.journeyTimelineHead{margin-top:26px}
+.journeyTimeline{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:12px 0 28px}
+.journeyTimeline::before{content:"";position:absolute;left:9%;right:9%;top:49px;height:2px;background:linear-gradient(90deg,#6f3b7a,#6f3b7a 33%,#704738 67%,#6e552f);opacity:.45;z-index:0}
+.journeyTimelineChapter{position:relative;z-index:1;min-height:190px;padding:19px 15px 15px;border-radius:18px;border:1px solid rgba(139,113,151,.22);background:linear-gradient(180deg,rgba(19,12,25,.96),rgba(10,7,14,.98));text-align:center;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease,filter .2s ease;overflow:hidden}
+.journeyTimelineChapter:hover{transform:translateY(-2px)}
+.journeyTimelineNumber{position:absolute;left:10px;top:9px;font:700 11px Georgia,serif;color:#796d80}
+.journeyTimelineSigil{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:29px;background:#0b0710;border:1px solid rgba(121,105,132,.3);box-shadow:inset 0 0 22px rgba(0,0,0,.5);margin-bottom:8px}
+.journeyTimelineState{font-size:.66rem;letter-spacing:.11em;text-transform:uppercase;color:#8f8395}
+.journeyTimelineChapter h3{margin:7px 0 5px;font-size:1rem}
+.journeyTimelineMeta{margin:0 0 10px;color:#9d91a4;font-size:.78rem;line-height:1.35}
+.journeyTimelineProgress{width:100%;height:6px;border-radius:999px;background:#08050c;border:1px solid rgba(255,255,255,.06);overflow:hidden;margin-top:auto}
+.journeyTimelineProgress i{display:block;height:100%;background:linear-gradient(90deg,#6e407d,#9c5eaa);transition:width .35s ease}
+.journeyTimelinePct{margin-top:6px;font-size:.72rem;color:#8e8295}
+.journeyTimelineChapter.pending{opacity:.58;filter:saturate(.55)}
+.journeyTimelineChapter.pending .journeyTimelineSigil{filter:grayscale(.65)}
+.journeyTimelineChapter.active{opacity:1;filter:none;border-color:rgba(187,93,220,.48);box-shadow:0 18px 38px rgba(0,0,0,.25),inset 0 0 30px rgba(166,77,203,.05)}
+.journeyTimelineChapter.active .journeyTimelineSigil{border-color:#a352bd;background:radial-gradient(circle at 35% 30%,#5d2a70,#170b20 72%);box-shadow:0 0 24px rgba(170,72,211,.22),inset 0 0 22px rgba(0,0,0,.35)}
+.journeyTimelineChapter.active .journeyTimelineState,.journeyTimelineChapter.active .journeyTimelinePct{color:#d7a7e8}
+.journeyTimelineChapter.active .journeyTimelineProgress i{background:linear-gradient(90deg,#9d49c2,#dd73f3)}
+.journeyTimelineChapter.done{opacity:1;filter:none;border-color:rgba(228,182,86,.5);box-shadow:0 18px 38px rgba(0,0,0,.25),inset 0 0 32px rgba(213,161,65,.05)}
+.journeyTimelineChapter.done .journeyTimelineSigil{border-color:#d8aa51;background:radial-gradient(circle at 35% 30%,#745021,#20140b 72%);box-shadow:0 0 25px rgba(232,181,79,.2),inset 0 0 20px rgba(255,214,120,.03)}
+.journeyTimelineChapter.done .journeyTimelineState,.journeyTimelineChapter.done .journeyTimelinePct{color:#edcf83}
+.journeyTimelineChapter.done .journeyTimelineProgress i{background:linear-gradient(90deg,#b57b28,#f0c96e)}
+@media(max-width:900px){
+ .journeyTimeline{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .journeyTimeline::before{display:none}
+}
+@media(max-width:560px){
+ .journeyTimeline{grid-template-columns:1fr;gap:9px}
+ .journeyTimelineChapter{min-height:0;display:grid;grid-template-columns:54px minmax(0,1fr) auto;grid-template-rows:auto auto auto;gap:3px 10px;text-align:left;align-items:center;padding:12px 13px}
+ .journeyTimelineNumber{left:auto;right:10px;top:8px}
+ .journeyTimelineSigil{width:50px;height:50px;font-size:24px;grid-row:1/4;margin:0}
+ .journeyTimelineState{grid-column:2}
+ .journeyTimelineChapter h3{grid-column:2;margin:0;font-size:.96rem}
+ .journeyTimelineMeta{grid-column:2;margin:0;font-size:.72rem}
+ .journeyTimelineProgress{grid-column:1/4;margin-top:7px}
+ .journeyTimelinePct{grid-column:3;grid-row:2;margin:0;align-self:center}
+}
