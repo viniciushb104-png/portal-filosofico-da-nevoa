@@ -182,8 +182,7 @@ function analyze({local=null,progressRows=[],cloudRpg=null,profile=null,routes=n
  else objective='Revisitar suas conquistas e Memórias despertas.';
 
  const phaseTrophy=(idx,id,icon,name,label)=>{
-  const p=phases[idx],current=Math.min(p.score,p.score<0?0:p.score),target=p.score>=p.score&&p.done?p.score:p.score;
-  const threshold=LAB_PHASES[idx].score,registered=Math.min(threshold,Math.max(0,Number(p.score||0)));
+  const p=phases[idx],threshold=LAB_PHASES[idx].score,registered=Math.min(threshold,Math.max(0,Number(p.score||0)));
   const pctPhase=p.done?100:Math.min(95,Math.round(registered/Math.max(1,threshold)*100));
   return {id,icon,name,text:'Conclua a Fase '+(idx+1)+' — '+label+'.',
    requirement:registered>0&&!p.done?registered+'/'+threshold+' pontos registrados • falta concluir Fase '+(idx+1)+' — '+label:'Falta concluir Fase '+(idx+1)+' — '+label,
