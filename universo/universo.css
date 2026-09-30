@@ -1852,3 +1852,36 @@ body[data-page="segredos"] textarea{
 .journeyActivityItem.legacy{opacity:.68}.journeyActivityItem.legacy em{color:#9d8f73}
 .journeyActivityEmpty{padding:15px;border:1px dashed rgba(255,255,255,.08);border-radius:12px;color:#82768a;font-size:.75rem;text-align:center}
 @media(max-width:620px){.journeyActivityItem{grid-template-columns:38px minmax(0,1fr)}.journeyActivityItem>span{grid-column:2}.journeyActivityIcon{width:34px;height:34px;font-size:17px}}
+
+
+/* V13 — Próxima conquista inteligente */
+.journeyNextAchievement{
+ display:grid;
+ grid-template-columns:54px minmax(0,1fr) auto;
+ gap:12px;
+ align-items:center;
+ margin-top:10px;
+ padding:13px 15px;
+ border-color:rgba(218,170,77,.28);
+ background:radial-gradient(circle at 7% 50%,rgba(195,139,53,.12),transparent 24%),linear-gradient(90deg,#160f12,#0d0812);
+ text-decoration:none;
+ color:inherit;
+ transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.journeyNextAchievement:hover{transform:translateY(-1px);border-color:rgba(238,190,91,.5);box-shadow:0 16px 34px rgba(0,0,0,.2)}
+.journeyAchievementSeal{
+ width:50px;height:50px;border-radius:50%;display:grid;place-items:center;
+ border:1px solid #a77a36;background:radial-gradient(circle at 35% 30%,#694718,#1f1408 72%);
+ box-shadow:0 0 20px rgba(225,174,72,.16);font-size:24px
+}
+.journeyAchievementCopy small{display:block;color:#d6a95c;font-size:8px;font-weight:950;letter-spacing:.13em}
+.journeyAchievementCopy h3{margin:3px 0 2px;font-size:16px}
+.journeyAchievementCopy p{margin:0;color:#b8a58a;font-size:9px;line-height:1.4}
+.journeyAchievementTrack{height:5px;margin-top:7px;border-radius:999px;background:#09060a;border:1px solid rgba(255,255,255,.055);overflow:hidden}
+.journeyAchievementTrack i{display:block;height:100%;background:linear-gradient(90deg,#9f6f29,#efc66e);transition:width .35s ease}
+.journeyNextAchievement>strong{font:900 16px Georgia,serif;color:#edc873;white-space:nowrap}
+@media(max-width:620px){
+ .journeyNextAchievement{grid-template-columns:46px minmax(0,1fr);padding:12px}
+ .journeyAchievementSeal{width:42px;height:42px;font-size:21px}
+ .journeyNextAchievement>strong{grid-column:2;font-size:13px}
+}
