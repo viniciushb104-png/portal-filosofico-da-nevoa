@@ -94,50 +94,28 @@ $$('.filter').forEach(btn=>btn.onclick=()=>{$$('.filter').forEach(b=>b.classList
 $$('.level').forEach(el=>el.onclick=()=>{document.querySelector('#jogos').scrollIntoView({behavior:'smooth'});$(`.filter[data-filter="${el.dataset.level}"]`).click()});
 $('#resetBtn').onclick=()=>{if(confirm('Reiniciar todo o progresso salvo neste dispositivo?')){localStorage.removeItem('nevoaProgressV4');localStorage.removeItem('nevoaProgressV3');location.reload()}};
 function updateMap(){$$('.mapNode[data-game]').forEach(n=>{const id=n.dataset.game;const done=id==='socrates'?state.socrates>=7:(state.completed[id]||0)>=20;n.classList.toggle('done',done)})}
-function getParadoxiaHomeSave(){
- const local=(()=>{try{return JSON.parse(localStorage.getItem('paradoxiaSaveV1')||localStorage.getItem('paradoxiaSave')||'null')}catch(e){return null}})();
- const cloud=homeCloudRpg&&typeof homeCloudRpg.save_data==='object'?homeCloudRpg.save_data:null;
- const rank=x=>x?((x.completed?1:0)*100000)+(Object.keys(x.flags||{}).length*2000)+(Object.keys(x.awards||{}).length*250)+(Number(x.score)||0):0;
- return rank(cloud)>rank(local)?cloud:local;
+function homeJourney(){
+ if(!window.NevoaProgress)return null;
+ return window.NevoaProgress.analyze({
+  local:state,cloudRpg:homeCloudRpg,profile:onlineProfileData,
+  routes:{
+   mansion:'#jogos',
+   labyrinth:['jogos/plataforma-filosofica/','jogos/plataforma-filosofica/fase2/','jogos/plataforma-filosofica/fase3/','jogos/plataforma-filosofica/fase4/','jogos/plataforma-filosofica/fase5/'],
+   paradoxia:'jogos/paradoxia/',memories:'universo/grimorio.html'
+  }
+ });
 }
 function resolveContinueJourney(){
- const c=state.completed||{};
- const mansionRooms=Math.min(7,Number(state.socrates||0));
- const lab=[Number(c.plataforma||0)>=60,Number(c.plataoPlataforma||0)>=70,Number(c.descartesPlataforma||0)>=80,Number(c.humePlataforma||0)>=90,Number(c.eticaPlataforma||0)>=100];
- const labDone=lab.filter(Boolean).length;
- const labSteps=[
-  {phase:1,name:'Sócrates',href:'jogos/plataforma-filosofica/'},
-  {phase:2,name:'Platão',href:'jogos/plataforma-filosofica/fase2/'},
-  {phase:3,name:'Descartes',href:'jogos/plataforma-filosofica/fase3/'},
-  {phase:4,name:'Hume',href:'jogos/plataforma-filosofica/fase4/'},
-  {phase:5,name:'Ética',href:'jogos/plataforma-filosofica/fase5/'}
- ];
- let nextIndex=lab.findIndex(x=>!x);if(nextIndex<0)nextIndex=4;const nextLab=labSteps[nextIndex];
- const para=getParadoxiaHomeSave();
- const paraStarted=!!(para&&para.classKey)||Number(para&&para.score||0)>0||Object.keys(para&&para.flags||{}).length>0||Object.keys(para&&para.awards||{}).length>0;
- const paraDone=!!(para&&para.completed===true);
- const paraPct=paraDone?100:Math.min(95,Math.round(Math.min(120,Number(para&&para.score||0))/120*100));
- const last=readLastActivity();
- const mansion={kind:'mansion',icon:'🏚️',eyebrow:'RETOMAR MANSÃO',title:mansionRooms?'Continue no cômodo '+Math.min(7,mansionRooms+1)+' de 7':'Comece pela Mansão de Sócrates',text:mansionRooms?'Sua próxima pergunta está esperando na Mansão.':'Sete cômodos de diálogo, perguntas e pistas abrem a primeira grande aventura.',href:'#jogos',pct:Math.round(mansionRooms/7*100),meta:mansionRooms+'/7 cômodos atravessados'};
- const labyrinth={kind:'labyrinth',icon:'🎮',eyebrow:'RETOMAR LABIRINTO',title:'Fase '+nextLab.phase+' — '+nextLab.name,text:labDone?'Você concluiu '+labDone+' de 5 fases. A próxima porta já está definida.':'O primeiro caminho do Labirinto começa com Sócrates.',href:nextLab.href,pct:labDone*20,meta:labDone+'/5 fases concluídas'};
- const paradox={kind:'paradoxia',icon:'🎭',eyebrow:'RETOMAR PARADOXIA',title:paraStarted?'Voltar ao Reino das Escolhas':'Adentrar Paradoxia',text:paraStarted?(para&&para.world&&para.world.place?'Último local registrado: '+para.world.place+'.':'Seu RPG está salvo e pronto para continuar.'):'Escolhas, missões e duelos de argumentos aguardam no reino.',href:'jogos/paradoxia/',pct:paraPct,meta:paraStarted?(paraPct+'% do capítulo registrado'):'Capítulo I ainda não iniciado'};
- const memories={kind:'memories',icon:'🏆',eyebrow:'JORNADA PRINCIPAL CONCLUÍDA',title:'Revisite suas Memórias',text:'Os grandes caminhos foram percorridos. Reveja troféus, registros e descobertas no Grimório.',href:'universo/grimorio.html',pct:100,meta:'Grandes caminhos concluídos',complete:true};
- if(last&&last.kind==='paradoxia'&&paraStarted&&!paraDone)return paradox;
- if(last&&last.kind==='labyrinth'&&labDone<5)return labyrinth;
- if(last&&last.kind==='mansion'&&mansionRooms<7)return mansion;
- if(paraStarted&&!paraDone)return paradox;
- if(labDone>0&&labDone<5)return labyrinth;
- if(mansionRooms<7)return mansion;
- if(labDone<5)return labyrinth;
- if(!paraDone)return paradox;
- return memories;
+ const j=homeJourney();
+ if(j)return j.next;
+ return {kind:'mansion',icon:'🏚️',eyebrow:'SUA JORNADA',title:'Entre na Mansão de Sócrates',text:'A primeira porta da jornada espera por perguntas melhores.',href:'#jogos',pct:0,meta:'0/7 cômodos atravessados'};
 }
 function updateContinueCard(){
  const card=$('#continueJourneyCard');if(!card)return;
  const x=resolveContinueJourney();
  const set=(id,val)=>{const el=$(id);if(el)el.textContent=val};
- set('#continueJourneyIcon',x.icon);set('#continueJourneyEyebrow',x.eyebrow);set('#continueJourneyTitle',x.title);set('#continueJourneyText',x.text);set('#continueJourneyMeta',x.meta);
- const fill=$('#continueJourneyFill');if(fill)fill.style.width=x.pct+'%';
+ set('#continueJourneyIcon',x.icon);set('#continueJourneyEyebrow',x.eyebrow||'SUA JORNADA');set('#continueJourneyTitle',x.title);set('#continueJourneyText',x.text);set('#continueJourneyMeta',x.meta);
+ const fill=$('#continueJourneyFill');if(fill)fill.style.width=(x.pct||0)+'%';
  const btn=$('#continueJourneyBtn');if(btn){btn.href=x.href;btn.textContent=x.complete?'Abrir Memórias →':'Continuar daqui →';if(x.kind==='mansion')btn.onclick=e=>{e.preventDefault();openSocrates()};else btn.onclick=null}
  card.classList.toggle('complete',!!x.complete);
 }
@@ -146,7 +124,7 @@ async function refreshContinueCloud(){
  try{homeCloudRpg=await window.NevoaOnline.loadRpgState()}catch(e){homeCloudRpg=null}
  updateContinueCard();
 }
-function currentRank(){const ranks=[['Aprendiz da Névoa',0],['Investigador da Névoa',60],['Filósofo da Cripta',140],['Mestre dos Enigmas',240],['Guardião do Portal',360]];let current=ranks[0],next=ranks[1];for(let i=0;i<ranks.length;i++) if(state.xp>=ranks[i][1]){current=ranks[i]; next=ranks[i+1]||null} return {current,next};}
+function currentRank(){const r=window.NevoaProgress?.rank(state.xp);if(r)return {current:[r.name,r.min],next:r.next?[r.next,r.max]:null};return {current:['Aprendiz da Névoa',0],next:['Investigador da Névoa',60]};}
 function updateUI(){checkAchievements();const {current,next}=currentRank();$('#rankTitle').textContent=current[0];$('#profileRank').textContent=current[0].replace(' da Névoa','').replace(' dos Enigmas','').replace(' do Portal','');$('#profileXP').textContent=state.xp+' XP';$('#xpText').textContent=state.xp+' pontos conquistados.';$('#nextRank').textContent=next?`Próximo nível: ${next[1]} XP`:'Nível máximo alcançado';$('#progressFill').style.width=Math.min(100,state.xp/360*100)+'%';renderAchievements();updateMap();renderHall();updateContinueCard();}
 
 const quotes=['“Uma boa pergunta pode abrir portas que uma resposta pronta mantém fechadas.”','“Pensar é desconfiar do primeiro caminho quando existem outras portas.”','“Argumentar não é vencer alguém: é testar razões.”','“A dúvida pode ser uma lanterna quando usada com método.”']; $('#dailyQuote').textContent=quotes[new Date().getDate()%quotes.length];
@@ -240,20 +218,11 @@ function setOnlineProfile(profile,logged=!!window.NevoaOnline?.getSession?.()){
 }
 function applyServerProgress(snapshot){
  if(!snapshot?.profile)return;
- const p=snapshot.profile,claims=snapshot.progress||[];onlineProfileData=p;
- state.xp=Number(p.xp)||0;
- const roomKeys=['filosofos','logica','etica','descartes','platao','fontes','escape','dilemas'];
- claims.forEach(c=>{
-   const k=c.event_key,score=Number(c.best_score)||0;
-   if(roomKeys.includes(k))state.completed[k]=Math.max(Number(state.completed[k]||0),score);
-   if(k==='socrates_mansion')state.socrates=Math.max(Number(state.socrates||0),score>=130?7:Math.min(7,Math.floor(score/15)));
-   if(k==='platform_socrates')state.completed.plataforma=Math.max(Number(state.completed.plataforma||0),score);
-   if(k==='platform_plato')state.completed.plataoPlataforma=Math.max(Number(state.completed.plataoPlataforma||0),score);
-   if(k==='platform_descartes')state.completed.descartesPlataforma=Math.max(Number(state.completed.descartesPlataforma||0),score);
-   if(k==='platform_hume')state.completed.humePlataforma=Math.max(Number(state.completed.humePlataforma||0),score);
-   if(k==='platform_ethics'){state.completed.eticaPlataforma=Math.max(Number(state.completed.eticaPlataforma||0),score);if(score>=100)state.completed.labirintoCompleto=1;}
-   if(k==='rpg_paradoxia')state.completed.rpgParadoxia=Math.max(Number(state.completed.rpgParadoxia||0),score);
- });
+ const p=snapshot.profile;onlineProfileData=p;
+ if(window.NevoaProgress){
+   const merged=window.NevoaProgress.mergeServerIntoLocal(state,snapshot);
+   state.xp=merged.xp;state.socrates=merged.socrates;state.completed=merged.completed;state.achievements=merged.achievements;
+ }else state.xp=Number(p.xp)||0;
  saveState();checkAchievements();setOnlineProfile(p);updateUI();
 }
 function applyOnlineClaim(result){
