@@ -69,6 +69,24 @@ function cleanHistory(value){
   });
 }
 
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+
+function canRetryAI(error){
+  const text=String(error?.message||error||"").toLowerCase();
+  if(/3036|daily free allocation|used up your daily|account limited/.test(text)) return false;
+  return /3040|capacity|tempor|timeout|3007|aborted|3008|429|502|503|504/.test(text);
+}
+
+async function runAIStable(env,input){
+  try{
+    return await env.AI.run(MODEL,input);
+  }catch(error){
+    if(!canRetryAI(error)) throw error;
+    await wait(500);
+    return env.AI.run(MODEL,input);
+  }
+}
+
 export default {
   async fetch(request,env){
     const url=new URL(request.url);
@@ -116,7 +134,7 @@ export default {
 
     try{
       if(body?.stream===true){
-        const stream=await env.AI.run(MODEL,{...options,stream:true});
+        const stream=await runAIStable(env,{...options,stream:true});
         return new Response(stream,{
           status:200,
           headers:{
@@ -127,7 +145,7 @@ export default {
         });
       }
 
-      const result=await env.AI.run(MODEL,options);
+      const result=await runAIStable(env,options);
       const reply=String(
         result?.response ??
         result?.choices?.[0]?.message?.content ??
