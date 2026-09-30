@@ -78,13 +78,20 @@ function canRetryAI(error){
 }
 
 async function runAIStable(env,input){
-  try{
-    return await env.AI.run(MODEL,input);
-  }catch(error){
-    if(!canRetryAI(error)) throw error;
-    await wait(500);
-    return env.AI.run(MODEL,input);
+  const streaming=input?.stream===true;
+  let lastError;
+  for(let attempt=0;attempt<3;attempt++){
+    try{
+      return streaming
+        ? await env.AI.run(MODEL,input)
+        : await env.AI.run(MODEL,input,{rejectIfBusy:true});
+    }catch(error){
+      lastError=error;
+      if(!canRetryAI(error)||attempt===2) throw error;
+      await wait(650*(attempt+1));
+    }
   }
+  throw lastError;
 }
 
 export default {
@@ -157,7 +164,14 @@ export default {
       return json({reply,model:MODEL},200,origin);
     }catch(error){
       console.error("workers_ai_error",error);
-      return json({error:"ai_temporarily_unavailable"},503,origin);
+      const detail=String(error?.message||error||"");
+      if(/3036|daily free allocation|used up your daily|account limited/i.test(detail)){
+        return json({error:"daily_limit_reached",code:"daily_limit"},429,origin);
+      }
+      if(/3040|capacity/i.test(detail)){
+        return json({error:"ai_capacity_busy",code:"capacity"},503,origin);
+      }
+      return json({error:"ai_temporarily_unavailable",code:"temporary"},503,origin);
     }
   }
 };

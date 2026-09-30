@@ -784,102 +784,42 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  async function askRemoteAI(message,onChunk){
    if(!REMOTE_AI_URL)throw new Error("remote_ai_not_configured");
    const prior=history.slice(0,-1).slice(-8).map(m=>({role:m.role,content:String(m.content||"").slice(0,1200)}));
-   let reply="";
-   let streamedAny=false;
 
-   const emitPiece=value=>{
-     const piece=String(value||"");
-     if(!piece)return;
-     let delta=piece;
-     if(reply&&piece.startsWith(reply)){delta=piece.slice(reply.length);reply=piece}
-     else if(!reply&&piece.length>1){reply=piece}
-     else reply+=piece;
-     if(delta){
-       streamedAny=true;
-       if(onChunk)onChunk(delta);
-     }
-   };
-
-   const parseEvent=raw=>{
-     const payload=raw.split(/\r?\n/).filter(line=>line.startsWith("data:")).map(line=>line.slice(5).trimStart()).join("\n").trim();
-     if(!payload||payload==="[DONE]")return;
-     let data;
-     try{data=JSON.parse(payload)}catch{return}
-     const piece=
-       data?.response ??
-       data?.choices?.[0]?.delta?.content ??
-       data?.choices?.[0]?.message?.content ??
-       data?.result?.response ??
-       data?.delta?.content ??
-       data?.token?.text ??
-       "";
-     emitPiece(piece);
-   };
-
-   const runAttempt=async attempt=>{
+   const requestOnce=async()=>{
      const controller=new AbortController();
-     let firstTokenTimer=setTimeout(()=>controller.abort(),45000);
-     const clearFirstTokenTimer=()=>{
-       if(firstTokenTimer){clearTimeout(firstTokenTimer);firstTokenTimer=null}
-     };
+     const timeout=setTimeout(()=>controller.abort(),60000);
      try{
        const res=await fetch(REMOTE_AI_URL,{
          method:"POST",
-         headers:{"Content-Type":"application/json","Accept":"text/event-stream, application/json"},
-         body:JSON.stringify({message:String(message||"").slice(0,1600),history:prior,stream:true}),
+         headers:{"Content-Type":"application/json","Accept":"application/json"},
+         body:JSON.stringify({message:String(message||"").slice(0,1600),history:prior,stream:false}),
          signal:controller.signal
        });
-       const contentType=String(res.headers.get("content-type")||"").toLowerCase();
+       const data=await res.json().catch(()=>({}));
        if(!res.ok){
-         clearFirstTokenTimer();
-         const data=await res.json().catch(()=>({}));
          const err=new Error(data.error||("remote_ai_http_"+res.status));
          err.status=res.status;
+         err.code=data.code||"";
          throw err;
        }
-       if(!contentType.includes("text/event-stream")||!res.body){
-         clearFirstTokenTimer();
-         const data=await res.json().catch(()=>({}));
-         const text=String(data.reply||data.response||"").trim();
-         if(!text)throw new Error("remote_ai_empty");
-         emitPiece(text);
-         return text;
-       }
-
-       const reader=res.body.getReader();
-       const decoder=new TextDecoder();
-       let buffer="";
-       while(true){
-         const {value,done}=await reader.read();
-         if(done)break;
-         if(value&&value.length)clearFirstTokenTimer();
-         buffer+=decoder.decode(value,{stream:true});
-         const events=buffer.split(/\r?\n\r?\n/);
-         buffer=events.pop()||"";
-         events.forEach(parseEvent);
-       }
-       clearFirstTokenTimer();
-       buffer+=decoder.decode();
-       if(buffer.trim())parseEvent(buffer);
-       const finalReply=reply.trim();
-       if(!finalReply)throw new Error("remote_ai_empty");
-       return finalReply;
-     }catch(err){
-       clearFirstTokenTimer();
-       const retryable=!streamedAny&&attempt===0&&(
-         err?.name==="AbortError" ||
-         [408,429,502,503,504].includes(Number(err?.status||0)) ||
-         /tempor|timeout|capacity|network|fetch|empty|aborted/i.test(String(err?.message||""))
-       );
-       if(retryable){
-         await new Promise(r=>setTimeout(r,650));
-         return runAttempt(1);
-       }
-       throw err;
-     }
+       const reply=String(data.reply||data.response||"").trim();
+       if(!reply)throw new Error("remote_ai_empty");
+       return reply;
+     }finally{clearTimeout(timeout)}
    };
 
-   return runAttempt(0);
+   try{
+     return await requestOnce();
+   }catch(err){
+     const retryable=
+       err?.name==="AbortError" ||
+       [408,429,502,503,504].includes(Number(err?.status||0)) ||
+       /tempor|timeout|capacity|network|fetch|empty|aborted/i.test(String(err?.message||""));
+     if(!retryable||err?.code==="daily_limit")throw err;
+     setStatus("✦ Amigo da Névoa • reorganizando a névoa","busy");
+     await new Promise(r=>setTimeout(r,900));
+     return requestOnce();
+   }
  }
  async function askFriend(message,onChunk){
    const safe=safetyReply(message);if(safe)return safe;
