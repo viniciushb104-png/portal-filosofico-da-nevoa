@@ -112,11 +112,24 @@ function resolveContinueJourney(){
 }
 function updateContinueCard(){
  const card=$('#continueJourneyCard');if(!card)return;
- const x=resolveContinueJourney();
+ const j=homeJourney();
+ const x=j?j.next:resolveContinueJourney();
+ const hud=j&&j.hud?j.hud:{};
  const set=(id,val)=>{const el=$(id);if(el)el.textContent=val};
- set('#continueJourneyIcon',x.icon);set('#continueJourneyEyebrow',x.eyebrow||'SUA JORNADA');set('#continueJourneyTitle',x.title);set('#continueJourneyText',x.text);set('#continueJourneyMeta',x.meta);
+ set('#continueJourneyIcon',x.icon);
+ set('#continueJourneyEyebrow',x.eyebrow||'SUA JORNADA');
+ set('#continueJourneyTitle',x.title);
+ set('#continueJourneyText',x.text);
+ set('#continueJourneyMeta',x.meta);
+ set('#continueJourneyLast',hud.lastLabel||'Nenhuma atividade registrada');
+ set('#continueJourneyObjective',hud.objective||'Escolha sua primeira porta.');
+ const trophy=hud.nextTrophy||{};
+ set('#continueJourneyTrophy',(trophy.icon?trophy.icon+' ':'')+(trophy.name||'Discípulo do Diálogo'));
+ set('#continueJourneyRank',hud.rank||'Aprendiz da Névoa');
+ set('#continueJourneyXP',(Number(hud.xp)||0)+' XP');
  const fill=$('#continueJourneyFill');if(fill)fill.style.width=(x.pct||0)+'%';
  const btn=$('#continueJourneyBtn');if(btn){btn.href=x.href;btn.textContent=x.complete?'Abrir Memórias →':'Continuar daqui →';if(x.kind==='mansion')btn.onclick=e=>{e.preventDefault();openSocrates()};else btn.onclick=null}
+ card.dataset.chapter=x.kind||'mansion';
  card.classList.toggle('complete',!!x.complete);
 }
 async function refreshContinueCloud(){
