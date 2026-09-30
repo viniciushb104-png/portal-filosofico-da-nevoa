@@ -99,6 +99,13 @@ const renderParadoxiaMissions=rows=>{
  const status=$("#journeyParaMissionStatus");if(status)status.textContent=done+"/"+defs.length+" concluídas";
  box.innerHTML=defs.map(m=>{const row=map[m.key]||{},ok=Number(row.best_score||0)>0;return `<a class="journeyParaMission ${ok?"done":""}" href="../jogos/paradoxia/${m.href}"><span>${m.icon}</span><div><b>${m.title}</b><small>${m.theme}</small></div><em>${ok?"✓ "+Number(row.best_score||0)+" pts":"◇ Pendente"}</em></a>`}).join("");
 };
+const renderActivityChronicle=()=>{
+ const box=$("#journeyActivityList");if(!box)return;
+ const items=window.NevoaActivity?.list?.(10)||[];
+ if(!items.length){box.innerHTML='<div class="journeyActivityEmpty">A Crônica começa a registrar seus próximos marcos a partir de agora.</div>';return}
+ box.innerHTML=items.map(item=>`<div class="journeyActivityItem ${item.type||"progress"} ${item.legacy?"legacy":""}"><div class="journeyActivityIcon">${item.icon||"✦"}</div><div><b>${item.title||"Jornada atualizada"}</b><small>${item.text||""}</small><em>${window.NevoaActivity?.formatTime?.(item)||""}</em></div>${item.xp!==null&&item.xp!==undefined&&Number(item.xp)!==0?`<span>${Number(item.xp)>0?"+":""}${Number(item.xp)} XP</span>`:""}</div>`).join("");
+};
+
 shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro da Névoa. Cada pergunta respondida deixa uma marca no mundo.",`
 <section class="section journeySection"><div class="wrap">
   <div class="journeyHero panel">
@@ -157,7 +164,7 @@ shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro 
 
   <div class="journeyLower">
     <div class="panel journeyMemories"><div class="eyebrow">Memórias da jornada</div><h3>O que você já levou da Névoa</h3><div class="journeyStats"><div><b id="journeyXpStat">${localXp}</b><small>XP</small></div><div><b>${u.unlocks.length}</b><small>Registros</small></div><div><b>${u.cards.length}</b><small>Cartas</small></div><div><b>${u.secrets.length}</b><small>Segredos</small></div><div><b>${diary.length}</b><small>Reflexões</small></div><div><b>${args.length}</b><small>Argumentos</small></div></div><a class="btn subtle" href="grimorio.html">🏆 Ver Memórias e troféus</a></div>
-    <div class="panel journeyChronicle"><div class="eyebrow">Crônica do explorador</div><h3>Marcas no mundo</h3><div class="chronicleLine ${jd.effectiveMansionRooms?"done":""}"><span>🏚️</span><div><b>Mansão</b><small id="journeyMansionChronicle">${jd.effectiveMansionRooms?jd.effectiveMansionRooms+"/7 cômodos atravessados":"Ainda não explorada"}</small></div></div><div class="chronicleLine ${jd.labPct?"done":""}"><span>🎮</span><div><b>Labirinto</b><small id="journeyLabChronicle">${jd.labPct?jd.labDoneCount+"/5 fases concluídas":"As portas aguardam"}</small></div></div><div class="chronicleLine ${jd.paraPct?"done":""}"><span>🎭</span><div><b>Paradoxia</b><small id="journeyParaChronicle">${jd.paraPct?jd.paraPct+"% registrado":"O reino ainda chama"}</small></div></div></div>
+    <div class="panel journeyChronicle activityChronicle"><div class="eyebrow">CRÔNICA DO EXPLORADOR</div><h3>Últimas marcas na Névoa</h3><p class="journeyChronicleLead">Só entram aqui acontecimentos importantes da sua jornada.</p><div id="journeyActivityList" class="journeyActivityList"></div></div>
   </div>
 
   <div class="panel profileAvatarEditor" id="profileAvatarEditor" hidden><div class="eyebrow">Galeria de Avatares da Névoa</div><h3>Escolha sua aparência no Portal</h3><p>Os dez avatares são artes oficiais do Portal. Você pode usar qualquer um deles e trocar quando quiser.</p><div class="avatarGallery" id="avatarGallery"></div><div class="avatarGalleryFooter"><div class="profileNameStatus" id="avatarStatus" role="status" aria-live="polite"></div><button class="btn subtle" id="closeAvatarGallery" type="button">Fechar galeria</button></div></div>
@@ -165,6 +172,8 @@ shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro 
   <div class="note profileNextStep"><b>🛡️ Identidade protegida</b><small>O perfil usa somente os dez avatares oficiais do Portal. Não há envio livre de foto pessoal.</small></div>
 </div></section>`);
 renderParadoxiaMissions([]);
+renderActivityChronicle();
+window.addEventListener('nevoa-activity',renderActivityChronicle);
 
 const nameEl=$("#profileDisplayName"),hint=$("#profileAccountHint"),edit=$("#editProfileName"),login=$("#profileLoginLink");
 const editor=$("#profileNameEditor"),form=$("#profileNameForm"),input=$("#profileNameInput"),cancel=$("#cancelProfileName"),save=$("#saveProfileName"),status=$("#profileNameStatus");
@@ -223,7 +232,7 @@ async function loadProfile(){
  profile=snapshot?.profile||await window.NevoaOnline.sessionProfile();
  if(!profile){nameEl.textContent="Explorador da Névoa";hint.textContent="Sua sessão expirou. Entre novamente para sincronizar a Jornada.";login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return}
  try{paintAvatar(profile.avatar_key||await window.NevoaOnline.profileAvatar())}catch(e){paintAvatar("avatar-01")}
- applyAvatarRank();nameEl.textContent=profile.nickname||"Explorador da Névoa";hint.textContent=(profile.class_name?profile.class_name+" • ":"")+rankInfo(profile.xp).name+" • jornada sincronizada";repaintJourney(profile.xp,snapshot?.progress||[],cloudRpg,missionRows);login.hidden=true;edit.hidden=false;avatarOpenAction.hidden=false;
+ applyAvatarRank();nameEl.textContent=profile.nickname||"Explorador da Névoa";hint.textContent=(profile.class_name?profile.class_name+" • ":"")+rankInfo(profile.xp).name+" • jornada sincronizada";const syncedJourney=repaintJourney(profile.xp,snapshot?.progress||[],cloudRpg,missionRows);window.NevoaActivity?.baseline?.(syncedJourney.core);renderActivityChronicle();login.hidden=true;edit.hidden=false;avatarOpenAction.hidden=false;
 }
 avatarOpen.onclick=openAvatarEditor;avatarOpenAction.onclick=openAvatarEditor;avatarClose.onclick=closeAvatarEditor;edit.onclick=openEditor;cancel.onclick=closeEditor;
 form.onsubmit=async e=>{e.preventDefault();if(!profile)return;const proposed=(input.value||"").replace(/\s+/g," ").trim();if(proposed.length<2||proposed.length>24){showStatus("Escolha um nome entre 2 e 24 caracteres.","bad");return}save.disabled=true;save.textContent="Salvando...";showStatus("A Névoa está verificando o novo nome...","info");try{const updated=await window.NevoaOnline.updateProfileName(proposed);profile=updated||await window.NevoaOnline.sessionProfile();nameEl.textContent=profile?.nickname||proposed;hint.textContent=(profile?.class_name?profile.class_name+" • ":"")+rankInfo(profile?.xp||localXp).name+" • jornada sincronizada";showStatus("✓ Nome atualizado com segurança.","ok");setTimeout(()=>{editor.hidden=true;showStatus("")},900)}catch(err){showStatus(err?.message||"Não foi possível alterar o nome agora.","bad")}finally{save.disabled=false;save.textContent="Salvar nome"}};
