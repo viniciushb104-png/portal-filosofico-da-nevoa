@@ -804,9 +804,9 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  }
  async function askRemoteAI(message,onChunk){
    if(!REMOTE_AI_URL)throw new Error("remote_ai_not_configured");
-   const prior=history.slice(0,-1).slice(-6).map(m=>({
+   const prior=history.slice(0,-1).slice(-4).map(m=>({
      role:m.role,
-     content:String(m.content||"").slice(0,1000)
+     content:String(m.content||"").slice(0,700)
    }));
    const controller=new AbortController();
    const timeout=setTimeout(()=>controller.abort(),90000);
@@ -815,7 +815,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
        method:"POST",
        headers:{"Content-Type":"application/json","Accept":"application/json"},
        body:JSON.stringify({
-         message:String(message||"").slice(0,1400),
+         message:String(message||"").slice(0,1200),
          history:prior
        }),
        signal:controller.signal
