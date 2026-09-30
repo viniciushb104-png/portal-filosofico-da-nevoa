@@ -1,3 +1,5 @@
+import { DurableObject } from "cloudflare:workers";
+
 const MODEL = "@cf/zai-org/glm-4.7-flash";
 const SITE_ORIGINS = new Set([
   "https://viniciushb104-png.github.io",
@@ -64,6 +66,14 @@ function extractReply(result){
     result?.result?.response ??
     ""
   ).trim();
+}
+
+// Compatibilidade de deploy: o namespace antigo continua registrado na Cloudflare,
+// mas NÃO participa das conversas. /chat vai direto para env.AI.run().
+export class NevoaQueue extends DurableObject {
+  async fetch(){
+    return new Response("unused",{status:410});
+  }
 }
 
 export default {
