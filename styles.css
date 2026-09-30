@@ -223,3 +223,94 @@ section{padding:70px 0}.sectionHead{max-width:820px;text-align:center;margin:0 a
  .continueJourneyIcon{width:48px;height:48px;font-size:23px}
  .continueJourneyCopy h2{font-size:20px}
 }
+
+
+/* V9.5 — HUD compacto da Jornada na Home */
+.continueJourneyCard{
+ grid-template-columns:auto minmax(0,1fr) minmax(190px,230px);
+ gap:20px;
+ align-items:stretch;
+ padding:20px 22px;
+}
+.continueJourneyCopy{display:flex;flex-direction:column;justify-content:center}
+.continueJourneyIntel{
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:8px;
+ margin-top:13px;
+ max-width:820px;
+}
+.continueJourneyIntel>div{
+ min-width:0;
+ padding:9px 10px;
+ border-radius:11px;
+ border:1px solid rgba(255,255,255,.06);
+ background:rgba(255,255,255,.025);
+}
+.continueJourneyIntel small{
+ display:block;
+ margin-bottom:4px;
+ color:#8f8198;
+ font-size:7px;
+ font-weight:900;
+ letter-spacing:.12em;
+}
+.continueJourneyIntel b{
+ display:block;
+ color:#ded1e5;
+ font-size:9px;
+ line-height:1.35;
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+}
+.continueJourneyAside{
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ gap:11px;
+ padding-left:18px;
+ border-left:1px solid rgba(255,255,255,.075);
+}
+.continueJourneyRank{
+ position:relative;
+ padding:12px 13px;
+ border-radius:14px;
+ border:1px solid rgba(197,145,73,.22);
+ background:linear-gradient(145deg,rgba(40,24,17,.55),rgba(17,10,21,.72));
+ overflow:hidden;
+}
+.continueJourneyRank::after{
+ content:"✦";
+ position:absolute;
+ right:9px;
+ top:5px;
+ color:rgba(231,185,98,.18);
+ font-size:28px;
+}
+.continueJourneyRank small,.continueJourneyRank b,.continueJourneyRank span{display:block;position:relative;z-index:1}
+.continueJourneyRank small{font-size:7px;letter-spacing:.14em;color:#a48e72;font-weight:900}
+.continueJourneyRank b{font-family:Georgia,serif;font-size:15px;color:#f0dfbd;margin:4px 0 2px}
+.continueJourneyRank span{font-size:9px;color:#d3b77c;font-weight:800}
+.continueJourneyAside .continueJourneyBtn{width:100%;box-sizing:border-box}
+.continueJourneyCard[data-chapter="paradoxia"]{border-color:#673f83;background:radial-gradient(circle at 10% 0,#5d28733b,transparent 31%),linear-gradient(145deg,#150a20,#09050f)}
+.continueJourneyCard[data-chapter="labyrinth"]{border-color:#5f456e;background:radial-gradient(circle at 10% 0,#44315932,transparent 31%),linear-gradient(145deg,#120b19,#09060d)}
+.continueJourneyCard[data-chapter="memories"]{border-color:#9d7933}
+@media(max-width:980px){
+ .continueJourneyCard{grid-template-columns:64px minmax(0,1fr)}
+ .continueJourneyAside{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,240px);align-items:center;padding:12px 0 0;border-left:0;border-top:1px solid rgba(255,255,255,.07)}
+ .continueJourneyRank{min-height:48px}
+}
+@media(max-width:760px){
+ .continueJourneyCard{grid-template-columns:58px minmax(0,1fr);padding:15px}
+ .continueJourneyIntel{grid-template-columns:1fr;gap:6px}
+ .continueJourneyIntel>div{padding:8px 9px}
+ .continueJourneyIntel b{white-space:normal}
+ .continueJourneyAside{grid-template-columns:1fr}
+ .continueJourneyRank{padding:10px 11px}
+}
+@media(max-width:470px){
+ .continueJourneyCard{grid-template-columns:48px minmax(0,1fr)}
+ .continueJourneyAside{grid-column:1/-1}
+ .continueJourneyIntel{grid-column:1/-1}
+}
