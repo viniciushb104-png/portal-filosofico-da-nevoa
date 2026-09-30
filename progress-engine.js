@@ -142,7 +142,29 @@ function analyze({local=null,progressRows=[],cloudRpg=null,profile=null,routes=n
  else if(!paradoxia.completed)next=paraNext;
  else next=memoryNext;
 
- return {xp,rank:rankInfo,claims,mansion,labyrinth,paradoxia,memories,next,lastActivity:lastSeen,trophies:TROPHIES};
+ const lastLabel=lastSeen?.title||
+   (lastSeen?.kind==='mansion'?'Mansão de Sócrates':
+    lastSeen?.kind==='labyrinth'?(lastSeen?.phase?'Fase '+lastSeen.phase+' do Labirinto':'Labirinto dos Filósofos'):
+    lastSeen?.kind==='paradoxia'?'Paradoxia':'Nenhuma atividade registrada');
+
+ let objective='Escolha sua primeira porta e comece a explorar.';
+ if(next.kind==='mansion')objective=mansion.started?'Concluir o cômodo '+Math.min(7,mansion.rooms+1)+' da Mansão.':'Entrar na Mansão e investigar o primeiro cômodo.';
+ else if(next.kind==='labyrinth')objective='Concluir a Fase '+labyrinth.nextPhase.phase+' — '+labyrinth.nextPhase.name+'.';
+ else if(next.kind==='paradoxia')objective=paradoxia.started?(paradoxia.place?'Continuar explorando '+paradoxia.place+'.':'Avançar no Capítulo I de Paradoxia.'):'Iniciar o Capítulo I de Paradoxia.';
+ else objective='Revisitar suas conquistas e Memórias despertas.';
+
+ let nextTrophy={icon:'🏚️',name:'Discípulo do Diálogo',text:'Conclua a Mansão de Sócrates.'};
+ if(mansion.completed&&!phases[0].done)nextTrophy={icon:'🏛️',name:'Caminhante de Atenas',text:'Conclua a Fase 1 do Labirinto.'};
+ else if(phases[0].done&&!phases[1].done)nextTrophy={icon:'🌞',name:'Libertado da Caverna',text:'Conclua a Fase 2 — Platão.'};
+ else if(phases[1].done&&!phases[2].done)nextTrophy={icon:'🪞',name:'A Certeza do Cogito',text:'Conclua a Fase 3 — Descartes.'};
+ else if(phases[2].done&&!phases[3].done)nextTrophy={icon:'🌫️',name:'Investigador do Hábito',text:'Conclua a Fase 4 — Hume.'};
+ else if(phases[3].done&&!phases[4].done)nextTrophy={icon:'⚖️',name:'Juiz da Névoa',text:'Conclua a Fase 5 — Ética.'};
+ else if(labyrinth.completed&&!paradoxia.completed)nextTrophy={icon:'🎭',name:'Cidadão de Paradoxia',text:'Conclua o Capítulo I de Paradoxia.'};
+ else if(memories.completed)nextTrophy={icon:'🏆',name:'Coleção principal completa',text:'Todas as Memórias principais foram despertas.'};
+
+ const hud={lastLabel,objective,nextTrophy,rank:rankInfo.name,rankShort:rankInfo.short,xp,chapter:next.kind};
+
+ return {xp,rank:rankInfo,claims,mansion,labyrinth,paradoxia,memories,next,lastActivity:lastSeen,hud,trophies:TROPHIES};
 }
 
 function mergeServerIntoLocal(local,snapshot){
