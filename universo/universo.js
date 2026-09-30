@@ -258,7 +258,7 @@ function segredos(){
          <button class="btn subtle" id="secretDeepToggle" type="button" aria-label="Modo de conversa" title="Modo ágil / reflexão profunda">⚡</button>
          <button class="btn subtle" id="secretClearChat" type="button" aria-label="Nova conversa" title="Nova conversa">↻</button>
        </div>
-       <small class="secretFriendTransparency">Por padrão eu converso no modo ágil, sem downloads pesados. O modo profundo é opcional e usa um modelo generativo local no navegador. A conversa fica nesta sessão.</small>
+       <small class="secretFriendTransparency">Uma conversa, um único cérebro: o Amigo da Névoa mantém o fio do que você diz sem alternar entre modos de resposta. A conversa fica nesta sessão.</small>
      </div>
    </aside>
 
@@ -287,8 +287,6 @@ function segredos(){
    </section>
  </div></div></section>`);
 
- const FRIEND_AI_URL="https://gsenhfhmabkjqhybpixm.supabase.co/functions/v1/amigo-da-nevoa";
- const FRIEND_AI_KEY="sb_publishable_VZoR4YrEww-o6HTkN6UVJA_0ywIaTgB";
  const REMOTE_AI_URL=String(window.NEVOA_AI_ENDPOINT||"").trim();
  const ghost=$("#secretGhost"),bubble=$("#secretGhostLine"),log=$("#secretChatLog"),form=$("#secretComposer"),input=$("#secretMessage"),status=$("#secretAiStatus"),send=$("#secretSend"),mic=$("#secretMic");
  const secretSprites={
@@ -853,12 +851,12 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  async function askFriend(message,onChunk){
    const safe=safetyReply(message);if(safe)return safe;
    if(REMOTE_AI_URL){
+     setStatus("✦ Amigo da Névoa • pensando","busy");
      try{
-       setStatus("✦ Amigo da Névoa • pensando","busy");
        return await askRemoteAI(message,onChunk);
      }catch(err){
-       console.warn("Amigo da Névoa remoto indisponível; usando fallback local.",err);
-       setStatus("modo reserva • conversa disponível","ready");
+       console.warn("Amigo da Névoa remoto indisponível.",err);
+       throw new Error("A névoa oscilou por um instante. Tente enviar sua mensagem novamente.");
      }
    }
    if(deepMode&&!localAIFailed&&"gpu" in navigator){
@@ -875,6 +873,11 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  }
 
  function thinkingReaction(message){
+   if(REMOTE_AI_URL){
+     bubbleText("…");
+     setGhostSprite(lanternSrc);
+     return;
+   }
    const n=normalizeAIText(message);
    const lines=n.includes("?")
      ?["Opa… boa pergunta. Deixa eu puxar esse fio.","Hmm… essa tem mais de uma camada. Um instante.","He-he… gostei dessa. Estou juntando as peças."]
@@ -898,7 +901,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  async function sendMessage(text){
    const message=String(text||"").trim();if(!message||busy)return;
    addMessage("user",message);input.value="";setBusy(true);thinkingReaction(message);
-   if(!deepMode)await new Promise(r=>setTimeout(r,160+Math.floor(Math.random()*140)));
+   if(!REMOTE_AI_URL&&!deepMode)await new Promise(r=>setTimeout(r,160+Math.floor(Math.random()*140)));
    let draft=null,streamed="";
    const onChunk=chunk=>{
      if(!chunk)return;
