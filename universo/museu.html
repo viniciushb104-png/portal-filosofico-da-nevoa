@@ -19,7 +19,7 @@ body[data-page="museu"]{overflow-x:hidden}
 .museumEra{position:absolute;top:24px;color:#d7b0df;font:900 13px Georgia,serif;letter-spacing:.14em;text-transform:uppercase}
 .exhibit{position:absolute;top:118px;width:230px;text-align:center}
 .frame{width:176px;height:225px;margin:auto;padding:10px;border:9px ridge #9c6b3e;background:#17101b;box-shadow:0 14px 35px #000b,0 0 0 2px #e1b56a55;display:grid;place-items:center;cursor:pointer;color:#fff}
-.frame:focus-visible{outline:3px solid #d56df0;outline-offset:5px}.portraitFallback{font-size:62px}.frame video{display:none;width:100%;height:100%;object-fit:cover}
+.frame:focus-visible{outline:3px solid #d56df0;outline-offset:5px}.portraitFallback{font-size:62px}.portraitArt{width:100%;height:100%;object-fit:cover;object-position:center;display:none}.frame.hasArt .portraitArt{display:block}.frame.hasArt .portraitFallback{display:none}.frame video{display:none;width:100%;height:100%;object-fit:cover}
 .exhibit h3{font:900 19px Georgia,serif;margin:12px 0 3px}.exhibit p{margin:0;color:#bba7c4;font-size:11px}.exhibit.near .frame{box-shadow:0 14px 35px #000b,0 0 28px #d568f075}
 .interactHint{opacity:0;margin-top:9px;color:#ffc184;font-size:10px;font-weight:900}.exhibit.near .interactHint{opacity:1}
 .player{position:absolute;left:140px;bottom:88px;width:54px;height:92px;z-index:5;display:grid;align-content:end;justify-items:center;filter:drop-shadow(0 8px 6px #000)}
@@ -57,6 +57,7 @@ const dialog=document.getElementById('museumModal'),videoBox=document.getElement
 let x=140,near=null,held=0,raf=0;
 exhibits.innerHTML=philosophers.map((p,i)=>`<article class="exhibit" data-i="${i}" style="left:${positions[i]}px"><button class="frame" type="button" aria-label="Interagir com ${p.name}"><span class="portraitFallback">${p.icon}</span></button><h3>${p.name}</h3><p>${p.concept}</p><div class="interactHint">✦ INTERAGIR</div></article>`).join('');
 const cards=[...document.querySelectorAll('.exhibit')];
+cards.forEach(card=>{const img=card.querySelector('.portraitArt'),frame=card.querySelector('.frame');img.addEventListener('load',()=>frame.classList.add('hasArt'));img.addEventListener('error',()=>frame.classList.remove('hasArt'));if(img.complete&&img.naturalWidth)frame.classList.add('hasArt')});
 function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
 function update(){
  x=clamp(x,70,3060);player.style.left=x+'px';
