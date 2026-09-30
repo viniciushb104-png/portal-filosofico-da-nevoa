@@ -13,6 +13,15 @@ const LAB_PHASES=[
  {eventKey:'platform_hume',localKey:'humePlataforma',phase:4,name:'Hume',score:90,icon:'🌫️'},
  {eventKey:'platform_ethics',localKey:'eticaPlataforma',phase:5,name:'Ética',score:100,icon:'⚖️'}
 ];
+const PARADOXIA_STORY=[
+ {id:'gate',icon:'🚪',location:'Vila das Abóboras',type:'dilemma'},
+ {id:'market',icon:'🎪',location:'Feira das Ilusões',type:'battle'},
+ {id:'bridge',icon:'🌉',location:'Ponte do Lúmen',type:'dilemma'},
+ {id:'theseus',icon:'🎃',location:'Floresta das Sombras Doces',type:'dilemma'},
+ {id:'library',icon:'📚',location:'Biblioteca Proibida',type:'battle'},
+ {id:'square',icon:'🕰️',location:'Praça do Tempo',type:'dilemma'},
+ {id:'boss',icon:'👑',location:'Castelo do Paradoxo',type:'boss'}
+];
 const TROPHIES=[
  {id:'mansion',icon:'🏚️',name:'Discípulo do Diálogo'},
  {id:'platform_socrates',icon:'🏛️',name:'Caminhante de Atenas'},
@@ -83,7 +92,7 @@ function defaultRoutes(){
  };
 }
 
-function analyze({local=null,progressRows=[],cloudRpg=null,profile=null,routes=null,last=null}={}){
+function analyze({local=null,progressRows=[],cloudRpg=null,profile=null,routes=null,last=null,missionRows=[]}={}){
  const base=normalizeLocal(local||localProgress());
  const completed=base.completed||{},achievements=base.achievements||{},claims=claimsMap(progressRows);
  const route={...defaultRoutes(),...(routes||{})};
@@ -115,7 +124,26 @@ function analyze({local=null,progressRows=[],cloudRpg=null,profile=null,routes=n
  const started=paraDone||(hasSave?(!!rpg.classKey||Number(rpg.sceneIndex||0)>0||Number(rpg.score||0)>0||Object.keys(rpg.flags||{}).length>0||Object.keys(rpg.awards||{}).length>0):claimPara>0);
  const score=hasSave?Math.max(0,Number(rpg.score||0),paraDone?claimPara:0):Math.max(0,claimPara);
  const paraPct=paraDone?100:Math.min(95,Math.round(Math.min(120,score)/120*100));
- const paradoxia={save:rpg,score,pct:paraPct,started,completed:paraDone,state:stateLabel(started,paraDone),place:rpg?.world?.place||null};
+ const story=PARADOXIA_STORY.map((item,i)=>{
+   let done=false;
+   if(item.type==='dilemma')done=!!rpg?.flags?.[item.id];
+   else if(item.type==='battle')done=!!rpg?.awards?.[item.id];
+   else if(item.type==='boss')done=paraDone;
+   const active=started&&!done&&!paraDone&&Number(rpg?.sceneIndex||0)===i;
+   return {...item,done,active};
+ });
+ const storyDoneCount=story.filter(x=>x.done).length;
+ const tacticalRows=Array.isArray(missionRows)?missionRows:[];
+ const tacticalCompleted=tacticalRows.filter(row=>Number(row?.best_score||0)>0).length;
+ const tacticalBest=tacticalRows.reduce((sum,row)=>sum+Math.max(0,Number(row?.best_score||0)),0);
+ const paradoxia={
+  save:rpg,score,pct:paraPct,started,completed:paraDone,state:stateLabel(started,paraDone),place:rpg?.world?.place||null,
+  story,storyDoneCount,storyTotal:PARADOXIA_STORY.length,
+  concepts:Array.isArray(rpg?.history)?rpg.history.length:0,
+  secrets:Math.max(0,Number(rpg?.inventory?.secrets||0)),
+  mistCoins:Math.max(0,Number(rpg?.inventory?.mistCoins||0)),
+  tacticalCompleted,tacticalTotal:tacticalRows.length,tacticalBest
+ };
 
  const trophyFlags={
   mansion:mansion.completed,
@@ -182,7 +210,7 @@ function mergeServerIntoLocal(local,snapshot){
 
 window.NevoaProgress={
  version:'1.0.0',
- LAB_PHASES,TROPHIES,RANKS,
+ LAB_PHASES,PARADOXIA_STORY,TROPHIES,RANKS,
  readJSON,localProgress,localRpg,lastActivity,claimsMap,rank,analyze,mergeServerIntoLocal
 };
 window.dispatchEvent(new Event('nevoa-progress-ready'));
