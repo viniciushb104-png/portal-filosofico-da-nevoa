@@ -181,14 +181,49 @@ function analyze({local=null,progressRows=[],cloudRpg=null,profile=null,routes=n
  else if(next.kind==='paradoxia')objective=paradoxia.started?(paradoxia.place?'Continuar explorando '+paradoxia.place+'.':'Avançar no Capítulo I de Paradoxia.'):'Iniciar o Capítulo I de Paradoxia.';
  else objective='Revisitar suas conquistas e Memórias despertas.';
 
- let nextTrophy={icon:'🏚️',name:'Discípulo do Diálogo',text:'Conclua a Mansão de Sócrates.'};
- if(mansion.completed&&!phases[0].done)nextTrophy={icon:'🏛️',name:'Caminhante de Atenas',text:'Conclua a Fase 1 do Labirinto.'};
- else if(phases[0].done&&!phases[1].done)nextTrophy={icon:'🌞',name:'Libertado da Caverna',text:'Conclua a Fase 2 — Platão.'};
- else if(phases[1].done&&!phases[2].done)nextTrophy={icon:'🪞',name:'A Certeza do Cogito',text:'Conclua a Fase 3 — Descartes.'};
- else if(phases[2].done&&!phases[3].done)nextTrophy={icon:'🌫️',name:'Investigador do Hábito',text:'Conclua a Fase 4 — Hume.'};
- else if(phases[3].done&&!phases[4].done)nextTrophy={icon:'⚖️',name:'Juiz da Névoa',text:'Conclua a Fase 5 — Ética.'};
- else if(labyrinth.completed&&!paradoxia.completed)nextTrophy={icon:'🎭',name:'Cidadão de Paradoxia',text:'Conclua o Capítulo I de Paradoxia.'};
- else if(memories.completed)nextTrophy={icon:'🏆',name:'Coleção principal completa',text:'Todas as Memórias principais foram despertas.'};
+ let nextTrophy={
+  id:'mansion',icon:'🏚️',name:'Discípulo do Diálogo',
+  text:'Conclua a Mansão de Sócrates.',
+  requirement:mansion.rooms+'/7 cômodos concluídos • faltam '+Math.max(0,7-mansion.rooms),
+  current:mansion.rooms,target:7,pct:mansion.pct,href:route.mansion
+ };
+ if(mansion.completed&&!phases[0].done)nextTrophy={
+  id:'platform_socrates',icon:'🏛️',name:'Caminhante de Atenas',
+  text:'Conclua a Fase 1 — Sócrates.',
+  requirement:'Falta concluir Fase 1 — Sócrates',current:0,target:1,pct:0,href:route.labyrinth[0]
+ };
+ else if(phases[0].done&&!phases[1].done)nextTrophy={
+  id:'platform_plato',icon:'🌞',name:'Libertado da Caverna',
+  text:'Conclua a Fase 2 — Platão.',
+  requirement:'Falta concluir Fase 2 — Platão',current:0,target:1,pct:0,href:route.labyrinth[1]
+ };
+ else if(phases[1].done&&!phases[2].done)nextTrophy={
+  id:'platform_descartes',icon:'🪞',name:'A Certeza do Cogito',
+  text:'Conclua a Fase 3 — Descartes.',
+  requirement:'Falta concluir Fase 3 — Descartes',current:0,target:1,pct:0,href:route.labyrinth[2]
+ };
+ else if(phases[2].done&&!phases[3].done)nextTrophy={
+  id:'platform_hume',icon:'🌫️',name:'Investigador do Hábito',
+  text:'Conclua a Fase 4 — Hume.',
+  requirement:'Falta concluir Fase 4 — Hume',current:0,target:1,pct:0,href:route.labyrinth[3]
+ };
+ else if(phases[3].done&&!phases[4].done)nextTrophy={
+  id:'platform_ethics',icon:'⚖️',name:'Juiz da Névoa',
+  text:'Conclua a Fase 5 — Ética.',
+  requirement:'Falta concluir Fase 5 — Ética',current:0,target:1,pct:0,href:route.labyrinth[4]
+ };
+ else if(labyrinth.completed&&!paradoxia.completed)nextTrophy={
+  id:'paradoxia',icon:'🎭',name:'Cidadão de Paradoxia',
+  text:'Conclua o Capítulo I de Paradoxia.',
+  requirement:paradoxia.storyDoneCount+'/'+paradoxia.storyTotal+' encontros concluídos • faltam '+Math.max(0,paradoxia.storyTotal-paradoxia.storyDoneCount),
+  current:paradoxia.storyDoneCount,target:paradoxia.storyTotal,
+  pct:Math.round(paradoxia.storyDoneCount/Math.max(1,paradoxia.storyTotal)*100),href:route.paradoxia
+ };
+ else if(memories.completed)nextTrophy={
+  id:'complete',icon:'🏆',name:'Coleção principal completa',
+  text:'Todas as Memórias principais foram despertas.',
+  requirement:memories.count+'/'+memories.total+' Memórias despertas',current:memories.count,target:memories.total,pct:100,href:route.memories,complete:true
+ };
 
  const hud={lastLabel,objective,nextTrophy,rank:rankInfo.name,rankShort:rankInfo.short,xp,chapter:next.kind};
 
