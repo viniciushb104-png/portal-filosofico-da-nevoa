@@ -125,6 +125,7 @@ function updateContinueCard(){
  set('#continueJourneyObjective',hud.objective||'Escolha sua primeira porta.');
  const trophy=hud.nextTrophy||{};
  set('#continueJourneyTrophy',(trophy.icon?trophy.icon+' ':'')+(trophy.name||'Discípulo do Diálogo'));
+ set('#continueJourneyTrophyRequirement',trophy.requirement||'Continue sua jornada para revelar o próximo requisito.');
  set('#continueJourneyRank',hud.rank||'Aprendiz da Névoa');
  set('#continueJourneyXP',(Number(hud.xp)||0)+' XP');
  const fill=$('#continueJourneyFill');if(fill)fill.style.width=(x.pct||0)+'%';
