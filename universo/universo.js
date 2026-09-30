@@ -288,17 +288,7 @@ function segredos(){
  </div></div></section>`);
 
  const REMOTE_AI_URL=String(window.NEVOA_AI_ENDPOINT||"").trim();
- const NEVOA_CLIENT_ID=(()=>{
-   const key="nevoaAnonymousClientV1";
-   try{
-     let id=localStorage.getItem(key);
-     if(!id){
-       id=(crypto.randomUUID?crypto.randomUUID():("nevoa-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2)));
-       localStorage.setItem(key,id);
-     }
-     return id;
-   }catch(e){return "nevoa-session-"+Math.random().toString(36).slice(2)}
- })();
+
  const ghost=$("#secretGhost"),bubble=$("#secretGhostLine"),log=$("#secretChatLog"),form=$("#secretComposer"),input=$("#secretMessage"),status=$("#secretAiStatus"),send=$("#secretSend"),mic=$("#secretMic");
  const secretSprites={
    idle:"assets/segredos/fantasma-talk-00.webp",
@@ -803,18 +793,20 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  }
  async function askRemoteAI(message,onChunk){
    if(!REMOTE_AI_URL)throw new Error("remote_ai_not_configured");
-   const prior=history.slice(0,-1).slice(-6).map(m=>({role:m.role,content:String(m.content||"").slice(0,1000)}));
+   const prior=history.slice(0,-1).slice(-6).map(m=>({
+     role:m.role,
+     content:String(m.content||"").slice(0,1000)
+   }));
    const controller=new AbortController();
-   const timeout=setTimeout(()=>controller.abort(),240000);
-   const queueNotice=setTimeout(()=>{
-     setStatus("✦ Há outros espíritos na Névoa • aguardando sua vez","busy");
-     bubbleText("Sua pergunta está comigo. Só estou esperando uma brecha na névoa…");
-   },4500);
+   const timeout=setTimeout(()=>controller.abort(),90000);
    try{
      const res=await fetch(REMOTE_AI_URL,{
        method:"POST",
        headers:{"Content-Type":"application/json","Accept":"application/json"},
-       body:JSON.stringify({message:String(message||"").slice(0,1400),history:prior,client_id:NEVOA_CLIENT_ID}),
+       body:JSON.stringify({
+         message:String(message||"").slice(0,1400),
+         history:prior
+       }),
        signal:controller.signal
      });
      const data=await res.json().catch(()=>({}));
@@ -829,7 +821,6 @@ NOTAS PEDAGÓGICAS RELEVANTES:
      return reply;
    }finally{
      clearTimeout(timeout);
-     clearTimeout(queueNotice);
    }
  }
  async function askFriend(message,onChunk){

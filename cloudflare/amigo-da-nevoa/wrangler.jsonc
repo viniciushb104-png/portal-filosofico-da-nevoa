@@ -6,20 +6,6 @@
   "ai": {
     "binding": "AI"
   },
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "CHAT_QUEUE",
-        "class_name": "NevoaQueue"
-      }
-    ]
-  },
-  "exports": {
-    "NevoaQueue": {
-      "type": "durable-object",
-      "storage": "sqlite"
-    }
-  },
   "observability": {
     "enabled": true
   }

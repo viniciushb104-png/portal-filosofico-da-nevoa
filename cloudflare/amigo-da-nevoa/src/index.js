@@ -1,5 +1,3 @@
-import { DurableObject } from "cloudflare:workers";
-
 const MODEL = "@cf/zai-org/glm-4.7-flash";
 const SITE_ORIGINS = new Set([
   "https://viniciushb104-png.github.io",
@@ -32,10 +30,10 @@ Você é o Amigo da Névoa: uma única personalidade contínua, não um professo
 function cors(origin){
   const allowed=SITE_ORIGINS.has(origin) ? origin : "https://viniciushb104-png.github.io";
   return {
-    "Access-Control-Allow-Origin": allowed,
-    "Access-Control-Allow-Methods": "POST,OPTIONS,GET",
-    "Access-Control-Allow-Headers": "Content-Type,Accept",
-    "Vary": "Origin"
+    "Access-Control-Allow-Origin":allowed,
+    "Access-Control-Allow-Methods":"POST,OPTIONS,GET",
+    "Access-Control-Allow-Headers":"Content-Type,Accept",
+    "Vary":"Origin"
   };
 }
 
@@ -51,7 +49,7 @@ function json(data,status=200,origin=""){
 }
 
 function cleanHistory(value){
-  if(!Array.isArray(value)) return [];
+  if(!Array.isArray(value))return [];
   return value.slice(-6).flatMap(item=>{
     const role=item?.role==="assistant"?"assistant":item?.role==="user"?"user":null;
     const content=typeof item?.content==="string"?item.content.trim().slice(0,1000):"";
@@ -68,62 +66,22 @@ function extractReply(result){
   ).trim();
 }
 
-function classifyError(error){
-  const detail=String(error?.message||error||"");
-  if(/3036|daily free allocation|used up your daily|account limited/i.test(detail)) return "daily_limit";
-  if(/3040|capacity temporarily exceeded|out of capacity/i.test(detail)) return "capacity";
-  return "temporary";
-}
-
-async function generate(env,messages){
-  // V36: um único caminho de inferência, igual ao uso síncrono recomendado
-  // pela Cloudflare. Sem fila artesanal, sem rejectIfBusy e sem cascata de modelos.
-  const result=await env.AI.run(MODEL,{
-    messages,
-    max_completion_tokens:220,
-    temperature:0.45,
-    top_p:0.85
-  });
-  const reply=extractReply(result);
-  if(!reply)throw new Error("empty_model_response");
-  return reply;
-}
-
-// Mantida somente porque o binding Durable Object já existe no projeto.
-// A conversa pública não passa mais por esta classe.
-export class NevoaQueue extends DurableObject {
-  async fetch(){
-    return new Response(JSON.stringify({ok:true,unused:true}),{
-      headers:{"Content-Type":"application/json"}
-    });
-  }
-}
-
 export default {
   async fetch(request,env){
     const url=new URL(request.url);
     const origin=request.headers.get("Origin")||"";
 
     if(request.method==="OPTIONS"){
-      if(origin&&!SITE_ORIGINS.has(origin)) return new Response(null,{status:403});
+      if(origin&&!SITE_ORIGINS.has(origin))return new Response(null,{status:403});
       return new Response(null,{status:204,headers:cors(origin)});
     }
 
     if(request.method==="GET"&&url.pathname==="/health"){
-      return json({
-        ok:true,
-        service:"amigo-da-nevoa",
-        model:MODEL,
-        routing:"direct-single-model-v36"
-      },200,origin);
+      return json({ok:true,service:"amigo-da-nevoa",model:MODEL,routing:"browser-worker-ai-direct"},200,origin);
     }
 
-    if(request.method!=="POST"||url.pathname!=="/chat"){
-      return json({error:"not_found"},404,origin);
-    }
-    if(origin&&!SITE_ORIGINS.has(origin)){
-      return json({error:"origin_not_allowed"},403,origin);
-    }
+    if(request.method!=="POST"||url.pathname!=="/chat")return json({error:"not_found"},404,origin);
+    if(origin&&!SITE_ORIGINS.has(origin))return json({error:"origin_not_allowed"},403,origin);
 
     let body;
     try{body=await request.json()}
@@ -139,18 +97,21 @@ export default {
     ];
 
     try{
-      const reply=await generate(env,messages);
-      return json({reply,model:MODEL,routing:"direct"},200,origin);
+      // Fluxo mínimo oficial do Workers AI: uma chamada, um modelo, uma resposta.
+      const result=await env.AI.run(MODEL,{messages});
+      const reply=extractReply(result);
+      if(!reply)throw new Error("empty_model_response");
+      return json({reply,model:MODEL},200,origin);
     }catch(error){
-      console.error("workers_ai_error",error);
-      const code=classifyError(error);
-      if(code==="daily_limit"){
-        return json({error:"daily_limit_reached",code},429,origin);
+      console.error("workers_ai_direct_error",error);
+      const detail=String(error?.message||error||"");
+      if(/3036|daily free allocation|used up your daily|account limited/i.test(detail)){
+        return json({error:"daily_limit_reached",code:"daily_limit"},429,origin);
       }
-      return json({
-        error:code==="capacity"?"ai_capacity_busy":"ai_temporarily_unavailable",
-        code
-      },503,origin);
+      if(/3040|capacity temporarily exceeded|out of capacity/i.test(detail)){
+        return json({error:"ai_capacity_busy",code:"capacity"},503,origin);
+      }
+      return json({error:"ai_temporarily_unavailable",code:"temporary"},503,origin);
     }
   }
 };
