@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 
-const MODEL = "@cf/qwen/qwen3-30b-a3b-fp8";
-const QUEUE_SHARDS = 3;
+const MODEL = "@cf/zai-org/glm-4.7-flash";
+const QUEUE_SHARDS = 2;
 const SITE_ORIGINS = new Set([
   "https://viniciushb104-png.github.io",
   "http://localhost:8000",
@@ -65,13 +65,10 @@ async function generateWithRetries(env,messages){
   const options={
     messages,
     max_tokens:200,
-    temperature:0.50,
-    top_p:0.82,
-    top_k:40,
-    repetition_penalty:1.06,
-    frequency_penalty:0.12
+    temperature:0.45,
+    top_p:0.85
   };
-  for(let attempt=0;attempt<4;attempt++){
+  for(let attempt=0;attempt<5;attempt++){
     try{
       const result=await env.AI.run(MODEL,options);
       const reply=String(result?.response ?? result?.choices?.[0]?.message?.content ?? result?.result?.response ?? "").trim();
@@ -80,10 +77,10 @@ async function generateWithRetries(env,messages){
     }catch(error){
       const kind=errorKind(error);
       if(kind==="daily_limit") return {ok:false,error:"daily_limit_reached",code:"daily_limit",status:429};
-      if(attempt===3 || (kind!=="capacity"&&kind!=="temporary")){
+      if(attempt===4 || (kind!=="capacity"&&kind!=="temporary")){
         return {ok:false,error:"ai_temporarily_unavailable",code:kind==="capacity"?"capacity":"temporary",status:503};
       }
-      await sleep(900*Math.pow(2,attempt));
+      await sleep(800*Math.pow(2,attempt));
     }
   }
   return {ok:false,error:"ai_temporarily_unavailable",code:"temporary",status:503};

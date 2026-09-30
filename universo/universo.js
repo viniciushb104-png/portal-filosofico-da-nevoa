@@ -325,10 +325,15 @@ function segredos(){
    ghost.addEventListener("error",()=>{
      ghost.style.visibility="visible";
      ghost.style.opacity="1";
+     ghost.classList.remove("secretGhostPop");
      if(ghost.dataset.sprite!==idleSrc){
        ghost.dataset.sprite=idleSrc;
        ghost.src=idleSrc;
      }
+   });
+   ghost.addEventListener("load",()=>{
+     ghost.style.visibility="visible";
+     ghost.style.opacity="1";
    });
  }
  let speakingTimer=null,poseTimer=null,blinkTimer=null,busy=false,voiceOn=true,musicOn=true,history=[];
@@ -375,14 +380,8 @@ function segredos(){
    else apply();
  }
  function scheduleBlink(){
-   if(blinkTimer)clearTimeout(blinkTimer);
-   blinkTimer=setTimeout(()=>{
-     if(!busy&&!speakingTimer&&!poseTimer&&ghost){
-       setGhostSprite(blinkSrc);
-       setTimeout(()=>{if(!busy&&!speakingTimer&&!poseTimer)setGhostSprite(idleSrc)},145);
-     }
-     scheduleBlink();
-   },2600+Math.random()*2600);
+   if(blinkTimer){clearTimeout(blinkTimer);blinkTimer=null}
+   // V33: sprite estável para o fantasma nunca piscar ou desaparecer.
  }
  function stopTalking(finalSrc=idleSrc){
    if(speakingTimer){clearInterval(speakingTimer);speakingTimer=null}
@@ -397,8 +396,11 @@ function segredos(){
  }
  function animateTalking(){
    clearGhostTimers();
-   let open=false;
-   speakingTimer=setInterval(()=>{open=!open;setGhostSprite(open?talkSrc:idleSrc)},115+Math.floor(Math.random()*45));
+   setGhostSprite(talkSrc);
+   // Mantém a pose de fala sem trocar a imagem dezenas de vezes por segundo.
+   speakingTimer=setInterval(()=>{
+     if(ghost){ghost.style.visibility="visible";ghost.style.opacity="1"}
+   },1200);
  }
  function bubbleText(text){
    if(!bubble)return;
