@@ -55,9 +55,9 @@ const positions=[330,680,1030,1390,1750,2110,2510,2870];
 const exhibits=document.getElementById('exhibits'),world=document.getElementById('museumWorld'),viewport=document.getElementById('museumViewport'),player=document.getElementById('museumPlayer'),action=document.getElementById('interact');
 const dialog=document.getElementById('museumModal'),videoBox=document.getElementById('museumVideo');
 let x=140,near=null,held=0,raf=0;
-exhibits.innerHTML=philosophers.map((p,i)=>`<article class="exhibit" data-i="${i}" style="left:${positions[i]}px"><button class="frame" type="button" aria-label="Interagir com ${p.name}"><span class="portraitFallback">${p.icon}</span></button><h3>${p.name}</h3><p>${p.concept}</p><div class="interactHint">✦ INTERAGIR</div></article>`).join('');
+exhibits.innerHTML=philosophers.map((p,i)=>`<article class="exhibit" data-i="${i}" style="left:${positions[i]}px"><button class="frame" type="button" aria-label="Interagir com ${p.name}"><img class="portraitArt" src="assets/images/museu/${p.id}.png" alt="Retrato de ${p.name}" loading="eager" decoding="async"><span class="portraitFallback">${p.icon}</span></button><h3>${p.name}</h3><p>${p.concept}</p><div class="interactHint">✦ INTERAGIR</div></article>`).join('');
 const cards=[...document.querySelectorAll('.exhibit')];
-cards.forEach(card=>{const img=card.querySelector('.portraitArt'),frame=card.querySelector('.frame');img.addEventListener('load',()=>frame.classList.add('hasArt'));img.addEventListener('error',()=>frame.classList.remove('hasArt'));if(img.complete&&img.naturalWidth)frame.classList.add('hasArt')});
+cards.forEach(card=>{const img=card.querySelector('.portraitArt'),frame=card.querySelector('.frame');if(!img)return;const show=()=>frame.classList.add('hasArt'),fallback=()=>frame.classList.remove('hasArt');img.addEventListener('load',show);img.addEventListener('error',fallback);if(img.complete&&img.naturalWidth)show()});
 function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
 function update(){
  x=clamp(x,70,3060);player.style.left=x+'px';
