@@ -47,13 +47,16 @@ function journeyStatus(progressRows=[],cloudRpg=null,base=progress()){
  if(saves.length){
    saves.forEach(save=>{paraScore=Math.max(paraScore,Math.max(0,Number(save.score||0)));if(save.completed===true)paraDone=true});
  }else paraScore=Math.max(0,claimPara);
+ const paraStarted=saves.length?saves.some(save=>!!save.classKey||Number(save.sceneIndex||0)>0||Number(save.score||0)>0||Object.keys(save.flags||{}).length>0||Object.keys(save.awards||{}).length>0||save.completed===true):claimPara>0;
  const paraPct=paraDone?100:Math.min(95,Math.round(Math.min(120,paraScore)/120*100));
  const trophies={
    mansion:effectiveMansionRooms>=7,
    platform_socrates:labPhases[0],platform_plato:labPhases[1],platform_descartes:labPhases[2],
    platform_hume:labPhases[3],platform_ethics:labPhases[4],labyrinthMaster:labDoneCount===5,paradoxia:paraDone
  };
- return {claims,effectiveMansionRooms,mansionPct,labPhases,labDoneCount,labPct,paraScore,paraPct,paraDone,trophies};
+ const trophyCount=Object.values(trophies).filter(Boolean).length;
+ const memoriesPct=Math.round(trophyCount/JOURNEY_TROPHIES.length*100);
+ return {claims,effectiveMansionRooms,mansionPct,labPhases,labDoneCount,labPct,paraScore,paraPct,paraStarted,paraDone,trophies,trophyCount,memoriesPct};
 }
 function shell(title,lead,body){document.title=title+" — Portal Filosófico da Névoa";$("#app").innerHTML=`<header class="top"><div class="wrap topIn"><a class="brand" href="../index.html#grande-mapa" title="Abrir o Grande Mapa">Portal Filosófico <span>da Névoa</span></a><nav class="nav"><a href="../index.html#grande-mapa">🗺️ Mapa</a><a href="../jogos/paradoxia/">Paradoxia</a><a href="../jogos/plataforma-filosofica/">Labirinto</a><a href="grimorio.html">Grimório</a><a href="perfil.html">Perfil</a><a href="../salao-da-nevoa.html">Salão</a></nav><a class="worldMapBtn" href="../index.html#grande-mapa" aria-label="Abrir Grande Mapa">🗺️ <span>Mapa</span></a></div></header><section class="hero"><div class="wrap"><div class="eyebrow">Universo da Névoa</div><h1>${title}</h1><p class="lead">${lead}</p><div class="chips"><span class="chip">${p.xp||0} XP</span><span class="chip">${u.unlocks.length} registros</span><span class="chip">${u.cards.length} cartas</span><span class="chip">${u.secrets.length} segredos</span></div></div></section>${body}<footer class="footer"><div class="wrap">PENSAR • QUESTIONAR • ARGUMENTAR • TRANSFORMAR<br><br><a href="../index.html#grande-mapa">← Voltar ao Grande Mapa</a></div></footer>`}
 const card=(icon,title,desc,href,meta="")=>`<article class="card"><div class="icon">${icon}</div>${meta?`<div class="meta">${meta}</div>`:""}<h3>${title}</h3><p>${desc}</p>${href?`<a href="${href}">Entrar →</a>`:""}</article>`;
@@ -98,6 +101,9 @@ const journeyData=(xp,progressRows=[],cloudRpg=null)=>{
 };
 const jd=journeyData(localXp);
 const worldCard=(cls,icon,kicker,title,pct,desc,href)=>`<a class="journeyWorldCard ${cls}" href="${href}"><div class="journeyWorldArt"><span>${icon}</span><i style="--world-progress:${pct}%"></i></div><div class="journeyWorldCopy"><small>${kicker}</small><h3>${title}</h3><p>${desc}</p><div class="journeyWorldProgress"><i style="width:${pct}%"></i></div><b>${pct}% explorado <span>→</span></b></div></a>`;
+const timelineState=(started,done)=>done?"done":started?"active":"pending";
+const timelineLabel=state=>state==="done"?"✓ Concluído":state==="active"?"◈ Em andamento":"◇ Não iniciado";
+const timelineChapter=(id,number,icon,title,state,pct,meta,href)=>`<a class="journeyTimelineChapter ${state}" id="journeyTimeline${id}" data-timeline-id="${id}" href="${href}"><span class="journeyTimelineNumber">${number}</span><div class="journeyTimelineSigil">${icon}</div><small class="journeyTimelineState">${timelineLabel(state)}</small><h3>${title}</h3><p class="journeyTimelineMeta">${meta}</p><div class="journeyTimelineProgress"><i style="width:${pct}%"></i></div><b class="journeyTimelinePct">${pct}%</b></a>`;
 shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro da Névoa. Cada pergunta respondida deixa uma marca no mundo.",`
 <section class="section journeySection"><div class="wrap">
   <div class="journeyHero panel">
@@ -116,6 +122,14 @@ shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro 
 
   <div class="journeyNext panel">
     <div class="journeyNextIcon" id="journeyNextIcon">${jd.next.icon}</div><div><small>A NÉVOA RECOMENDA</small><h3 id="journeyNextTitle">${jd.next.title}</h3><p id="journeyNextText">${jd.next.text}</p></div><a class="btn" id="journeyNextLink" href="${jd.next.href}">Continuar jornada →</a>
+  </div>
+
+  <div class="journeySectionHead journeyTimelineHead"><div><div class="eyebrow">LINHA DA JORNADA</div><h2>Os capítulos da sua história</h2></div><p>Cada marco acende conforme sua jornada real é registrada no Portal.</p></div>
+  <div class="journeyTimeline" id="journeyTimeline">
+    ${timelineChapter("Mansion","I","🏚️","Mansão de Sócrates",timelineState(jd.effectiveMansionRooms>0,jd.mansionPct===100),jd.mansionPct,jd.effectiveMansionRooms+"/7 cômodos","../index.html#jogos")}
+    ${timelineChapter("Labyrinth","II","🎮","Labirinto dos Filósofos",timelineState(jd.labDoneCount>0,jd.labPct===100),jd.labPct,jd.labDoneCount+"/5 fases","../jogos/plataforma-filosofica/")}
+    ${timelineChapter("Paradoxia","III","🎭","Paradoxia",timelineState(jd.paraStarted,jd.paraDone),jd.paraPct,jd.paraDone?"Capítulo I concluído":jd.paraStarted?"Capítulo em andamento":"Reino ainda não visitado","../jogos/paradoxia/")}
+    ${timelineChapter("Memories","IV","🏆","Memórias",timelineState(jd.trophyCount>0,jd.trophyCount===JOURNEY_TROPHIES.length),jd.memoriesPct,jd.trophyCount+"/"+JOURNEY_TROPHIES.length+" despertas","grimorio.html")}
   </div>
 
   <div class="journeySectionHead"><div><div class="eyebrow">Destinos percorridos</div><h2>Seu caminho pelo Portal</h2></div><p>Nenhuma região é bloqueada. Os selos apenas registram onde sua história já passou.</p></div>
@@ -167,6 +181,20 @@ const repaintJourney=(xp,progressRows=[],cloudRpg=null)=>{
  const labStatus=$("#journeyLabStatus");if(labStatus)labStatus.textContent=d.labDoneCount+"/5 concluídas";
  const labHint=$("#journeyLabHint");if(labHint)labHint.textContent=d.labDoneCount===5?"🏆 Mestre do Labirinto conquistado":"Conclua as fases pendentes para despertar o troféu Mestre do Labirinto.";
  document.querySelectorAll(".journeyPhaseSeal").forEach((seal,i)=>{const done=!!d.labPhases[i];seal.classList.toggle("done",done);const small=seal.querySelector("small");if(small)small.textContent=done?"✓ Concluída":"◇ Pendente"});
+ const timeline=[
+  ["Mansion",timelineState(d.effectiveMansionRooms>0,d.mansionPct===100),d.mansionPct,d.effectiveMansionRooms+"/7 cômodos"],
+  ["Labyrinth",timelineState(d.labDoneCount>0,d.labPct===100),d.labPct,d.labDoneCount+"/5 fases"],
+  ["Paradoxia",timelineState(d.paraStarted,d.paraDone),d.paraPct,d.paraDone?"Capítulo I concluído":d.paraStarted?"Capítulo em andamento":"Reino ainda não visitado"],
+  ["Memories",timelineState(d.trophyCount>0,d.trophyCount===JOURNEY_TROPHIES.length),d.memoriesPct,d.trophyCount+"/"+JOURNEY_TROPHIES.length+" despertas"]
+ ];
+ timeline.forEach(([id,state,pct,meta])=>{
+   const node=$("#journeyTimeline"+id);if(!node)return;
+   node.classList.remove("pending","active","done");node.classList.add(state);
+   const st=node.querySelector(".journeyTimelineState");if(st)st.textContent=timelineLabel(state);
+   const mt=node.querySelector(".journeyTimelineMeta");if(mt)mt.textContent=meta;
+   const fill=node.querySelector(".journeyTimelineProgress i");if(fill)fill.style.width=pct+"%";
+   const pc=node.querySelector(".journeyTimelinePct");if(pc)pc.textContent=pct+"%";
+ });
  return d;
 };
 async function loadProfile(){
