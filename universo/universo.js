@@ -329,7 +329,7 @@ function segredos(){
  let speakingTimer=null,poseTimer=null,blinkTimer=null,busy=false,voiceOn=true,musicOn=true,history=[];
  const friendMusic=new Audio("assets/audio/amigo-da-nevoa/conversas-entre-lapides.mp3");
  friendMusic.loop=true;
- friendMusic.preload="auto";
+ friendMusic.preload="metadata";
  friendMusic.volume=.18;
  try{voiceOn=localStorage.getItem("nevoaFriendVoice")!=="off"}catch(e){}
  try{musicOn=localStorage.getItem("nevoaFriendMusic")!=="off"}catch(e){}
