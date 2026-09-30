@@ -1808,3 +1808,33 @@ body[data-page="segredos"] textarea{
  .journeyTimelineProgress{grid-column:1/4;margin-top:7px}
  .journeyTimelinePct{grid-column:3;grid-row:2;margin:0;align-self:center}
 }
+
+
+/* V11 — Paradoxia detalhada na Minha Jornada */
+.journeyParadoxiaDetail{margin-top:18px;padding:18px;border-color:rgba(128,65,149,.34);background:radial-gradient(circle at 12% 0,rgba(99,40,122,.13),transparent 28%),linear-gradient(145deg,rgba(18,9,25,.96),rgba(9,5,13,.98))}
+.journeyParaSummary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0 18px}
+.journeyParaSummary>div{min-width:0;padding:12px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(255,255,255,.025)}
+.journeyParaSummary span,.journeyParaSummary b,.journeyParaSummary small{display:block}
+.journeyParaSummary span{font-size:20px;margin-bottom:5px}.journeyParaSummary b{font-size:13px;color:#efe5f4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.journeyParaSummary small{margin-top:3px;font-size:8px;color:#9f90a8}
+.journeyParaSubhead{display:flex;justify-content:space-between;gap:12px;align-items:end;margin:14px 0 9px}.journeyParaSubhead small,.journeyParaSubhead b{display:block}.journeyParaSubhead small{font-size:8px;letter-spacing:.12em;color:#af83c1;font-weight:900}.journeyParaSubhead b{font-family:Georgia,serif;font-size:15px;margin-top:2px}.journeyParaSubhead>a{font-size:9px;color:#d6a9e8;text-decoration:none}.journeyParaSubhead strong{font-size:9px;color:#d8c0e2}
+.journeyParaEncounters{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.journeyParaEncounter{min-width:0;text-align:center;padding:10px 7px;border:1px solid rgba(255,255,255,.06);border-radius:12px;background:#0d0712;opacity:.62}
+.journeyParaEncounter span,.journeyParaEncounter b,.journeyParaEncounter small{display:block}.journeyParaEncounter span{font-size:20px}.journeyParaEncounter b{font-size:8px;margin:5px 0;color:#d6c9dc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.journeyParaEncounter small{font-size:7px;color:#85788d}
+.journeyParaEncounter.active{opacity:1;border-color:#9a4eb6;background:#160b1d;box-shadow:inset 0 0 18px rgba(165,70,197,.08)}.journeyParaEncounter.active small{color:#d7a9e8}
+.journeyParaEncounter.done{opacity:1;border-color:#397b61;background:#0c1814}.journeyParaEncounter.done small{color:#8ddfba}
+.journeyParadoxiaMissions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.journeyParaMission{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:8px;min-width:0;padding:9px 10px;border:1px solid rgba(255,255,255,.06);border-radius:12px;background:#0d0712;color:inherit;text-decoration:none}
+.journeyParaMission>span{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#0a0610;border:1px solid #51305e}.journeyParaMission b,.journeyParaMission small{display:block}.journeyParaMission b{font-size:9px}.journeyParaMission small{font-size:7px;color:#95849e;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.journeyParaMission em{font-size:7px;font-style:normal;color:#9b8ba3;white-space:nowrap}
+.journeyParaMission.done{border-color:#397b61;background:#0c1814}.journeyParaMission.done>span{border-color:#46a77e}.journeyParaMission.done em{color:#8ddfba}
+@media(max-width:980px){
+ .journeyParaSummary{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .journeyParaEncounters{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .journeyParadoxiaMissions{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+ .journeyParadoxiaDetail{padding:13px}
+ .journeyParaSummary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .journeyParaEncounters{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .journeyParadoxiaMissions{grid-template-columns:1fr}
+ .journeyParaSubhead{align-items:flex-start;flex-direction:column}
+}
