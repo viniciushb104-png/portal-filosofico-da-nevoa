@@ -300,7 +300,28 @@ function segredos(){
    lantern:"assets/segredos/fantasma-lantern.webp"
  };
  const {idle:idleSrc,talk:talkSrc,blink:blinkSrc,explain:explainSrc,eureka:eurekaSrc,lantern:lanternSrc}=secretSprites;
- Object.values(secretSprites).forEach(src=>{const img=new Image();img.src=src});
+ const spriteCache=new Map();
+ Object.values(secretSprites).forEach(src=>{
+   const img=new Image();
+   img.decoding="async";
+   img.src=src;
+   const ready=typeof img.decode==="function"?img.decode().catch(()=>{}):Promise.resolve();
+   spriteCache.set(src,{img,ready});
+ });
+ let ghostSpriteRequest=0;
+ if(ghost){
+   ghost.dataset.sprite=idleSrc;
+   ghost.style.visibility="visible";
+   ghost.style.opacity="1";
+   ghost.addEventListener("error",()=>{
+     ghost.style.visibility="visible";
+     ghost.style.opacity="1";
+     if(ghost.dataset.sprite!==idleSrc){
+       ghost.dataset.sprite=idleSrc;
+       ghost.src=idleSrc;
+     }
+   });
+ }
  let speakingTimer=null,poseTimer=null,blinkTimer=null,busy=false,voiceOn=true,musicOn=true,history=[];
  const friendMusic=new Audio("assets/audio/amigo-da-nevoa/conversas-entre-lapides.mp3");
  friendMusic.loop=true;
@@ -319,14 +340,30 @@ function segredos(){
    if(blinkTimer){clearTimeout(blinkTimer);blinkTimer=null}
  }
  function setGhostSprite(src,pop=false){
-   if(!ghost)return;
-   ghost.src=src;
-   if(pop){
+   if(!ghost||!src)return;
+   ghost.style.visibility="visible";
+   ghost.style.opacity="1";
+   const animate=()=>{
+     if(!pop)return;
      ghost.classList.remove("secretGhostPop");
      void ghost.offsetWidth;
      ghost.classList.add("secretGhostPop");
      setTimeout(()=>ghost&&ghost.classList.remove("secretGhostPop"),430);
-   }
+   };
+   if(ghost.dataset.sprite===src){animate();return}
+   const request=++ghostSpriteRequest;
+   const apply=()=>{
+     if(request!==ghostSpriteRequest||!ghost)return;
+     ghost.dataset.sprite=src;
+     ghost.src=src;
+     ghost.style.visibility="visible";
+     ghost.style.opacity="1";
+     animate();
+   };
+   const cached=spriteCache.get(src);
+   if(cached&&cached.img.complete&&cached.img.naturalWidth>0)apply();
+   else if(cached)cached.ready.then(apply).catch(()=>{});
+   else apply();
  }
  function scheduleBlink(){
    if(blinkTimer)clearTimeout(blinkTimer);
@@ -418,8 +455,16 @@ function segredos(){
  function setBusy(on){
    busy=on;send.disabled=on;mic.disabled=on;
    send.textContent=on?"…":"➤";
-   if(on){setStatus("pensando na névoa...","busy");showGhostPose(lanternSrc,2600)}
-   else{setStatus(REMOTE_AI_URL?"✦ IA da Névoa • pronta":(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta"),"ready");stopTalking()}
+   if(on){
+     setStatus("pensando na névoa...","busy");
+     clearGhostTimers();
+     setGhostSprite(lanternSrc,true);
+     if(ghost)ghost.classList.add("secretGhostThinking");
+   }else{
+     if(ghost)ghost.classList.remove("secretGhostThinking");
+     setStatus(REMOTE_AI_URL?"✦ IA da Névoa • pronta":(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta"),"ready");
+     stopTalking();
+   }
  }
  async function askFriendFallback(message){
    const raw=String(message||"").trim();
@@ -738,21 +783,69 @@ NOTAS PEDAGÓGICAS RELEVANTES:
      }catch(err){reject(err)}
    });
  }
- async function askRemoteAI(message){
+ async function askRemoteAI(message,onChunk){
    if(!REMOTE_AI_URL)throw new Error("remote_ai_not_configured");
-   const prior=history.slice(0,-1).slice(-10).map(m=>({role:m.role,content:String(m.content||"").slice(0,1600)}));
+   const prior=history.slice(0,-1).slice(-8).map(m=>({role:m.role,content:String(m.content||"").slice(0,1200)}));
    const controller=new AbortController();
-   const timeout=setTimeout(()=>controller.abort(),18000);
+   const timeout=setTimeout(()=>controller.abort(),30000);
+   let reply="";
+   const emitPiece=value=>{
+     const piece=String(value||"");
+     if(!piece)return;
+     let delta=piece;
+     if(reply&&piece.startsWith(reply)){delta=piece.slice(reply.length);reply=piece}
+     else if(!reply&&piece.length>1){reply=piece}
+     else reply+=piece;
+     if(delta&&onChunk)onChunk(delta);
+   };
+   const parseEvent=raw=>{
+     const payload=raw.split(/\r?\n/).filter(line=>line.startsWith("data:")).map(line=>line.slice(5).trimStart()).join("\n").trim();
+     if(!payload||payload==="[DONE]")return;
+     let data;
+     try{data=JSON.parse(payload)}catch{return}
+     const piece=
+       data?.response ??
+       data?.choices?.[0]?.delta?.content ??
+       data?.choices?.[0]?.message?.content ??
+       data?.result?.response ??
+       data?.delta?.content ??
+       data?.token?.text ??
+       "";
+     emitPiece(piece);
+   };
    try{
      const res=await fetch(REMOTE_AI_URL,{
        method:"POST",
-       headers:{"Content-Type":"application/json"},
-       body:JSON.stringify({message:String(message||"").slice(0,1600),history:prior}),
+       headers:{"Content-Type":"application/json","Accept":"text/event-stream, application/json"},
+       body:JSON.stringify({message:String(message||"").slice(0,1600),history:prior,stream:true}),
        signal:controller.signal
      });
-     const data=await res.json().catch(()=>({}));
-     if(!res.ok)throw new Error(data.error||("remote_ai_http_"+res.status));
-     const reply=String(data.reply||"").trim();
+     const contentType=String(res.headers.get("content-type")||"").toLowerCase();
+     if(!res.ok){
+       const data=await res.json().catch(()=>({}));
+       throw new Error(data.error||("remote_ai_http_"+res.status));
+     }
+     if(!contentType.includes("text/event-stream")||!res.body){
+       const data=await res.json().catch(()=>({}));
+       const text=String(data.reply||data.response||"").trim();
+       if(!text)throw new Error("remote_ai_empty");
+       if(onChunk)onChunk(text);
+       return text;
+     }
+     const reader=res.body.getReader();
+     const decoder=new TextDecoder();
+     let buffer="";
+     while(true){
+       const {value,done}=await reader.read();
+       if(done)break;
+       buffer+=decoder.decode(value,{stream:true});
+       const events=buffer.split(/\r?\n\r?\n/);
+       buffer=events.pop()||"";
+       events.forEach(parseEvent);
+     }
+     buffer+=decoder.decode();
+     if(buffer.trim())parseEvent(buffer);
+     reply=reply.trim();
      if(!reply)throw new Error("remote_ai_empty");
      return reply;
    }finally{clearTimeout(timeout)}
@@ -762,7 +855,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
    if(REMOTE_AI_URL){
      try{
        setStatus("✦ Amigo da Névoa • pensando","busy");
-       return await askRemoteAI(message);
+       return await askRemoteAI(message,onChunk);
      }catch(err){
        console.warn("Amigo da Névoa remoto indisponível; usando fallback local.",err);
        setStatus("modo reserva • conversa disponível","ready");
@@ -789,7 +882,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
        ?["Hmm… entendi o caminho da sua ideia. Quero olhar mais de perto.","Opa… aí tem um ponto interessante. Deixa eu pensar com você.","He-he… gostei desse raciocínio. Só um instante."]
        :["Hmm… deixa eu puxar esse fio.","Opa… a névoa está formando uma ideia.","Um segundo… estou juntando as peças."];
    const phrase=lines[Math.floor(Math.random()*lines.length)];
-   bubbleText(phrase);setGhostSprite(lanternSrc,true);
+   bubbleText(phrase);setGhostSprite(lanternSrc);
  }
  function beginGhostDraft(){
    const item=document.createElement("article");
@@ -813,6 +906,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
      streamed+=chunk;
      draft.update(streamed);
      bubbleText(streamed.slice(-230));
+     setStatus("✦ Amigo da Névoa • respondendo","busy");
      setGhostSprite(explainSrc);
    };
    try{

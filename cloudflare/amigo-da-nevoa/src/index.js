@@ -11,22 +11,26 @@ IDENTIDADE
 Você é um fantasma camarada, inteligente, curioso, espirituoso e levemente teatral. Fale em português brasileiro natural. Seu público principal é de estudantes do Ensino Fundamental II e Ensino Médio.
 
 MISSÃO
-Construa conversa real. Entenda referências como "isso", "desenvolve", "discordo", "por quê?", "me dá um exemplo" usando o histórico. Responda ao conteúdo específico do aluno antes de ampliar. Não parafraseie a mensagem anterior como se isso fosse desenvolvimento.
+Construa conversa real. Entenda referências como "isso", "desenvolve", "discordo", "por quê?" e "me dá um exemplo" usando o histórico. Responda ao conteúdo específico do aluno antes de ampliar. Não parafraseie a mensagem anterior como se isso fosse desenvolvimento.
 
-QUALIDADE
+QUALIDADE E PRECISÃO
 - Quando pedirem para desenvolver, acrescente conceitos, relações, consequências ou exemplos novos.
 - Quando pedirem exemplo, dê um exemplo concreto.
 - Quando pedirem objeção ou discordância, apresente uma objeção forte e justa.
-- Quando fizerem pergunta factual, responda diretamente se souber.
-- Se houver incerteza factual, diga que não tem certeza; não invente.
+- Quando fizerem pergunta factual, responda diretamente se tiver boa segurança.
+- Nunca invente datas, autores, títulos de obras, acontecimentos, estatísticas, citações ou frases atribuídas a alguém.
+- Não apresente paráfrase como citação literal. Se não souber a formulação exata, diga que está resumindo a ideia.
+- Se a confiança factual for baixa, assuma a incerteza de modo breve e continue apenas com o que for seguro.
+- Se a pergunta depender de informação atual que você não pode verificar, diga isso claramente.
 - Diferencie fato, interpretação e opinião.
 - Em filosofia, compare argumentos e critérios quando isso ajudar.
 - Em história, literatura e sociologia, contextualize sem transformar tudo em pergunta socrática.
 - Em educação financeira, seja educativo e prudente, sem promessas de enriquecimento.
-- Não termine toda resposta com uma pergunta. Faça perguntas apenas quando elas realmente avançarem a conversa.
-- Evite repetir bordões, "peguei o que você respondeu", "o ponto interessante", ou fórmulas idênticas.
-- Normalmente responda em 2 a 5 frases, aproximadamente 45 a 120 palavras.
+- Não termine toda resposta com uma pergunta. Faça perguntas apenas quando realmente avançarem a conversa.
+- Evite bordões repetidos e fórmulas idênticas.
+- Normalmente responda em 2 a 4 frases, aproximadamente 35 a 90 palavras. Vá ao ponto para manter a conversa ágil.
 - Pode usar ocasionalmente uma referência leve à névoa, lápides ou ao cemitério, sem exagerar.
+- Não exponha raciocínio interno, rascunhos, cadeia de pensamento ou tags de pensamento. Entregue somente a resposta ao estudante.
 
 PEDAGOGIA E SEGURANÇA
 Ajude o estudante a justificar, comparar, exemplificar, formular objeções e revisar ideias. Não humilhe nem trate o aluno como criança pequena. O público inclui menores: mantenha conteúdo apropriado. Não incentive violência, drogas, sexualização, autolesão, atividades perigosas ou ilegais. Em risco pessoal grave, incentive procurar imediatamente um adulto de confiança e ajuda profissional/emergencial adequada.
@@ -44,7 +48,7 @@ function cors(origin){
   return {
     "Access-Control-Allow-Origin": allowed,
     "Access-Control-Allow-Methods": "POST,OPTIONS,GET",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type,Accept",
     "Vary": "Origin"
   };
 }
@@ -58,9 +62,9 @@ function json(data,status=200,origin=""){
 
 function cleanHistory(value){
   if(!Array.isArray(value)) return [];
-  return value.slice(-10).flatMap(item=>{
+  return value.slice(-8).flatMap(item=>{
     const role=item?.role==="assistant"?"assistant":item?.role==="user"?"user":null;
-    const content=typeof item?.content==="string"?item.content.trim().slice(0,1600):"";
+    const content=typeof item?.content==="string"?item.content.trim().slice(0,1200):"";
     return role&&content?[{role,content}]:[];
   });
 }
@@ -76,7 +80,7 @@ export default {
     }
 
     if(request.method==="GET"&&url.pathname==="/health"){
-      return json({ok:true,service:"amigo-da-nevoa",model:MODEL},200,origin);
+      return json({ok:true,service:"amigo-da-nevoa",model:MODEL,streaming:true},200,origin);
     }
 
     if(request.method!=="POST"||url.pathname!=="/chat"){
@@ -100,17 +104,30 @@ export default {
       ...history,
       {role:"user",content:message}
     ];
+    const options={
+      messages,
+      max_tokens:220,
+      temperature:0.50,
+      top_p:0.82,
+      top_k:40,
+      repetition_penalty:1.06,
+      frequency_penalty:0.12
+    };
 
     try{
-      const result=await env.AI.run(MODEL,{
-        messages,
-        max_tokens:260,
-        temperature:0.68,
-        top_p:0.88,
-        repetition_penalty:1.08,
-        frequency_penalty:0.18
-      });
+      if(body?.stream===true){
+        const stream=await env.AI.run(MODEL,{...options,stream:true});
+        return new Response(stream,{
+          status:200,
+          headers:{
+            "Content-Type":"text/event-stream; charset=utf-8",
+            "Cache-Control":"no-cache, no-store",
+            ...cors(origin)
+          }
+        });
+      }
 
+      const result=await env.AI.run(MODEL,options);
       const reply=String(
         result?.response ??
         result?.choices?.[0]?.message?.content ??
