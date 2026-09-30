@@ -11,6 +11,7 @@ function saveU(u){localStorage.setItem("nevoaUniverseV1",JSON.stringify(u))}
 window.NevoaUniverse={unlock(id){const x=universe();if(!x.unlocks.includes(id))x.unlocks.push(id);saveU(x)},addCard(id){const x=universe();if(!x.cards.includes(id))x.cards.push(id);saveU(x)},addSecret(id){const x=universe();if(!x.secrets.includes(id))x.secrets.push(id);saveU(x)},addCoins(n=1){const x=universe();x.coins=(x.coins||0)+n;saveU(x)}};
 function seed(){const p=progress(),x=universe(),c=p.completed||{},ids=["socrates","argumento"];if(c.platao)ids.push("platao","caverna");if(c.descartes)ids.push("descartes");if(c.logica)ids.push("popularidade","adhominem");if((p.xp||0)>=120)ids.push("autonomia");if(localStorage.getItem("paradoxiaSave"))ids.push("teseu","certeza");ids.forEach(i=>{if(!x.unlocks.includes(i))x.unlocks.push(i)});D.cards.forEach(i=>{if((p.xp||0)>=i.xp&&!x.cards.includes(i.id))x.cards.push(i.id)});saveU(x);return x}
 const u=seed(),p=progress();
+const Progress=window.NevoaProgress;
 const LAB_PHASES=[
  {id:"platform_socrates",name:"Sócrates",icon:"🏛️",localKey:"plataforma",score:60},
  {id:"platform_plato",name:"Platão",icon:"🌞",localKey:"plataoPlataforma",score:70},
@@ -29,34 +30,21 @@ const JOURNEY_TROPHIES=[
  {id:"paradoxia",icon:"🎭",name:"Cidadão de Paradoxia",desc:"Conclua o Capítulo I de Paradoxia."}
 ];
 function journeyStatus(progressRows=[],cloudRpg=null,base=progress()){
- const completed=base.completed||{},achievements=base.achievements||{},claims={};
- (Array.isArray(progressRows)?progressRows:[]).forEach(row=>{const k=String(row?.event_key||"");if(k)claims[k]=Math.max(Number(claims[k]||0),Number(row?.best_score||0))});
- const localRooms=Math.min(7,Number(base.socrates||0));
- const remoteMansionScore=Number(claims.socrates_mansion||0);
- const remoteRooms=remoteMansionScore>=130?7:Math.min(6,Math.floor(remoteMansionScore/15));
- const effectiveMansionRooms=Math.max(localRooms,remoteRooms);
- const mansionPct=Math.round(effectiveMansionRooms/7*100);
- const forceLabComplete=Number(completed.labirintoCompleto||0)>=1||!!achievements.labyrinthMaster;
- const labPhases=LAB_PHASES.map(x=>forceLabComplete||Number(completed[x.localKey]||0)>=x.score||Number(claims[x.id]||0)>=x.score);
- const labDoneCount=labPhases.filter(Boolean).length,labPct=labDoneCount*20;
- const localRpg=readJSON("paradoxiaSaveV1",null)||readJSON("paradoxiaSave",null);
- const cloudSave=cloudRpg&&typeof cloudRpg.save_data==="object"?cloudRpg.save_data:null;
- const saves=[localRpg,cloudSave].filter(x=>x&&typeof x==="object");
- const claimPara=Number(claims.rpg_paradoxia||0);
- let paraScore=0,paraDone=claimPara>=120;
- if(saves.length){
-   saves.forEach(save=>{paraScore=Math.max(paraScore,Math.max(0,Number(save.score||0)));if(save.completed===true)paraDone=true});
- }else paraScore=Math.max(0,claimPara);
- const paraStarted=saves.length?saves.some(save=>!!save.classKey||Number(save.sceneIndex||0)>0||Number(save.score||0)>0||Object.keys(save.flags||{}).length>0||Object.keys(save.awards||{}).length>0||save.completed===true):claimPara>0;
- const paraPct=paraDone?100:Math.min(95,Math.round(Math.min(120,paraScore)/120*100));
- const trophies={
-   mansion:effectiveMansionRooms>=7,
-   platform_socrates:labPhases[0],platform_plato:labPhases[1],platform_descartes:labPhases[2],
-   platform_hume:labPhases[3],platform_ethics:labPhases[4],labyrinthMaster:labDoneCount===5,paradoxia:paraDone
+ if(!Progress)throw new Error('NevoaProgress não carregado');
+ const core=Progress.analyze({
+  local:base,progressRows,cloudRpg,
+  routes:{
+   mansion:'../index.html#jogos',
+   labyrinth:['../jogos/plataforma-filosofica/','../jogos/plataforma-filosofica/fase2/','../jogos/plataforma-filosofica/fase3/','../jogos/plataforma-filosofica/fase4/','../jogos/plataforma-filosofica/fase5/'],
+   paradoxia:'../jogos/paradoxia/',memories:'grimorio.html'
+  }
+ });
+ return {
+  claims:core.claims,effectiveMansionRooms:core.mansion.rooms,mansionPct:core.mansion.pct,
+  labPhases:core.labyrinth.phases.map(x=>x.done),labDoneCount:core.labyrinth.doneCount,labPct:core.labyrinth.pct,
+  paraScore:core.paradoxia.score,paraPct:core.paradoxia.pct,paraStarted:core.paradoxia.started,paraDone:core.paradoxia.completed,
+  trophies:core.memories.trophies,trophyCount:core.memories.count,memoriesPct:core.memories.pct,next:core.next,core
  };
- const trophyCount=Object.values(trophies).filter(Boolean).length;
- const memoriesPct=Math.round(trophyCount/JOURNEY_TROPHIES.length*100);
- return {claims,effectiveMansionRooms,mansionPct,labPhases,labDoneCount,labPct,paraScore,paraPct,paraStarted,paraDone,trophies,trophyCount,memoriesPct};
 }
 function shell(title,lead,body){document.title=title+" — Portal Filosófico da Névoa";$("#app").innerHTML=`<header class="top"><div class="wrap topIn"><a class="brand" href="../index.html#grande-mapa" title="Abrir o Grande Mapa">Portal Filosófico <span>da Névoa</span></a><nav class="nav"><a href="../index.html#grande-mapa">🗺️ Mapa</a><a href="../jogos/paradoxia/">Paradoxia</a><a href="../jogos/plataforma-filosofica/">Labirinto</a><a href="grimorio.html">Grimório</a><a href="perfil.html">Perfil</a><a href="../salao-da-nevoa.html">Salão</a></nav><a class="worldMapBtn" href="../index.html#grande-mapa" aria-label="Abrir Grande Mapa">🗺️ <span>Mapa</span></a></div></header><section class="hero"><div class="wrap"><div class="eyebrow">Universo da Névoa</div><h1>${title}</h1><p class="lead">${lead}</p><div class="chips"><span class="chip">${p.xp||0} XP</span><span class="chip">${u.unlocks.length} registros</span><span class="chip">${u.cards.length} cartas</span><span class="chip">${u.secrets.length} segredos</span></div></div></section>${body}<footer class="footer"><div class="wrap">PENSAR • QUESTIONAR • ARGUMENTAR • TRANSFORMAR<br><br><a href="../index.html#grande-mapa">← Voltar ao Grande Mapa</a></div></footer>`}
 const card=(icon,title,desc,href,meta="")=>`<article class="card"><div class="icon">${icon}</div>${meta?`<div class="meta">${meta}</div>`:""}<h3>${title}</h3><p>${desc}</p>${href?`<a href="${href}">Entrar →</a>`:""}</article>`;
@@ -89,15 +77,10 @@ function cartas(){shell("Cartas da Névoa","Coleção sem compra e sem vantagem 
 function perfil(){
 const diary=readJSON("nevoaDiaryV1",[]),args=readJSON("nevoaArgumentsV1",[]),localXp=Number(p.xp||0);
 const avatars=Array.isArray(window.NEVOA_AVATARS)?window.NEVOA_AVATARS:[];
-const rankInfo=x=>x>=360?{name:"Guardião da Névoa",next:null,min:360,max:360}:x>=240?{name:"Mestre da Névoa",next:"Guardião",min:240,max:360}:x>=140?{name:"Filósofo da Névoa",next:"Mestre",min:140,max:240}:x>=60?{name:"Investigador da Névoa",next:"Filósofo",min:60,max:140}:{name:"Aprendiz da Névoa",next:"Investigador",min:0,max:60};
+const rankInfo=x=>{const r=Progress.rank(x);return {name:r.name,next:r.nextShort,min:r.min,max:r.max,pct:r.pct}};
 const journeyData=(xp,progressRows=[],cloudRpg=null)=>{
- const r=rankInfo(xp),span=Math.max(1,r.max-r.min),pct=r.next?Math.max(0,Math.min(100,(xp-r.min)/span*100)):100;
- const j=journeyStatus(progressRows,cloudRpg,progress());
- let next={icon:"🏚️",title:"Entre na Mansão de Sócrates",text:"A primeira porta da jornada espera por perguntas melhores.",href:"../index.html#jogos"};
- if(j.effectiveMansionRooms>=7&&j.labPct<100)next={icon:"🎮",title:"Atravesse o Labirinto",text:"Continue pelas cinco fases e transforme conceitos em caminho.",href:"../jogos/plataforma-filosofica/"};
- if(j.labPct>=100&&!j.paraDone)next={icon:"🎭",title:"Viaje para Paradoxia",text:"O Reino das Escolhas aguarda suas decisões e argumentos.",href:"../jogos/paradoxia/"};
- if(j.paraDone)next={icon:"🏆",title:"Explore as Memórias",text:"Sua jornada já deixou marcas. Reveja descobertas e procure os segredos restantes.",href:"grimorio.html"};
- return {...j,r,pct,next};
+ const r=rankInfo(xp),j=journeyStatus(progressRows,cloudRpg,progress());
+ return {...j,r,pct:r.pct,next:j.next};
 };
 const jd=journeyData(localXp);
 const worldCard=(cls,icon,kicker,title,pct,desc,href)=>`<a class="journeyWorldCard ${cls}" href="${href}"><div class="journeyWorldArt"><span>${icon}</span><i style="--world-progress:${pct}%"></i></div><div class="journeyWorldCopy"><small>${kicker}</small><h3>${title}</h3><p>${desc}</p><div class="journeyWorldProgress"><i style="width:${pct}%"></i></div><b>${pct}% explorado <span>→</span></b></div></a>`;
