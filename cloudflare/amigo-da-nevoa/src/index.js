@@ -1,6 +1,8 @@
 import { DurableObject } from "cloudflare:workers";
 
-const MODEL = "@cf/zai-org/glm-4.7-flash";
+const PRIMARY_MODEL = "@cf/zai-org/glm-4.7-flash";
+const FALLBACK_MODEL = "@cf/google/gemma-4-26b-a4b-it";
+const MODEL = PRIMARY_MODEL;
 const QUEUE_SHARDS = 2;
 const SITE_ORIGINS = new Set([
   "https://viniciushb104-png.github.io",
@@ -60,30 +62,67 @@ function errorKind(error){
   if(/3007|3008|timeout|aborted|temporarily unavailable/i.test(detail)) return "temporary";
   return "unknown";
 }
-function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
-async function generateWithRetries(env,messages){
-  const options={
-    messages,
-    max_tokens:200,
-    temperature:0.45,
-    top_p:0.85
-  };
-  for(let attempt=0;attempt<5;attempt++){
+function extractReply(result){
+  return String(
+    result?.response ??
+    result?.choices?.[0]?.message?.content ??
+    result?.result?.response ??
+    ""
+  ).trim();
+}
+
+async function runModel(env,model,messages,clientId,rejectIfBusy){
+  const result=await env.AI.run(
+    model,
+    {
+      messages,
+      max_tokens:200,
+      temperature:0.45,
+      top_p:0.85
+    },
+    {
+      rejectIfBusy,
+      extraHeaders:{"x-session-affinity":clientId}
+    }
+  );
+  const reply=extractReply(result);
+  if(!reply)throw new Error("empty_model_response");
+  return reply;
+}
+
+async function generateSmooth(env,messages,clientId){
+  const fastModels=[PRIMARY_MODEL,FALLBACK_MODEL];
+  let lastError=null;
+
+  // Primeiro tenta dois pools diferentes sem ficar preso numa fila ocupada.
+  for(const model of fastModels){
     try{
-      const result=await env.AI.run(MODEL,options);
-      const reply=String(result?.response ?? result?.choices?.[0]?.message?.content ?? result?.result?.response ?? "").trim();
-      if(!reply) throw new Error("empty_model_response");
-      return {ok:true,reply,model:MODEL,attempts:attempt+1};
+      const reply=await runModel(env,model,messages,clientId,true);
+      return {ok:true,reply,model,mode:model===PRIMARY_MODEL?"primary":"fallback"};
     }catch(error){
+      lastError=error;
       const kind=errorKind(error);
-      if(kind==="daily_limit") return {ok:false,error:"daily_limit_reached",code:"daily_limit",status:429};
-      if(attempt===4 || (kind!=="capacity"&&kind!=="temporary")){
-        return {ok:false,error:"ai_temporarily_unavailable",code:kind==="capacity"?"capacity":"temporary",status:503};
+      if(kind==="daily_limit"){
+        return {ok:false,error:"daily_limit_reached",code:"daily_limit",status:429};
       }
-      await sleep(800*Math.pow(2,attempt));
+      // Capacidade/timeout: passa imediatamente ao outro modelo.
+      if(kind==="capacity"||kind==="temporary")continue;
+      // Erro inesperado de um modelo também não derruba a conversa: tenta o outro.
+      continue;
     }
   }
-  return {ok:false,error:"ai_temporarily_unavailable",code:"temporary",status:503};
+
+  // Se os dois pools estiverem cheios, faz UMA espera real na fila de capacidade
+  // da Cloudflare em vez de repetir 5 vezes com backoff no nosso Worker.
+  try{
+    const reply=await runModel(env,PRIMARY_MODEL,messages,clientId,false);
+    return {ok:true,reply,model:PRIMARY_MODEL,mode:"capacity-queue"};
+  }catch(error){
+    lastError=error;
+    const kind=errorKind(error);
+    if(kind==="daily_limit")return {ok:false,error:"daily_limit_reached",code:"daily_limit",status:429};
+    return {ok:false,error:"ai_temporarily_unavailable",code:kind==="capacity"?"capacity":"temporary",status:503};
+  }
 }
 
 export class NevoaQueue extends DurableObject {
@@ -105,7 +144,7 @@ export class NevoaQueue extends DurableObject {
     await previous;
     const waitedMs=Date.now()-enqueuedAt;
     try{
-      const result=await generateWithRetries(this.env,Array.isArray(payload?.messages)?payload.messages:[]);
+      const result=await generateSmooth(this.env,Array.isArray(payload?.messages)?payload.messages:[],"legacy-queue");
       return new Response(JSON.stringify({...result,queue:{ahead,waited_ms:waitedMs}}),{
         status:result.ok?200:Number(result.status||503),
         headers:{"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store"}
@@ -133,7 +172,7 @@ export default {
       return new Response(null,{status:204,headers:cors(origin)});
     }
     if(request.method==="GET"&&url.pathname==="/health"){
-      return json({ok:true,service:"amigo-da-nevoa",model:MODEL,queue:"durable-object",queue_shards:QUEUE_SHARDS},200,origin);
+      return json({ok:true,service:"amigo-da-nevoa",primary_model:PRIMARY_MODEL,fallback_model:FALLBACK_MODEL,routing:"direct-fast-failover",session_affinity:true},200,origin);
     }
     if(request.method!=="POST"||url.pathname!=="/chat") return json({error:"not_found"},404,origin);
     if(origin&&!SITE_ORIGINS.has(origin)) return json({error:"origin_not_allowed"},403,origin);
@@ -150,23 +189,22 @@ export default {
       {role:"user",content:message}
     ];
     const clientId=typeof body?.client_id==="string"?body.client_id.slice(0,80):"anonymous";
-    const lane=shardFor(clientId);
 
     try{
-      const stub=env.CHAT_QUEUE.getByName("nevoa-lane-"+lane);
-      const queuedResponse=await stub.fetch("https://nevoa.internal/generate",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({messages})
-      });
-      const data=await queuedResponse.json().catch(()=>({}));
-      if(!queuedResponse.ok){
-        return json({error:data.error||"ai_temporarily_unavailable",code:data.code||"temporary"},queuedResponse.status||503,origin);
+      const result=await generateSmooth(env,messages,clientId);
+      if(!result.ok){
+        return json({error:result.error,code:result.code},result.status||503,origin);
       }
-      return json({reply:data.reply,model:MODEL,queue:data.queue||null,attempts:data.attempts||1},200,origin);
+      return json({
+        reply:result.reply,
+        model:result.model,
+        routing:result.mode
+      },200,origin);
     }catch(error){
-      console.error("queue_or_ai_error",error);
-      return json({error:"ai_temporarily_unavailable",code:"temporary"},503,origin);
+      console.error("direct_ai_error",error);
+      const kind=errorKind(error);
+      if(kind==="daily_limit")return json({error:"daily_limit_reached",code:"daily_limit"},429,origin);
+      return json({error:"ai_temporarily_unavailable",code:kind==="capacity"?"capacity":"temporary"},503,origin);
     }
   }
 };
