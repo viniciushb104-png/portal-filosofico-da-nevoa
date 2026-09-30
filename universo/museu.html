@@ -1,1 +1,77 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#09050d"><meta name="description" content="Museu — Portal Filosófico da Névoa"><title>Museu</title><link rel="stylesheet" href="universo.css?v=1"></head><body data-page="museu"><main id="app"></main><script src="data.js?v=1"></script><script src="../progress-engine.js?v=6"></script><script src="universo.js?v=17"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09050d">
+<meta name="description" content="Museu dos Filósofos — Portal Filosófico da Névoa">
+<title>Museu dos Filósofos</title>
+<link rel="stylesheet" href="universo.css?v=18">
+<style>
+body[data-page="museu"]{overflow-x:hidden}
+.museumShell{background:#09050d;color:#f6edf8;min-height:620px;font-family:system-ui,sans-serif}
+.museumTop{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 4vw;background:#0b0710;border-bottom:1px solid #50305b}
+.museumTop a{color:#ead9ef;text-decoration:none;font-weight:800}.museumTop b{font-family:Georgia,serif;color:#ffc184}
+.museumIntro{padding:22px 4vw 14px;max-width:1100px;margin:auto}.museumIntro small{color:#e6a56d;font-weight:900;letter-spacing:.12em}.museumIntro h1{font:900 clamp(30px,5vw,52px)/1 Georgia,serif;margin:7px 0}.museumIntro p{color:#bdaac6;max-width:760px;line-height:1.55}
+.museumViewport{position:relative;width:100%;overflow:hidden;border-block:1px solid #5b3765;background:#08050b;touch-action:pan-y}
+.museumWorld{position:relative;width:3200px;height:520px;background:linear-gradient(#110b18 0 17%,#25152d 17% 20%,#160d1c 20% 76%,#2b1c27 76% 79%,#0b0710 79%);transition:transform .08s linear;will-change:transform}
+.museumWorld:before{content:"";position:absolute;inset:20% 0 21%;background:repeating-linear-gradient(90deg,transparent 0 250px,#ffffff08 252px,#0000 255px),linear-gradient(180deg,#ffffff05,transparent 30%,#0006);pointer-events:none}
+.museumEra{position:absolute;top:24px;color:#d7b0df;font:900 13px Georgia,serif;letter-spacing:.14em;text-transform:uppercase}
+.exhibit{position:absolute;top:118px;width:230px;text-align:center}
+.frame{width:176px;height:225px;margin:auto;padding:10px;border:9px ridge #9c6b3e;background:#17101b;box-shadow:0 14px 35px #000b,0 0 0 2px #e1b56a55;display:grid;place-items:center;cursor:pointer;color:#fff}
+.frame:focus-visible{outline:3px solid #d56df0;outline-offset:5px}.portraitFallback{font-size:62px}.frame video{display:none;width:100%;height:100%;object-fit:cover}
+.exhibit h3{font:900 19px Georgia,serif;margin:12px 0 3px}.exhibit p{margin:0;color:#bba7c4;font-size:11px}.exhibit.near .frame{box-shadow:0 14px 35px #000b,0 0 28px #d568f075}
+.interactHint{opacity:0;margin-top:9px;color:#ffc184;font-size:10px;font-weight:900}.exhibit.near .interactHint{opacity:1}
+.player{position:absolute;left:140px;bottom:88px;width:54px;height:92px;z-index:5;display:grid;align-content:end;justify-items:center;filter:drop-shadow(0 8px 6px #000)}
+.playerHead{width:30px;height:30px;border-radius:50%;background:#d6b08f;border:2px solid #2a172f}.playerBody{width:45px;height:55px;border-radius:16px 16px 8px 8px;background:#392047;border:2px solid #a060b3}.player:after{content:"";width:66px;height:10px;border-radius:50%;background:#0008;position:absolute;bottom:-5px;z-index:-1}
+.museumHud{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;background:#0b0710}.moveBtn,.actionBtn{min-width:54px;min-height:46px;border:1px solid #724282;border-radius:12px;background:#1b0d23;color:#fff;font-weight:900;cursor:pointer}.actionBtn{padding:0 18px;background:linear-gradient(#482052,#24102d);border-color:#a25ab8}.actionBtn:disabled{opacity:.38;cursor:not-allowed}
+.museumHelp{text-align:center;color:#9f8baa;font-size:11px;padding:0 12px 18px;background:#0b0710}
+.museumModal{border:1px solid #815092;border-radius:22px;background:#100817;color:#fff;width:min(620px,92vw);padding:0;box-shadow:0 30px 90px #000}.museumModal::backdrop{background:#050308dd;backdrop-filter:blur(4px)}
+.modalIn{padding:22px}.modalHead{display:flex;justify-content:space-between;gap:16px}.modalHead h2{font:900 32px Georgia,serif;margin:3px 0}.modalHead small{color:#eab47d;font-weight:900}.closeMuseum{width:44px;height:44px;border-radius:50%;border:1px solid #664071;background:#1c0e24;color:#fff;font-size:20px;cursor:pointer}.museumVideo{aspect-ratio:16/9;border:1px solid #5a3566;border-radius:16px;background:radial-gradient(circle,#392044,#0a060e 68%);display:grid;place-items:center;overflow:hidden;margin:16px 0}.museumVideo video{width:100%;height:100%;object-fit:cover}.videoWaiting{text-align:center;padding:25px;color:#c9b5d2}.videoWaiting b{display:block;font:900 18px Georgia,serif;color:#ffc184;margin-bottom:7px}.modalQuestion{border-left:3px solid #9c4cc1;padding-left:13px;color:#dac9e1;line-height:1.5}
+@media(max-width:620px){.museumIntro{padding-top:17px}.museumWorld{height:460px}.exhibit{top:92px}.player{bottom:72px;left:70px}.museumHud{position:relative}.museumHelp{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.museumWorld{transition:none}}
+</style>
+</head>
+<body data-page="museu">
+<div class="museumShell">
+<header class="museumTop"><a href="../index.html#grande-mapa">← Grande Mapa</a><b>Portal Filosófico da Névoa</b><a href="grimorio.html">Grimório</a></header>
+<section class="museumIntro"><small>UNIVERSO DA NÉVOA • GALERIA VIVA</small><h1>Museu dos Filósofos</h1><p>Caminhe pelos salões. Aproxime-se de um retrato e interaja com ele. Em breve, cada pintura ganhará vida com os vídeos dos filósofos.</p></section>
+<div class="museumViewport" id="museumViewport" tabindex="0" aria-label="Corredor explorável do Museu dos Filósofos">
+ <div class="museumWorld" id="museumWorld">
+  <div class="museumEra" style="left:190px">I • Antiguidade</div><div class="museumEra" style="left:1280px">II • Modernidade</div><div class="museumEra" style="left:2450px">III • Contemporânea</div>
+  <div class="player" id="museumPlayer" aria-label="Explorador"><div class="playerHead"></div><div class="playerBody"></div></div>
+  <div id="exhibits"></div>
+ </div>
+</div>
+<div class="museumHud"><button class="moveBtn" id="moveLeft" type="button" aria-label="Andar para a esquerda">◀</button><button class="actionBtn" id="interact" type="button" disabled>INTERAGIR</button><button class="moveBtn" id="moveRight" type="button" aria-label="Andar para a direita">▶</button></div>
+<div class="museumHelp">Computador: A/D ou ←/→ para caminhar • E/Enter para interagir. Celular: use os botões.</div>
+</div>
+<dialog class="museumModal" id="museumModal"><div class="modalIn"><div class="modalHead"><div><small id="modalEra"></small><h2 id="modalName"></h2><div id="modalConcept"></div></div><button class="closeMuseum" id="closeMuseum" type="button" aria-label="Fechar">×</button></div><div class="museumVideo" id="museumVideo"></div><p class="modalQuestion" id="modalQuestion"></p></div></dialog>
+<script src="data.js?v=1"></script>
+<script>
+(()=>{
+const philosophers=(window.NEVOA_DATA&&window.NEVOA_DATA.philosophers)||[];
+const positions=[330,680,1030,1390,1750,2110,2510,2870];
+const exhibits=document.getElementById('exhibits'),world=document.getElementById('museumWorld'),viewport=document.getElementById('museumViewport'),player=document.getElementById('museumPlayer'),action=document.getElementById('interact');
+const dialog=document.getElementById('museumModal'),videoBox=document.getElementById('museumVideo');
+let x=140,near=null,held=0,raf=0;
+exhibits.innerHTML=philosophers.map((p,i)=>`<article class="exhibit" data-i="${i}" style="left:${positions[i]}px"><button class="frame" type="button" aria-label="Interagir com ${p.name}"><span class="portraitFallback">${p.icon}</span></button><h3>${p.name}</h3><p>${p.concept}</p><div class="interactHint">✦ INTERAGIR</div></article>`).join('');
+const cards=[...document.querySelectorAll('.exhibit')];
+function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+function update(){
+ x=clamp(x,70,3060);player.style.left=x+'px';
+ const vw=viewport.clientWidth,cam=clamp(x-vw*.36,0,3200-vw);world.style.transform=`translateX(${-cam}px)`;
+ let best=null,dist=999;cards.forEach((c,i)=>{const d=Math.abs((positions[i]+115)-x);c.classList.toggle('near',d<155);if(d<dist){dist=d;best=i}});
+ near=dist<155?best:null;action.disabled=near===null;action.textContent=near===null?'APROXIME-SE':`INTERAGIR • ${philosophers[near].name}`;
+}
+function step(){if(held){x+=held*5;update();raf=requestAnimationFrame(step)}}
+function start(dir){held=dir;if(!raf)raf=requestAnimationFrame(step)}function stop(){held=0;if(raf)cancelAnimationFrame(raf);raf=0}
+function open(i){const p=philosophers[i];if(!p)return;document.getElementById('modalEra').textContent=p.era;document.getElementById('modalName').textContent=p.name;document.getElementById('modalConcept').textContent=p.concept;document.getElementById('modalQuestion').textContent='“'+p.question+'”';const src=`assets/videos/museu/${p.id}.mp4`;videoBox.innerHTML=`<video controls playsinline preload="metadata"><source src="${src}" type="video/mp4"></video><div class="videoWaiting"><b>Retrato aguardando sua voz</b>O espaço para o vídeo de ${p.name} já está preparado.</div>`;const v=videoBox.querySelector('video'),wait=videoBox.querySelector('.videoWaiting');v.addEventListener('loadeddata',()=>{wait.style.display='none';v.style.display='block'});v.addEventListener('error',()=>{v.style.display='none';wait.style.display='block'});dialog.showModal()}
+document.getElementById('moveLeft').addEventListener('pointerdown',()=>start(-1));document.getElementById('moveRight').addEventListener('pointerdown',()=>start(1));['pointerup','pointercancel','pointerleave'].forEach(ev=>{document.getElementById('moveLeft').addEventListener(ev,stop);document.getElementById('moveRight').addEventListener(ev,stop)});
+action.addEventListener('click',()=>near!==null&&open(near));cards.forEach((c,i)=>c.querySelector('.frame').addEventListener('click',()=>{x=positions[i]+115;update();open(i)}));
+document.getElementById('closeMuseum').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+viewport.addEventListener('keydown',e=>{if(['ArrowLeft','a','A'].includes(e.key)){e.preventDefault();x-=24;update()}if(['ArrowRight','d','D'].includes(e.key)){e.preventDefault();x+=24;update()}if(['e','E','Enter'].includes(e.key)&&near!==null){e.preventDefault();open(near)}});
+window.addEventListener('resize',update);update();viewport.focus({preventScroll:true});
+})();
+</script>
+</body></html>
