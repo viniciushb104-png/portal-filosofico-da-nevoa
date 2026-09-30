@@ -380,8 +380,14 @@ function segredos(){
    else apply();
  }
  function scheduleBlink(){
-   if(blinkTimer){clearTimeout(blinkTimer);blinkTimer=null}
-   // V33: sprite estável para o fantasma nunca piscar ou desaparecer.
+   if(blinkTimer)clearTimeout(blinkTimer);
+   blinkTimer=setTimeout(()=>{
+     if(!busy&&!speakingTimer&&!poseTimer&&ghost){
+       setGhostSprite(blinkSrc);
+       setTimeout(()=>{if(!busy&&!speakingTimer&&!poseTimer)setGhostSprite(idleSrc)},145);
+     }
+     scheduleBlink();
+   },2600+Math.random()*2600);
  }
  function stopTalking(finalSrc=idleSrc){
    if(speakingTimer){clearInterval(speakingTimer);speakingTimer=null}
@@ -396,11 +402,8 @@ function segredos(){
  }
  function animateTalking(){
    clearGhostTimers();
-   setGhostSprite(talkSrc);
-   // Mantém a pose de fala sem trocar a imagem dezenas de vezes por segundo.
-   speakingTimer=setInterval(()=>{
-     if(ghost){ghost.style.visibility="visible";ghost.style.opacity="1"}
-   },1200);
+   let open=false;
+   speakingTimer=setInterval(()=>{open=!open;setGhostSprite(open?talkSrc:idleSrc)},115+Math.floor(Math.random()*45));
  }
  function bubbleText(text){
    if(!bubble)return;
@@ -469,8 +472,12 @@ function segredos(){
    if(on){
      setStatus("pensando na névoa...","busy");
      clearGhostTimers();
-     setGhostSprite(lanternSrc,true);
-     if(ghost)ghost.classList.add("secretGhostThinking");
+     if(ghost){
+       ghost.style.visibility="visible";
+       ghost.style.opacity="1";
+       ghost.classList.remove("secretGhostPop");
+       ghost.classList.add("secretGhostThinking");
+     }
    }else{
      if(ghost)ghost.classList.remove("secretGhostThinking");
      setStatus(REMOTE_AI_URL?"✦ IA da Névoa • pronta":(deepMode?(localAIReady?"modo profundo • pronto":(localAIFailed?"modo ágil • pronto":"modo profundo • preparando")):"⚡ conversa ágil • pronta"),"ready");
@@ -855,7 +862,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  function thinkingReaction(message){
    if(REMOTE_AI_URL){
      bubbleText("…");
-     setGhostSprite(lanternSrc);
+     if(ghost){ghost.style.visibility="visible";ghost.style.opacity="1"}
      return;
    }
    const n=normalizeAIText(message);
