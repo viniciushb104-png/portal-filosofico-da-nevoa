@@ -29,10 +29,10 @@ const JOURNEY_TROPHIES=[
  {id:"labyrinthMaster",icon:"🏆",name:"Mestre do Labirinto",desc:"Conclua as cinco fases do Labirinto dos Filósofos."},
  {id:"paradoxia",icon:"🎭",name:"Cidadão de Paradoxia",desc:"Conclua o Capítulo I de Paradoxia."}
 ];
-function journeyStatus(progressRows=[],cloudRpg=null,base=progress()){
+function journeyStatus(progressRows=[],cloudRpg=null,base=progress(),missionRows=[]){
  if(!Progress)throw new Error('NevoaProgress não carregado');
  const core=Progress.analyze({
-  local:base,progressRows,cloudRpg,
+  local:base,progressRows,cloudRpg,missionRows,
   routes:{
    mansion:'../index.html#jogos',
    labyrinth:['../jogos/plataforma-filosofica/','../jogos/plataforma-filosofica/fase2/','../jogos/plataforma-filosofica/fase3/','../jogos/plataforma-filosofica/fase4/','../jogos/plataforma-filosofica/fase5/'],
@@ -43,6 +43,9 @@ function journeyStatus(progressRows=[],cloudRpg=null,base=progress()){
   claims:core.claims,effectiveMansionRooms:core.mansion.rooms,mansionPct:core.mansion.pct,
   labPhases:core.labyrinth.phases.map(x=>x.done),labDoneCount:core.labyrinth.doneCount,labPct:core.labyrinth.pct,
   paraScore:core.paradoxia.score,paraPct:core.paradoxia.pct,paraStarted:core.paradoxia.started,paraDone:core.paradoxia.completed,
+  paraStory:core.paradoxia.story,paraStoryDone:core.paradoxia.storyDoneCount,paraStoryTotal:core.paradoxia.storyTotal,
+  paraPlace:core.paradoxia.place,paraConcepts:core.paradoxia.concepts,paraSecrets:core.paradoxia.secrets,paraCoins:core.paradoxia.mistCoins,
+  paraMissionDone:core.paradoxia.tacticalCompleted,paraMissionTotal:core.paradoxia.tacticalTotal,paraMissionBest:core.paradoxia.tacticalBest,
   trophies:core.memories.trophies,trophyCount:core.memories.count,memoriesPct:core.memories.pct,next:core.next,core
  };
 }
@@ -78,8 +81,8 @@ function perfil(){
 const diary=readJSON("nevoaDiaryV1",[]),args=readJSON("nevoaArgumentsV1",[]),localXp=Number(p.xp||0);
 const avatars=Array.isArray(window.NEVOA_AVATARS)?window.NEVOA_AVATARS:[];
 const rankInfo=x=>{const r=Progress.rank(x);return {name:r.name,next:r.nextShort,min:r.min,max:r.max,pct:r.pct}};
-const journeyData=(xp,progressRows=[],cloudRpg=null)=>{
- const r=rankInfo(xp),j=journeyStatus(progressRows,cloudRpg,progress());
+const journeyData=(xp,progressRows=[],cloudRpg=null,missionRows=[])=>{
+ const r=rankInfo(xp),j=journeyStatus(progressRows,cloudRpg,progress(),missionRows);
  return {...j,r,pct:r.pct,next:j.next};
 };
 const jd=journeyData(localXp);
@@ -87,6 +90,15 @@ const worldCard=(cls,icon,kicker,title,pct,desc,href)=>`<a class="journeyWorldCa
 const timelineState=(started,done)=>done?"done":started?"active":"pending";
 const timelineLabel=state=>state==="done"?"✓ Concluído":state==="active"?"◈ Em andamento":"◇ Não iniciado";
 const timelineChapter=(id,number,icon,title,state,pct,meta,href)=>`<a class="journeyTimelineChapter ${state}" id="journeyTimeline${id}" data-timeline-id="${id}" href="${href}"><span class="journeyTimelineNumber">${number}</span><div class="journeyTimelineSigil">${icon}</div><small class="journeyTimelineState">${timelineLabel(state)}</small><h3>${title}</h3><p class="journeyTimelineMeta">${meta}</p><div class="journeyTimelineProgress"><i style="width:${pct}%"></i></div><b class="journeyTimelinePct">${pct}%</b></a>`;
+const paradoxiaMissionDefs=()=>window.ParadoxiaMissions?.places||[];
+const missionRowsMap=rows=>Object.fromEntries((Array.isArray(rows)?rows:[]).map(r=>[r.mission_key,r]));
+const renderParadoxiaMissions=rows=>{
+ const box=$("#journeyParadoxiaMissions");if(!box)return;
+ const map=missionRowsMap(rows),defs=paradoxiaMissionDefs();
+ const done=defs.filter(m=>Number(map[m.key]?.best_score||0)>0).length;
+ const status=$("#journeyParaMissionStatus");if(status)status.textContent=done+"/"+defs.length+" concluídas";
+ box.innerHTML=defs.map(m=>{const row=map[m.key]||{},ok=Number(row.best_score||0)>0;return `<a class="journeyParaMission ${ok?"done":""}" href="../jogos/paradoxia/${m.href}"><span>${m.icon}</span><div><b>${m.title}</b><small>${m.theme}</small></div><em>${ok?"✓ "+Number(row.best_score||0)+" pts":"◇ Pendente"}</em></a>`}).join("");
+};
 shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro da Névoa. Cada pergunta respondida deixa uma marca no mundo.",`
 <section class="section journeySection"><div class="wrap">
   <div class="journeyHero panel">
@@ -128,6 +140,21 @@ shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro 
     <div class="journeyMilestoneFooter"><span id="journeyLabHint">${jd.labDoneCount===5?"🏆 Mestre do Labirinto conquistado":"Conclua as fases pendentes para despertar o troféu Mestre do Labirinto."}</span><a href="grimorio.html">Ver todas as Memórias →</a></div>
   </div>
 
+  <div class="panel journeyParadoxiaDetail">
+    <div class="journeyMilestonesHead"><div><div class="eyebrow">PARADOXIA • CAPÍTULO I</div><h3>Registro do Reino das Escolhas</h3></div><b id="journeyParaStoryStatus">${jd.paraStoryDone}/${jd.paraStoryTotal} encontros</b></div>
+    <div class="journeyParaSummary">
+      <div><span>🎭</span><b id="journeyParaScore">${jd.paraScore}/120</b><small>XP do capítulo</small></div>
+      <div><span>🗺️</span><b id="journeyParaPlace">${jd.paraPlace||"Ainda não visitado"}</b><small>Último local</small></div>
+      <div><span>✦</span><b id="journeyParaConcepts">${jd.paraConcepts}</b><small>Conceitos</small></div>
+      <div><span>🔮</span><b id="journeyParaSecrets">${jd.paraSecrets}/2</b><small>Segredos</small></div>
+      <div><span>🪙</span><b id="journeyParaCoins">${jd.paraCoins}</b><small>Moedas da Névoa</small></div>
+    </div>
+    <div class="journeyParaSubhead"><div><small>JORNADA PRINCIPAL</small><b>Os sete encontros do capítulo</b></div><a href="../jogos/paradoxia/">Explorar Paradoxia →</a></div>
+    <div class="journeyParaEncounters" id="journeyParaEncounters">${jd.paraStory.map(x=>`<div class="journeyParaEncounter ${x.done?"done":x.active?"active":""}"><span>${x.icon}</span><b>${x.location}</b><small>${x.done?"✓ Concluído":x.active?"◈ Em foco":"◇ Pendente"}</small></div>`).join("")}</div>
+    <div class="journeyParaSubhead missionHead"><div><small>MISSÕES DO REINO</small><b>Desafios táticos de Paradoxia</b></div><strong id="journeyParaMissionStatus">0/${paradoxiaMissionDefs().length} concluídas</strong></div>
+    <div class="journeyParadoxiaMissions" id="journeyParadoxiaMissions"></div>
+  </div>
+
   <div class="journeyLower">
     <div class="panel journeyMemories"><div class="eyebrow">Memórias da jornada</div><h3>O que você já levou da Névoa</h3><div class="journeyStats"><div><b id="journeyXpStat">${localXp}</b><small>XP</small></div><div><b>${u.unlocks.length}</b><small>Registros</small></div><div><b>${u.cards.length}</b><small>Cartas</small></div><div><b>${u.secrets.length}</b><small>Segredos</small></div><div><b>${diary.length}</b><small>Reflexões</small></div><div><b>${args.length}</b><small>Argumentos</small></div></div><a class="btn subtle" href="grimorio.html">🏆 Ver Memórias e troféus</a></div>
     <div class="panel journeyChronicle"><div class="eyebrow">Crônica do explorador</div><h3>Marcas no mundo</h3><div class="chronicleLine ${jd.effectiveMansionRooms?"done":""}"><span>🏚️</span><div><b>Mansão</b><small id="journeyMansionChronicle">${jd.effectiveMansionRooms?jd.effectiveMansionRooms+"/7 cômodos atravessados":"Ainda não explorada"}</small></div></div><div class="chronicleLine ${jd.labPct?"done":""}"><span>🎮</span><div><b>Labirinto</b><small id="journeyLabChronicle">${jd.labPct?jd.labDoneCount+"/5 fases concluídas":"As portas aguardam"}</small></div></div><div class="chronicleLine ${jd.paraPct?"done":""}"><span>🎭</span><div><b>Paradoxia</b><small id="journeyParaChronicle">${jd.paraPct?jd.paraPct+"% registrado":"O reino ainda chama"}</small></div></div></div>
@@ -137,6 +164,7 @@ shell("Minha Jornada","Sua identidade, conquistas e caminhos percorridos dentro 
   <div class="panel profileNameEditor" id="profileNameEditor" hidden><div class="eyebrow">Editar identidade</div><h3>Nome visível no Portal</h3><p>Use apelido ou primeiro nome. Para proteger sua privacidade, não coloque nome completo, telefone, e-mail, link ou rede social.</p><form id="profileNameForm" class="profileNameForm"><label for="profileNameInput">Novo nome</label><div class="profileNameRow"><input class="input" id="profileNameInput" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Ex.: Luna 8A"><button class="btn" id="saveProfileName" type="submit">Salvar nome</button><button class="btn subtle" id="cancelProfileName" type="button">Cancelar</button></div><small class="profileSafetyNote">2 a 24 caracteres. O filtro bloqueia contatos, termos inadequados e nomes que possam imitar contas oficiais. Seu apelido de entrada e seu PIN não mudam.</small><div class="profileNameStatus" id="profileNameStatus" role="status" aria-live="polite"></div></form></div>
   <div class="note profileNextStep"><b>🛡️ Identidade protegida</b><small>O perfil usa somente os dez avatares oficiais do Portal. Não há envio livre de foto pessoal.</small></div>
 </div></section>`);
+renderParadoxiaMissions([]);
 
 const nameEl=$("#profileDisplayName"),hint=$("#profileAccountHint"),edit=$("#editProfileName"),login=$("#profileLoginLink");
 const editor=$("#profileNameEditor"),form=$("#profileNameForm"),input=$("#profileNameInput"),cancel=$("#cancelProfileName"),save=$("#saveProfileName"),status=$("#profileNameStatus");
@@ -154,8 +182,8 @@ async function chooseAvatar(key){if(!profile||avatarBusy)return;const a=avatarBy
 const showStatus=(msg,type="")=>{status.textContent=msg;status.className="profileNameStatus "+type};
 const closeEditor=()=>{editor.hidden=true;showStatus("");input.value=profile?.nickname||""};
 const openEditor=()=>{if(!profile)return;input.value=profile.nickname||"";editor.hidden=false;showStatus("");requestAnimationFrame(()=>input.focus())};
-const repaintJourney=(xp,progressRows=[],cloudRpg=null)=>{
- const d=journeyData(Number(xp)||0,progressRows,cloudRpg);
+const repaintJourney=(xp,progressRows=[],cloudRpg=null,missionRows=[])=>{
+ const d=journeyData(Number(xp)||0,progressRows,cloudRpg,missionRows);
  const ids={journeyRankName:d.r.name,journeyXpText:(Number(xp)||0)+" XP",journeyXpNext:d.r.next?"Próximo título: "+d.r.next:"Título máximo alcançado",journeySealXp:Number(xp)||0,journeyXpStat:Number(xp)||0,journeyNextIcon:d.next.icon,journeyNextTitle:d.next.title,journeyNextText:d.next.text,journeyMansionChronicle:d.effectiveMansionRooms?d.effectiveMansionRooms+"/7 cômodos atravessados":"Ainda não explorada",journeyLabChronicle:d.labDoneCount?d.labDoneCount+"/5 fases concluídas":"As portas aguardam",journeyParaChronicle:d.paraPct?d.paraPct+"% registrado":"O reino ainda chama"};
  Object.entries(ids).forEach(([id,val])=>{const el=$("#"+id);if(el)el.textContent=val});
  const bar=$("#journeyXpBar");if(bar)bar.style.width=d.pct+"%";const heroXp=document.querySelector(".hero .chip");if(heroXp)heroXp.textContent=(Number(xp)||0)+" XP";
@@ -164,6 +192,10 @@ const repaintJourney=(xp,progressRows=[],cloudRpg=null)=>{
  const labStatus=$("#journeyLabStatus");if(labStatus)labStatus.textContent=d.labDoneCount+"/5 concluídas";
  const labHint=$("#journeyLabHint");if(labHint)labHint.textContent=d.labDoneCount===5?"🏆 Mestre do Labirinto conquistado":"Conclua as fases pendentes para despertar o troféu Mestre do Labirinto.";
  document.querySelectorAll(".journeyPhaseSeal").forEach((seal,i)=>{const done=!!d.labPhases[i];seal.classList.toggle("done",done);const small=seal.querySelector("small");if(small)small.textContent=done?"✓ Concluída":"◇ Pendente"});
+ const paraIds={journeyParaStoryStatus:d.paraStoryDone+"/"+d.paraStoryTotal+" encontros",journeyParaScore:d.paraScore+"/120",journeyParaPlace:d.paraPlace||"Ainda não visitado",journeyParaConcepts:d.paraConcepts,journeyParaSecrets:d.paraSecrets+"/2",journeyParaCoins:d.paraCoins};
+ Object.entries(paraIds).forEach(([id,val])=>{const el=$("#"+id);if(el)el.textContent=val});
+ const encounters=$("#journeyParaEncounters");if(encounters)encounters.innerHTML=d.paraStory.map(x=>`<div class="journeyParaEncounter ${x.done?"done":x.active?"active":""}"><span>${x.icon}</span><b>${x.location}</b><small>${x.done?"✓ Concluído":x.active?"◈ Em foco":"◇ Pendente"}</small></div>`).join("");
+ renderParadoxiaMissions(missionRows);
  const timeline=[
   ["Mansion",timelineState(d.effectiveMansionRooms>0,d.mansionPct===100),d.mansionPct,d.effectiveMansionRooms+"/7 cômodos"],
   ["Labyrinth",timelineState(d.labDoneCount>0,d.labPct===100),d.labPct,d.labDoneCount+"/5 fases"],
@@ -184,13 +216,14 @@ async function loadProfile(){
  paintAvatar("avatar-01");
  if(!window.NevoaOnline){hint.textContent="O serviço de conta não carregou. Reabra a página para tentar novamente.";login.hidden=false;return}
  if(!window.NevoaOnline.getSession()){nameEl.textContent="Explorador da Névoa";hint.textContent="Entre na sua conta para sincronizar sua Jornada, nome e avatar.";login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return}
- let snapshot=null,cloudRpg=null;
+ let snapshot=null,cloudRpg=null,missionRows=[];
  try{snapshot=await window.NevoaOnline.syncLocal(progress())}catch(e){}
  try{cloudRpg=await window.NevoaOnline.loadRpgState()}catch(e){}
+ try{missionRows=await window.NevoaOnline.paradoxiaMissions()}catch(e){}
  profile=snapshot?.profile||await window.NevoaOnline.sessionProfile();
  if(!profile){nameEl.textContent="Explorador da Névoa";hint.textContent="Sua sessão expirou. Entre novamente para sincronizar a Jornada.";login.hidden=false;edit.hidden=true;avatarOpenAction.hidden=true;return}
  try{paintAvatar(profile.avatar_key||await window.NevoaOnline.profileAvatar())}catch(e){paintAvatar("avatar-01")}
- applyAvatarRank();nameEl.textContent=profile.nickname||"Explorador da Névoa";hint.textContent=(profile.class_name?profile.class_name+" • ":"")+rankInfo(profile.xp).name+" • jornada sincronizada";repaintJourney(profile.xp,snapshot?.progress||[],cloudRpg);login.hidden=true;edit.hidden=false;avatarOpenAction.hidden=false;
+ applyAvatarRank();nameEl.textContent=profile.nickname||"Explorador da Névoa";hint.textContent=(profile.class_name?profile.class_name+" • ":"")+rankInfo(profile.xp).name+" • jornada sincronizada";repaintJourney(profile.xp,snapshot?.progress||[],cloudRpg,missionRows);login.hidden=true;edit.hidden=false;avatarOpenAction.hidden=false;
 }
 avatarOpen.onclick=openAvatarEditor;avatarOpenAction.onclick=openAvatarEditor;avatarClose.onclick=closeAvatarEditor;edit.onclick=openEditor;cancel.onclick=closeEditor;
 form.onsubmit=async e=>{e.preventDefault();if(!profile)return;const proposed=(input.value||"").replace(/\s+/g," ").trim();if(proposed.length<2||proposed.length>24){showStatus("Escolha um nome entre 2 e 24 caracteres.","bad");return}save.disabled=true;save.textContent="Salvando...";showStatus("A Névoa está verificando o novo nome...","info");try{const updated=await window.NevoaOnline.updateProfileName(proposed);profile=updated||await window.NevoaOnline.sessionProfile();nameEl.textContent=profile?.nickname||proposed;hint.textContent=(profile?.class_name?profile.class_name+" • ":"")+rankInfo(profile?.xp||localXp).name+" • jornada sincronizada";showStatus("✓ Nome atualizado com segurança.","ok");setTimeout(()=>{editor.hidden=true;showStatus("")},900)}catch(err){showStatus(err?.message||"Não foi possível alterar o nome agora.","bad")}finally{save.disabled=false;save.textContent="Salvar nome"}};
