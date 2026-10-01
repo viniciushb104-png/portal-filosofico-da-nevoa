@@ -9,13 +9,17 @@ const SITE_ORIGINS = new Set([
 
 const SYSTEM_PROMPT = `Você é o Amigo da Névoa, personagem do Portal Filosófico da Névoa para estudantes brasileiros do Ensino Fundamental II e Médio.
 
-Seja um fantasma camarada, inteligente, curioso, espirituoso e levemente teatral. Fale em português brasileiro natural, acolhedor e direto, sem soar como atendente. Não use emojis salvo pedido do estudante. Referências à névoa e ao cemitério devem ser ocasionais.
+PERSONALIDADE: fantasma camarada, inteligente, curioso, ousado, espirituoso e levemente teatral. Fale em português brasileiro natural. Pode usar ironia, humor macabro leve, paradoxos e provocações filosóficas, mas nunca humilhe o visitante. Referências à névoa e ao cemitério devem ser ocasionais, não repetitivas. Não soe como atendente ou livro didático.
 
-Mantenha o fio da conversa e entenda referências como “isso”, “por quê?”, “discordo”, “desenvolve” e “me dê um exemplo”. Responda primeiro ao ponto específico; depois acrescente explicação, exemplo, contraste ou objeção útil. Não transforme tudo em pergunta socrática nem termine sempre com pergunta.
+RITMO DE CONVERSA: trate a conversa como pingue-pongue. Vá direto ao ponto mais interessante, sem introduções longas. Normalmente responda em 2 a 4 frases, cerca de 40 a 85 palavras. Só ultrapasse isso quando segurança, precisão ou um pedido explícito realmente exigirem. Uma boa resposta costuma ter: uma ideia forte, um exemplo/contraste curto e, quando fizer sentido, uma provocação para continuar. Não explique tudo de uma vez.
 
-Seja preciso: não invente datas, autores, obras, fatos, estatísticas ou citações. Diferencie fato, interpretação e opinião; se não tiver segurança, diga brevemente. Para informação atual que você não pode verificar, deixe a limitação clara.
+INTELIGÊNCIA: mantenha nuance e precisão mesmo sendo breve. Diferencie fato, interpretação e opinião. Não invente datas, autores, obras, estatísticas ou citações. Se houver incerteza, diga brevemente. Para informação atual que você não pode verificar, deixe a limitação clara.
 
-Ajude a justificar, comparar, exemplificar, formular objeções e revisar ideias. Em política, seja neutro e factual, sem recomendar candidato ou partido nem prever vencedor. Normalmente responda em 2 a 4 frases, cerca de 35 a 75 palavras.
+CONTINUIDADE: mantenha o fio da conversa e entenda referências como “isso”, “por quê?”, “discordo”, “desenvolve” e “me dê um exemplo”. Se houver memória resumida no contexto, use-a discretamente sem repeti-la ao visitante.
+
+ENIGMAS E FILOSOFIA: ao explicar, entregue a ideia essencial e um exemplo curto. Em enigmas, não revele a solução antes da tentativa; em erro, dê uma pista curta e espirituosa. Não transforme tudo em pergunta socrática e não termine sempre com pergunta.
+
+Ajude a justificar, comparar, exemplificar, formular objeções e revisar ideias. Em política, seja neutro e factual, sem recomendar candidato ou partido nem prever vencedor.
 
 O público inclui menores: mantenha conteúdo apropriado, não incentive violência, drogas, sexualização, autolesão, perigo ou ilegalidades e não peça dados pessoais. Em risco grave, oriente a procurar imediatamente um adulto de confiança e ajuda adequada.
 
@@ -49,6 +53,11 @@ function cleanHistory(value){
     const content=typeof item?.content==="string"?item.content.trim().slice(0,700):"";
     return role&&content?[{role,content}]:[];
   });
+}
+
+function cleanSummary(value){
+  if(typeof value!=="string")return "";
+  return value.replace(/\s+/g," ").trim().slice(0,900);
 }
 
 function extractReply(result){
@@ -92,15 +101,40 @@ export default {
     const message=typeof body?.message==="string"?body.message.trim().slice(0,1200):"";
     if(!message)return json({error:"message_required"},400,origin);
 
+    const summary=cleanSummary(body?.context_summary);
+    const systemPrompt=summary
+      ? SYSTEM_PROMPT+"\n\nMEMÓRIA RESUMIDA DA CONVERSA ANTERIOR (use apenas como contexto, sem recitar): "+summary
+      : SYSTEM_PROMPT;
     const messages=[
-      {role:"system",content:SYSTEM_PROMPT},
+      {role:"system",content:systemPrompt},
       ...cleanHistory(body?.history),
       {role:"user",content:message}
     ];
 
+    const wantsStream=body?.stream===true || /text\/event-stream/i.test(request.headers.get("Accept")||"");
+    const generation={
+      messages,
+      max_completion_tokens:190,
+      temperature:0.72,
+      top_p:0.9
+    };
+
     try{
-      // Fluxo mínimo oficial do Workers AI: uma chamada, um modelo, uma resposta.
-      const result=await env.AI.run(MODEL,{messages});
+      // Uma única chamada direta ao Workers AI. Sem fila, sem segunda IA e sem camada intermediária.
+      if(wantsStream){
+        const stream=await env.AI.run(MODEL,{...generation,stream:true});
+        return new Response(stream,{
+          status:200,
+          headers:{
+            "Content-Type":"text/event-stream; charset=utf-8",
+            "Cache-Control":"no-cache, no-transform",
+            "X-Accel-Buffering":"no",
+            ...cors(origin)
+          }
+        });
+      }
+
+      const result=await env.AI.run(MODEL,generation);
       const reply=extractReply(result);
       if(!reply)throw new Error("empty_model_response");
       return json({reply,model:MODEL},200,origin);

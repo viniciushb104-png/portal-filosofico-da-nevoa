@@ -9,7 +9,7 @@ Backend de IA do Cemitério dos Segredos.
 - Production branch: `main`
 
 O arquivo `wrangler.jsonc` já cria o binding `AI`.
-O modelo usado é `@cf/qwen/qwen3-30b-a3b-fp8`.
+O modelo usado é `@cf/zai-org/glm-4.7-flash`.
 
 Depois do primeiro deploy, copie a URL `https://...workers.dev/chat` para:
 `universo/amigo-nevoa-config.js`
@@ -17,3 +17,9 @@ Depois do primeiro deploy, copie a URL `https://...workers.dev/chat` para:
 Enquanto o endpoint estiver vazio, o portal mantém o cérebro local de reserva.
 
 Cloudflare Builds conectado ao branch `main`.
+
+## Conversa ágil
+- Streaming SSE ativado no `/chat` para mostrar a resposta enquanto ela é gerada.
+- Saídas curtas por padrão, com personalidade do Amigo da Névoa preservada.
+- O cliente envia as últimas falas completas + uma memória compacta do contexto anterior.
+- `/chat` continua em uma única chamada direta para `env.AI.run()`.

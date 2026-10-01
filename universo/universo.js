@@ -409,6 +409,22 @@ function segredos(){
  function portalSession(){try{return(localStorage.getItem("nevoaStudentSession")||"").trim()}catch(e){return""}}
  function esc(v){return String(v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]))}
  function saveHistory(){try{sessionStorage.setItem("nevoaFriendHistory",JSON.stringify(history.slice(-12)))}catch(e){}}
+ function compactMemoryText(value,limit=160){
+   const clean=String(value||"").replace(/\s+/g," ").trim();
+   return clean.length>limit?clean.slice(0,limit-1)+"…":clean;
+ }
+ function remoteMemoryPayload(){
+   const prior=history.slice(0,-1);
+   const recent=prior.slice(-4).map(m=>({
+     role:m.role==="assistant"?"assistant":"user",
+     content:String(m.content||"").slice(0,700)
+   }));
+   const older=prior.slice(0,-4);
+   const summary=older.slice(-8).map(m=>
+     (m.role==="assistant"?"Fantasma: ":"Visitante: ")+compactMemoryText(m.content,150)
+   ).join(" | ").slice(0,900);
+   return {recent,summary};
+ }
  function clearGhostTimers(){
    if(speakingTimer){clearInterval(speakingTimer);speakingTimer=null}
    if(poseTimer){clearTimeout(poseTimer);poseTimer=null}
@@ -864,29 +880,83 @@ NOTAS PEDAGÓGICAS RELEVANTES:
  }
  async function askRemoteAI(message,onChunk){
    if(!REMOTE_AI_URL)throw new Error("remote_ai_not_configured");
-   const prior=history.slice(0,-1).slice(-4).map(m=>({
-     role:m.role,
-     content:String(m.content||"").slice(0,700)
-   }));
+   const memory=remoteMemoryPayload();
    const controller=new AbortController();
-   const timeout=setTimeout(()=>controller.abort(),90000);
+   const timeout=setTimeout(()=>controller.abort(),45000);
    try{
      const res=await fetch(REMOTE_AI_URL,{
        method:"POST",
-       headers:{"Content-Type":"application/json","Accept":"application/json"},
+       headers:{"Content-Type":"application/json","Accept":"text/event-stream"},
        body:JSON.stringify({
          message:String(message||"").slice(0,1200),
-         history:prior
+         history:memory.recent,
+         context_summary:memory.summary,
+         stream:true
        }),
        signal:controller.signal
      });
-     const data=await res.json().catch(()=>({}));
+
      if(!res.ok){
+       const data=await res.json().catch(()=>({}));
        const err=new Error(data.error||("remote_ai_http_"+res.status));
        err.status=res.status;
        err.code=data.code||"";
        throw err;
      }
+
+     const type=String(res.headers.get("content-type")||"").toLowerCase();
+     if(type.includes("text/event-stream")&&res.body){
+       const reader=res.body.getReader();
+       const decoder=new TextDecoder();
+       let buffer="",reply="";
+
+       const emitPiece=piece=>{
+         if(piece===null||piece===undefined)return;
+         const raw=typeof piece==="string"?piece:String(piece);
+         if(!raw)return;
+         let delta=raw;
+         if(reply&&raw.startsWith(reply))delta=raw.slice(reply.length);
+         if(!delta)return;
+         reply+=delta;
+         if(onChunk)onChunk(delta);
+       };
+
+       const consumeEvent=block=>{
+         const rows=String(block||"").split(/\r?\n/);
+         for(const row of rows){
+           if(!row.startsWith("data:"))continue;
+           const raw=row.slice(5).trim();
+           if(!raw||raw==="[DONE]")continue;
+           try{
+             const data=JSON.parse(raw);
+             const piece=
+               data?.choices?.[0]?.delta?.content ??
+               data?.choices?.[0]?.message?.content ??
+               data?.delta?.content ??
+               data?.response ??
+               data?.result?.response ??
+               data?.content ?? "";
+             emitPiece(piece);
+           }catch(e){}
+         }
+       };
+
+       while(true){
+         const {value,done}=await reader.read();
+         if(done)break;
+         buffer+=decoder.decode(value,{stream:true});
+         const events=buffer.split(/\r?\n\r?\n/);
+         buffer=events.pop()||"";
+         events.forEach(consumeEvent);
+       }
+       buffer+=decoder.decode();
+       if(buffer.trim())consumeEvent(buffer);
+       reply=reply.trim();
+       if(!reply)throw new Error("remote_ai_empty");
+       return reply;
+     }
+
+     const data=await res.json().catch(()=>({}));
      const reply=String(data.reply||data.response||"").trim();
      if(!reply)throw new Error("remote_ai_empty");
      return reply;
