@@ -356,8 +356,11 @@ Deno.serve(async (req: Request) => {
       }
 
       if (mod.state === "unavailable") {
-        const saved = await insertMessage(room.id, ctx.player_id, text, "approved", "guardian_fallback", null, 90);
-        return json({ ok: true, message: "Mensagem publicada.", id: saved?.id || null });
+        return json({
+          ok: false,
+          error: "moderation_temporarily_unavailable",
+          message: "O Guardião da Névoa está demorando a responder. Tente enviar novamente em alguns segundos.",
+        }, 503);
       }
 
       const saved = await insertMessage(room.id, ctx.player_id, text, "approved", "openai", null, 90);
