@@ -211,7 +211,7 @@ Deno.serve(async (req: Request) => {
         profile: {
           nickname: ctx.nickname,
           className: ctx.class_name || "",
-          access: ctx.access_status,
+          access: ctx.access_status === "suspended" ? "suspended" : "approved",
           moderator: !!ctx.is_moderator,
           owner: isOwner(ctx),
           avatarKey: ctx.avatar_key || "avatar-01",
@@ -221,31 +221,20 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === "request_access") {
-      if (ctx.is_moderator || ctx.access_status === "approved") {
-        return json({ ok: true, status: "approved" });
-      }
       if (ctx.access_status === "suspended") {
         return json({ error: "suspended", message: "Seu acesso ao Salão está suspenso. Procure o professor responsável." }, 403);
       }
-      if (ctx.access_status === "denied") {
-        return json({ error: "denied", message: "Seu pedido precisa ser revisto pelo professor responsável." }, 403);
-      }
-      if (ctx.access_status !== "pending") {
-        await sb("/rest/v1/chat_access", {
-          method: "POST",
-          headers: { "Prefer": "resolution=merge-duplicates,return=minimal" },
-          body: JSON.stringify({ player_id: ctx.player_id, status: "pending", requested_at: new Date().toISOString(), updated_at: new Date().toISOString() }),
-        });
-      }
-      return json({ ok: true, status: "pending", message: "Pedido enviado ao professor." });
+      return json({ ok: true, status: "approved", message: "Sua conta já tem acesso ao Salão." });
     }
 
-    const canEnter = ctx.is_moderator || ctx.access_status === "approved";
-    if (!canEnter) {
-      const message = ctx.access_status === "pending"
-        ? "Seu pedido de acesso ainda está aguardando aprovação."
-        : "Peça acesso ao professor antes de entrar no Salão.";
-      return json({ error: "access_required", access: ctx.access_status, message }, 403);
+    // Qualquer conta válida do Portal entra automaticamente.
+    // A tabela chat_access continua servindo apenas para suspensões de moderação.
+    if (ctx.access_status === "suspended") {
+      return json({
+        error: "suspended",
+        access: "suspended",
+        message: "Seu acesso ao Salão está suspenso por moderação. Procure o professor responsável."
+      }, 403);
     }
 
     if (action === "notifications") {
@@ -522,14 +511,12 @@ Deno.serve(async (req: Request) => {
     if (action === "mod_queue") {
       if (!isOwner(ctx)) return json({ error: "admin_only", message: "Acesso restrito. Somente o administrador Diniz-VINI pode abrir este painel." }, 403);
 
-      const [access, flagged, reports] = await Promise.all([
-        sb("/rest/v1/chat_access?status=eq.pending&select=player_id,status,requested_at&order=requested_at.asc&limit=100"),
+      const [flagged, reports] = await Promise.all([
         sb("/rest/v1/chat_messages?status=in.(pending,blocked)&select=id,player_id,room_id,body,status,moderation_reason,moderation_source,review_requested_at,created_at&order=review_requested_at.desc.nullslast,created_at.desc&limit=80"),
         sb("/rest/v1/chat_reports?status=eq.pending&select=id,message_id,reporter_id,reason,details,created_at&order=created_at.asc&limit=100"),
       ]);
 
       const ids = [
-        ...(access || []).map((x: any) => x.player_id),
         ...(flagged || []).map((x: any) => x.player_id),
         ...(reports || []).map((x: any) => x.reporter_id),
       ];
@@ -550,13 +537,7 @@ Deno.serve(async (req: Request) => {
 
       return json({
         ok: true,
-        access: (access || []).map((a: any) => ({
-          playerId: a.player_id,
-          nickname: pmap2.get(a.player_id)?.nickname || "Explorador",
-          className: pmap2.get(a.player_id)?.class_name || "",
-          avatarKey: pmap2.get(a.player_id)?.avatar_key || "avatar-01",
-          requestedAt: a.requested_at,
-        })),
+        access: [],
         flagged: (flagged || []).map((m: any) => ({
           id: m.id,
           playerId: m.player_id,
