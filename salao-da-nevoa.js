@@ -9,8 +9,8 @@ const els={
   shell:$("#chatShell"),roomList:$("#roomList"),roomTitle:$("#roomTitle"),roomKicker:$("#roomKicker"),
   messages:$("#messages"),composer:$("#composer"),input:$("#messageInput"),send:$("#sendBtn"),count:$("#charCount"),
   notice:$("#guardianNotice"),refresh:$("#refreshChat"),userChip:$("#userChip"),userChipAvatar:$("#userChipAvatar"),userChipText:$("#userChipText"),adminLink:$("#adminPanelLink"),
-  mod:$("#moderatorPanel"),refreshMod:$("#refreshMod"),accessQueue:$("#accessQueue"),flaggedQueue:$("#flaggedQueue"),reportQueue:$("#reportQueue"),
-  accessCount:$("#accessCount"),flaggedCount:$("#flaggedCount"),reportCount:$("#reportCount"),
+  mod:$("#moderatorPanel"),refreshMod:$("#refreshMod"),flaggedQueue:$("#flaggedQueue"),reportQueue:$("#reportQueue"),
+  flaggedCount:$("#flaggedCount"),reportCount:$("#reportCount"),
   reportDialog:$("#reportDialog"),reportForm:$("#reportForm"),reportReason:$("#reportReason"),reportDetails:$("#reportDetails"),
   toast:$("#toast")
 };
@@ -161,13 +161,7 @@ async function loadModerator(){
   if(!state.profile?.moderator)return;
   try{
     const q=await api("mod_queue");
-    els.accessCount.textContent=q.access?.length||0;els.flaggedCount.textContent=q.flagged?.length||0;els.reportCount.textContent=q.reports?.length||0;
-    els.accessQueue.replaceChildren(...((q.access?.length?q.access.map(a=>modItem(
-      a.nickname,(a.className||"Sem turma")+" • pedido "+timeLabel(a.requestedAt),"",[
-        {label:"✓ Aprovar • autorização conferida",cls:"ok",fn:()=>modAction("approve_access",{playerId:a.playerId})},
-        {label:"✕ Negar",cls:"danger",fn:()=>modAction("deny_access",{playerId:a.playerId})}
-      ])):[emptyMod("Nenhum pedido pendente.")])));
-
+els.flaggedCount.textContent=q.flagged?.length||0;els.reportCount.textContent=q.reports?.length||0;
     els.flaggedQueue.replaceChildren(...((q.flagged?.length?q.flagged.map(m=>modItem(
       m.author,(m.className||"Sem turma")+" • "+m.room+" • "+m.status+(m.reviewRequestedAt?" • REVISÃO SOLICITADA":""),
       m.body+"\nMotivo: "+(m.reason||"revisão humana"),[
@@ -206,33 +200,19 @@ async function boot(){
   }
   try{
     const p=await api("status");state.profile=p.profile;window.NevoaAvatar?.paint(els.userChipAvatar,p.profile.avatarKey||"avatar-01","Seu avatar");const chipFrame=els.userChipAvatar?.closest(".userChipAvatar");if(chipFrame)chipFrame.className="userChipAvatar avatarFrame "+(window.NevoaAvatar?.rankClass(Number(p.profile.xp)||0)||"rank-aprendiz");els.userChipText.textContent=p.profile.nickname+(p.profile.moderator?" • Professor":"");
-    if(p.profile.moderator||p.profile.access==="approved"){
-      els.gate.hidden=true;els.shell.hidden=false;
-      if(p.profile.owner&&els.adminLink)els.adminLink.hidden=false;
-      await loadRooms();startPoll();return;
-    }
-    if(p.profile.access==="pending"){
-      setGate("Pedido enviado ao professor","Seu acesso ainda não foi liberado. Quando o professor aprovar, esta página abrirá normalmente.",[
-        button("↻ Verificar novamente","",()=>location.reload())
-      ]);return;
-    }
     if(p.profile.access==="suspended"){
-      setGate("Acesso suspenso","Procure o professor responsável para revisar o acesso ao Salão.",[]);return;
+      setGate("Acesso suspenso","Seu acesso ao Salão foi suspenso por moderação. Procure o professor responsável para revisar a situação.",[]);return;
     }
-    if(p.profile.access==="denied"){
-      setGate("Acesso ainda não autorizado","O professor precisa revisar sua participação antes de liberar o Salão.",[]);return;
-    }
-    setGate("Peça entrada no Salão","Por segurança, cada conta precisa ser liberada pelo professor antes da primeira participação.",[
-      button("🕯️ Pedir acesso","orange",async()=>{
-        try{const r=await api("request_access");toast(r.message||"Pedido enviado.");setTimeout(()=>location.reload(),600)}
-        catch(e){toast(e.message)}
-      })
-    ]);
+    els.gate.hidden=true;els.shell.hidden=false;
+    if(p.profile.owner&&els.adminLink)els.adminLink.hidden=false;
+    await loadRooms();startPoll();
   }catch(e){
     if(e.code==="login_required"){
       setGate("Sua sessão expirou","Entre novamente para acessar o Salão.",[
         Object.assign(document.createElement("a"),{href:"login.html",textContent:"🔐 Entrar novamente"})
       ]);
+    }else if(e.code==="suspended"){
+      setGate("Acesso suspenso",e.message,[]);
     }else setGate("A névoa fechou a porta",e.message,[button("Tentar novamente","",()=>location.reload())]);
   }
 }
