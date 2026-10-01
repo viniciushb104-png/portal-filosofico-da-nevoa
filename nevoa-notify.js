@@ -133,7 +133,7 @@ function chatHandle(messages){
    fresh.forEach(m=>queue({type:'chat',icon:'💬',eyebrow:'CHAMADO DO SALÃO',title:m.author||'Explorador',text:(m.roomTitle?m.roomTitle+' • ':'')+String(m.body||'').slice(0,150),href:chatHref(m.roomKey||''),actionLabel:'Responder'}));
   }else{
    const last=fresh[fresh.length-1];
-   queue({type:'chat',icon:'🌫️',eyebrow:'CHAMADOS DO SALÃO',title:fresh.length+' novas mensagens',text:(last.author||'Explorador')+': '+String(last.body||'').slice(0,120),href:chatHref(last.roomKey||''),actionLabel:'Abrir Salão'});
+   queue({type:'chat',icon:'🌫️',eyebrow:'CHAMADOS DO SALÃO',title:fresh.length+' novas mensagens no Salão',text:(last.author||'Explorador')+': '+String(last.body||'').slice(0,120),href:chatHref(last.roomKey||''),actionLabel:'Abrir Salão'});
   }
  }
  chatSave();
@@ -158,7 +158,7 @@ function chatStart(){
  if(!chatState||typeof chatState!=='object')chatState={cursor:null,unread:0,seen:{}};
  if(!chatState.seen||typeof chatState.seen!=='object')chatState.seen={};
  if(/\/salao-da-nevoa\.html$/.test(location.pathname))chatState.unread=0;
- chatSave();chatPoll();chatTimer=setInterval(chatPoll,8000);
+ chatSave();chatPoll();chatTimer=setInterval(chatPoll,5000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')chatPoll()});
 }
 
