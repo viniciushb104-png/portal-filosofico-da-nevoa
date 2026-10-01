@@ -16,6 +16,13 @@ const els={
 };
 const state={profile:null,rooms:[],room:null,poll:null,reportMessageId:null,loading:false};
 
+function hasBlockedLanguage(value){
+  const t=String(value||"")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase();
+  return /(?:^|[^a-z0-9])(porra|caralho|foda(?:[\s-]*se)?|vai[\s,.;:!?-]*tomar[\s,.;:!?-]*no[\s,.;:!?-]*cu)(?=$|[^a-z0-9])/i.test(t);
+}
+
 function session(){return window.NevoaOnline?.getSession?.()||""}
 function toast(msg){els.toast.textContent=msg;els.toast.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>els.toast.classList.remove("show"),3200)}
 function notice(msg,type="warn",action=null){
@@ -94,6 +101,10 @@ async function loadMessages(scroll=false){
 }
 async function sendMessage(ev){
   ev.preventDefault();const msg=els.input.value.trim();if(!msg||!state.room)return;
+  if(hasBlockedLanguage(msg)){
+    const warning="Mensagem não enviada. Retire o palavrão ou ofensa e tente novamente.";
+    notice(warning);toast(warning);els.input.focus();return;
+  }
   els.send.disabled=true;notice("");
   try{
     const p=await api("send",{roomKey:state.room.room_key,message:msg});
