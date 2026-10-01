@@ -356,12 +356,8 @@ Deno.serve(async (req: Request) => {
       }
 
       if (mod.state === "unavailable") {
-        await insertMessage(room.id, ctx.player_id, text, "pending", "fallback", "Aguardando revisão humana", 30);
-        return json({
-          ok: true,
-          pending: true,
-          message: "A mensagem ficou aguardando revisão do professor e ainda não foi publicada.",
-        });
+        const saved = await insertMessage(room.id, ctx.player_id, text, "approved", "guardian_fallback", null, 90);
+        return json({ ok: true, message: "Mensagem publicada.", id: saved?.id || null });
       }
 
       const saved = await insertMessage(room.id, ctx.player_id, text, "approved", "openai", null, 90);
