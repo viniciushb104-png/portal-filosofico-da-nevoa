@@ -222,6 +222,22 @@ function watchParadoxiaLeaderboard(callback,scope='global',interval=15000){
   return ()=>{stopped=true;if(timer)clearInterval(timer)};
 }
 
+async function salaoNotifications(since=null){
+  const token=getSession();
+  if(!token)return {ok:false,messages:[],serverTime:null};
+  const res=await fetch(BASE+'/functions/v1/salao-nevoa',{
+    method:'POST',
+    headers:{'apikey':KEY,'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify({action:'notifications',sessionToken:token,since:since||null})
+  });
+  const payload=await res.json().catch(()=>({}));
+  if(!res.ok){
+    const e=new Error(payload?.message||'Não foi possível consultar o Salão.');
+    e.status=res.status;e.code=payload?.error||'';throw e;
+  }
+  return payload;
+}
+
 async function syncLocal(state){
   if((!getSession()&&!getCode())||!state)return null;
   const tasks=[];
@@ -258,7 +274,7 @@ window.NevoaOnline={
   loadParadoxiaTacticalProfile,saveParadoxiaTacticalProfile,
   activeParadoxiaSeason,paradoxiaMissions,startParadoxiaAttempt,recordParadoxiaCheckpoint,
   finishParadoxiaAttempt,paradoxiaLeaderboard,paradoxiaCompetitionStatus,watchParadoxiaLeaderboard,
-  syncLocal
+  salaoNotifications,syncLocal
 };
 window.dispatchEvent(new Event('nevoa-online-ready'));
 })();
