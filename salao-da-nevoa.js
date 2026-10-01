@@ -110,7 +110,7 @@ async function sendMessage(ev){
     const p=await api("send",{roomKey:state.room.room_key,message:msg});
     els.input.value="";els.count.textContent="0";
     if(p.pending)notice(p.message);
-    else{notice("Mensagem publicada.","ok");await loadMessages(true)}
+    else{notice("");await loadMessages(true)}
   }catch(e){
     const p=e.payload||{};
     if(p.reviewable&&p.messageId){
@@ -185,7 +185,7 @@ async function loadRooms(){
   if(state.rooms.length)await selectRoom(state.rooms[0]);
 }
 function startPoll(){
-  clearInterval(state.poll);state.poll=setInterval(()=>{if(document.visibilityState==="visible"&&state.room)loadMessages()},6000);
+  clearInterval(state.poll);state.poll=setInterval(()=>{if(document.visibilityState==="visible"&&state.room)loadMessages()},2500);
 }
 async function boot(){
   if(!session()){
