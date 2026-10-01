@@ -115,7 +115,7 @@ function guardianCheck(text: string) {
   if (/\b(meu endereço|minha rua|rua onde moro|avenida onde moro|moro na rua|moro na avenida|meu cep)\b/i.test(t)) {
     return { blocked: true, code: "address", reason: "Não compartilhe endereço ou localização pessoal." };
   }
-  if (/\b(porra|caralho|puta que pariu|vai se foder|vai tomar no cu|filho da puta|fdp|arrombado|cuzao|cuzão)\b/i.test(t)) {
+  if (/\b(porra|caralho|foda(?:[\s-]*se)?|puta que pariu|vai se foder|vai tomar no cu|filho da puta|fdp|arrombado|cuzao|cuzão)\b/i.test(t)) {
     return { blocked: true, code: "language", reason: "Use linguagem respeitosa no Salão." };
   }
   return { blocked: false, code: "", reason: "" };
@@ -334,7 +334,6 @@ Deno.serve(async (req: Request) => {
 
       const local = guardianCheck(text);
       if (local.blocked) {
-        await insertMessage(room.id, ctx.player_id, "[mensagem bloqueada pelo Guardião da Névoa]", "blocked", "guardian", local.code, 30);
         return json({
           ok: false,
           blocked: true,
