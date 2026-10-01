@@ -114,9 +114,12 @@ export default {
     const wantsStream=body?.stream===true || /text\/event-stream/i.test(request.headers.get("Accept")||"");
     const generation={
       messages,
-      max_completion_tokens:190,
+      max_completion_tokens:170,
       temperature:0.72,
-      top_p:0.9
+      top_p:0.9,
+      chat_template_kwargs:{
+        enable_thinking:false
+      }
     };
 
     try{

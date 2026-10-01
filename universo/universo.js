@@ -882,7 +882,7 @@ NOTAS PEDAGÓGICAS RELEVANTES:
    if(!REMOTE_AI_URL)throw new Error("remote_ai_not_configured");
    const memory=remoteMemoryPayload();
    const controller=new AbortController();
-   const timeout=setTimeout(()=>controller.abort(),45000);
+   const timeout=setTimeout(()=>controller.abort(),25000);
    try{
      const res=await fetch(REMOTE_AI_URL,{
        method:"POST",
