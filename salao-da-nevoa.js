@@ -65,6 +65,11 @@ function renderRooms(){
 }
 async function selectRoom(r){
   state.room=r;renderRooms();els.roomTitle.textContent=r.title;els.roomKicker.textContent="SALA COLETIVA";
+  try{
+    const u=new URL(location.href);
+    u.searchParams.set("room",r.room_key);
+    history.replaceState(null,"",u.pathname+u.search+u.hash);
+  }catch(_){}
   await loadMessages(true);
 }
 function messageNode(m){
@@ -182,7 +187,12 @@ async function loadModerator(){
 }
 async function loadRooms(){
   const p=await api("rooms");state.rooms=p.rooms||[];renderRooms();
-  if(state.rooms.length)await selectRoom(state.rooms[0]);
+  if(state.rooms.length){
+    const wanted=new URLSearchParams(location.search).get("room");
+    const target=state.rooms.find(r=>r.room_key===wanted)||state.rooms[0];
+    await selectRoom(target);
+    window.NevoaNotify?.markChatRead?.();
+  }
 }
 function startPoll(){
   clearInterval(state.poll);state.poll=setInterval(()=>{if(document.visibilityState==="visible"&&state.room)loadMessages()},2500);
@@ -232,5 +242,9 @@ els.refresh?.addEventListener("click",()=>loadMessages());
 els.refreshMod?.addEventListener("click",loadModerator);
 els.reportForm?.addEventListener("submit",submitReport);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&state.room)loadMessages()});
+window.addEventListener("nevoa-salao-message",(ev)=>{
+  const roomKey=ev.detail?.roomKey||"";
+  if(state.room&&(!roomKey||state.room.room_key===roomKey))loadMessages();
+});
 boot();
 })();
