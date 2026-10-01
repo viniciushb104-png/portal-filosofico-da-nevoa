@@ -41,7 +41,7 @@
       <div>
         <div class="eyebrow">SOMENTE ADMINISTRADOR • DINIZ-VINI</div>
         <h1>Painel do <span>Salão da Névoa</span></h1>
-        <p>Autorize participantes, filtre mensagens, revise bloqueios, acompanhe denúncias e suspenda acessos sem entrar diretamente no banco.</p>
+        <p>Acompanhe denúncias, revise mensagens bloqueadas e tome ações de moderação sem entrar diretamente no banco.</p>
       </div>
       <div class="adminSeal">
         <span>☠</span>
@@ -51,7 +51,6 @@
   </section>
 
   <section class="wrap statsGrid">
-    <article class="statCard"><span>🔑</span><div><small>PEDIDOS PENDENTES</small><strong id="statPendingAccess">0</strong></div></article>
     <article class="statCard"><span>🛡️</span><div><small>MENSAGENS RETIDAS</small><strong id="statHeldMessages">0</strong></div></article>
     <article class="statCard"><span>🚩</span><div><small>DENÚNCIAS PENDENTES</small><strong id="statPendingReports">0</strong></div></article>
     <article class="statCard"><span>💬</span><div><small>MENSAGENS CARREGADAS</small><strong id="statMessages">0</strong></div></article>
@@ -59,29 +58,10 @@
 
   <section class="wrap controlBar">
     <div class="adminTabs" role="tablist">
-      <button class="adminTab active" data-tab="access" type="button">🔑 Acessos</button>
       <button class="adminTab" data-tab="messages" type="button">💬 Mensagens</button>
-      <button class="adminTab" data-tab="reports" type="button">🚩 Denúncias</button>
+      <button class="adminTab active" data-tab="reports" type="button">🚩 Denúncias</button>
     </div>
     <button id="refreshAdmin" class="refreshAdmin" type="button">↻ Atualizar dados</button>
-  </section>
-
-  <section class="wrap adminPanel active" id="panel-access" data-panel="access">
-    <div class="panelHeader">
-      <div><div class="eyebrow">CONTROLE DE ENTRADA</div><h2>Autorizações do chat</h2><p>Quem está pendente, aprovado, suspenso ou negado.</p></div>
-    </div>
-    <div class="filterBar">
-      <label>Buscar jogador<input id="accessSearch" type="search" placeholder="Apelido ou turma..."></label>
-      <label>Status<select id="accessStatus">
-        <option value="all">Todos</option>
-        <option value="pending">Pendentes</option>
-        <option value="approved">Aprovados</option>
-        <option value="suspended">Suspensos</option>
-        <option value="denied">Negados</option>
-      </select></label>
-      <span class="filterCount"><b id="accessVisible">0</b> resultados</span>
-    </div>
-    <div id="accessTable" class="adminList"></div>
   </section>
 
   <section class="wrap adminPanel" id="panel-messages" data-panel="messages" hidden>
@@ -103,7 +83,7 @@
     <div id="messageTable" class="adminList messagesAdminList"></div>
   </section>
 
-  <section class="wrap adminPanel" id="panel-reports" data-panel="reports" hidden>
+  <section class="wrap adminPanel active" id="panel-reports" data-panel="reports">
     <div class="panelHeader">
       <div><div class="eyebrow">DENÚNCIAS DOS JOGADORES</div><h2>Fila de ocorrências</h2><p>Analise o contexto, remova conteúdo e suspenda participantes quando necessário.</p></div>
     </div>
@@ -123,14 +103,14 @@
 
   <section class="wrap adminFootNote">
     <span>🛡️</span>
-    <p>Esta interface é apenas uma camada visual. A autorização verdadeira é conferida novamente no servidor em cada consulta e em cada ação administrativa.</p>
+    <p>Esta interface é exclusiva do administrador. As ações de moderação são conferidas novamente no servidor antes de serem executadas.</p>
   </section>
 </section>
 </main>
 
 <div id="adminToast" class="adminToast" aria-live="polite"></div>
 <script src="online.js?v=10.0"></script>
-<script src="nevoa-notify.js?v=3"></script>
-<script src="painel-salao.js?v=1"></script>
+<script src="nevoa-notify.js?v=4"></script>
+<script src="painel-salao.js?v=2"></script>
 </body>
 </html>
