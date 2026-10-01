@@ -8,8 +8,8 @@ const $$=(s)=>[...document.querySelectorAll(s)];
 const els={
   gate:$("#adminGate"),gateTitle:$("#gateTitle"),gateText:$("#gateText"),gateActions:$("#gateActions"),
   app:$("#adminApp"),identity:$("#adminIdentity"),refresh:$("#refreshAdmin"),toast:$("#adminToast"),
-  statPendingAccess:$("#statPendingAccess"),statHeldMessages:$("#statHeldMessages"),statPendingReports:$("#statPendingReports"),statMessages:$("#statMessages"),
-  accessSearch:$("#accessSearch"),accessStatus:$("#accessStatus"),accessVisible:$("#accessVisible"),accessTable:$("#accessTable"),
+statHeldMessages:$("#statHeldMessages"),statPendingReports:$("#statPendingReports"),statMessages:$("#statMessages"),
+
   messageSearch:$("#messageSearch"),messageRoom:$("#messageRoom"),messageStatus:$("#messageStatus"),messageVisible:$("#messageVisible"),messageTable:$("#messageTable"),
   reportSearch:$("#reportSearch"),reportStatus:$("#reportStatus"),reportVisible:$("#reportVisible"),reportTable:$("#reportTable")
 };
@@ -49,8 +49,7 @@ async function act(kind,data,confirmText){
 }
 function statusPt(s){return({pending:"Pendente",approved:"Aprovado",suspended:"Suspenso",denied:"Negado",blocked:"Bloqueada",removed:"Removida",dismissed:"Encerrada",reviewed:"Revisada",actioned:"Com ação"})[s]||s}
 function renderStats(){
-  const d=state.data;els.statPendingAccess.textContent=d.counts?.access?.pending||0;
-  els.statHeldMessages.textContent=(d.counts?.messages?.pending||0)+(d.counts?.messages?.blocked||0);
+  const d=state.data;els.statHeldMessages.textContent=(d.counts?.messages?.pending||0)+(d.counts?.messages?.blocked||0);
   els.statPendingReports.textContent=d.counts?.reports?.pending||0;
   els.statMessages.textContent=d.messages?.length||0;
 }
@@ -60,23 +59,6 @@ function renderRooms(){
   const all=document.createElement("option");all.value="all";all.textContent="Todas as salas";els.messageRoom.append(all);
   (state.data?.rooms||[]).forEach(r=>{const o=document.createElement("option");o.value=r.room_key;o.textContent=r.title;els.messageRoom.append(o)});
   if([...els.messageRoom.options].some(o=>o.value===current))els.messageRoom.value=current;
-}
-function renderAccess(){
-  const q=norm(els.accessSearch.value),status=els.accessStatus.value;
-  const rows=(state.data?.access||[]).filter(a=>(status==="all"||a.status===status)&&(!q||norm(a.nickname+" "+a.className).includes(q)));
-  els.accessVisible.textContent=rows.length;
-  if(!rows.length){els.accessTable.replaceChildren(empty("Nenhum jogador encontrado com esses filtros."));return}
-  els.accessTable.replaceChildren(...rows.map(a=>{
-    const actions=[];
-    if(a.status!=="approved")actions.push({label:"✓ Autorizar",cls:"ok",fn:()=>act("approve_access",{playerId:a.playerId},"Autorizar "+a.nickname+" a usar o chat? Confirme somente após verificar a autorização aplicável.")});
-    if(a.status==="approved")actions.push({label:"⛔ Suspender",cls:"danger",fn:()=>act("suspend_user",{playerId:a.playerId},"Suspender o acesso de "+a.nickname+"?")});
-    if(a.status==="suspended")actions.push({label:"↩ Restaurar",cls:"ok",fn:()=>act("restore_user",{playerId:a.playerId},"Restaurar o acesso de "+a.nickname+"?")});
-    if(a.status==="pending")actions.push({label:"✕ Negar",cls:"danger",fn:()=>act("deny_access",{playerId:a.playerId},"Negar o pedido de "+a.nickname+"?")});
-    return row(a.nickname,a.className||"Sem turma","Pedido: "+when(a.requestedAt)+" • Atualização: "+when(a.updatedAt),[
-      {text:statusPt(a.status),status:a.status},
-      ...(a.authorizationConfirmedAt?[{text:"Autorização conferida "+when(a.authorizationConfirmedAt),status:"approved"}]:[])
-    ],actions);
-  }));
 }
 function renderMessages(){
   const q=norm(els.messageSearch.value),status=els.messageStatus.value,roomKey=els.messageRoom.value;
@@ -118,7 +100,7 @@ function renderReports(){
       ],actions);
   }));
 }
-function renderAll(){renderStats();renderRooms();renderAccess();renderMessages();renderReports()}
+function renderAll(){renderStats();renderRooms();renderMessages();renderReports()}
 async function load(){
   if(state.loading)return;state.loading=true;els.refresh.disabled=true;els.refresh.textContent="Atualizando...";
   try{
@@ -150,7 +132,6 @@ async function boot(){
   }
 }
 els.refresh?.addEventListener("click",load);
-[els.accessSearch,els.accessStatus].forEach(e=>e?.addEventListener("input",renderAccess));
 [els.messageSearch,els.messageRoom,els.messageStatus].forEach(e=>e?.addEventListener("input",renderMessages));
 [els.reportSearch,els.reportStatus].forEach(e=>e?.addEventListener("input",renderReports));
 boot();
